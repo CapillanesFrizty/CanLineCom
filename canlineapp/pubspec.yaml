@@ -20,4 +20,6 @@ flutter:
   assets:
     - lib/assets/images/logo/introduction.svg
     - lib/assets/images/logo/introduction.png
+    - lib/assets/images/logo/LogoText.svg
+    - lib/assets/images/logo/HeartLogo.svg
   uses-material-design: true
