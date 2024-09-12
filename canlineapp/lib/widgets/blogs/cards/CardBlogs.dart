@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
 class CardBlogs extends StatelessWidget {
   final VoidCallback onTap;
 
@@ -13,19 +13,20 @@ class CardBlogs extends StatelessWidget {
         margin: const EdgeInsets.all(8.0),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.orange[200],
+          color: Color(0xFFFFEAD1),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.local_atm,
-              color: Colors.white,
-              size: 40.0,
-            ),
-            SizedBox(height: 8.0),
-            Text(
+            SvgPicture.asset(
+                'lib/assets/icons/Clinics.svg', 
+                color: const Color(0xFFFFA133),
+                width: 69.0,
+                height: 62.0,
+              ),
+            const SizedBox(height: 8.0),
+            const Text(
               'Financial Assistance',
               style: TextStyle(color: Colors.white, fontSize: 16.0),
             ),
