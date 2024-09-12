@@ -1,4 +1,6 @@
-import './screen/onboarding/splash_screen.dart';
+import 'package:canerline_app/screen/homescreen/infohub.dart';
+
+// import './screen/onboarding/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,7 +13,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SplashScreen(
+      home: Infohub(
       ),
       debugShowCheckedModeBanner: false,
     );
