@@ -10,21 +10,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  // Initial opacity value
-  double _opacity = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeIn();
-  }
-
-  void _fadeIn() {
-    setState(() {
-      _opacity = 1.0; // Fade in
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,25 +17,36 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedOpacity(
-              opacity: _opacity,
-              duration: const Duration(seconds: 2),
-              child: SvgPicture.asset('lib/assets/images/logo/introduction.svg'), // Display image with opacity animation
-            ),
-            const SizedBox(height: 20), // Add some space between the image and the text
-            AnimatedOpacity(
-              opacity: _opacity,
-              duration: const Duration(seconds: 2),
-              child: const Text(
-                'With you, through every step',
-                style: TextStyle(
-                  color: Color(0xFF5B50A0),
-                  fontSize: 19,
-                  fontWeight: FontWeight.w100,
-                ),
+            ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return const LinearGradient(
+                  colors: [Color(0xFF5B50A0), Colors.white ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ).createShader(bounds);
+              },
+              child: SvgPicture.asset(
+                'lib/assets/images/logo/HeartLogo.svg',
+                width: 150,
+                height: 150,
+                color: Colors.white, // This color will be masked by the gradient
               ),
             ),
-            const SizedBox(height: 20), // Add some space between the text and the button
+            SvgPicture.asset(
+              'lib/assets/images/logo/LogoText.svg',
+              width: 70,
+              height: 70,
+            ),
+            const SizedBox(height: 20), // Add some space between the image and the text
+            const Text(
+              'With you, through every step',
+              style: TextStyle(
+                color: Color(0xFF5B50A0),
+                fontSize: 19,
+                fontWeight: FontWeight.w100,
+              ),
+            ),
+            const SizedBox(height: 50), // Add some space between the text and the button
             const GetstartedButton(), // Use the GetstartedButton widget
           ],
         ),
