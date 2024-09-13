@@ -47,59 +47,96 @@ class InfohubBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+    final isPortrait =
+        MediaQuery.of(context).orientation == Orientation.portrait;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(25.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 60.0),
+          const SizedBox(height: 20.0),
           const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Hello, Hanna Forger',
-              style: TextStyle(
-                fontFamily: 'Gilroy',
-                color: Color(0xFF5B50A0),
-                fontSize: 40.0,
-              ),
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hello,',
+                  style: TextStyle(
+                    fontFamily: 'GilroyLight',
+                    color: Color(0xFF5B50A0),
+                    fontSize: 40.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Hanna Forger!',
+                  style: TextStyle(
+                    fontFamily: 'GilroyLight',
+                    color: Color(0xFF5B50A0),
+                    fontSize: 40.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 20.0),
+          const SizedBox(height: 30.0),
           const SearchBarInfoHub(),
-          const SizedBox(height: 20.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconButton(
-                icon: Icon(isGrid ? Icons.view_list : Icons.grid_view),
-                onPressed: toggleLayout,
-              ),
-            ],
-          ),
+          const SizedBox(height: 30.0),
           Expanded(
-            child: isGrid
-                ? GridView.count(
-                    crossAxisCount: isPortrait ? 2 : 4,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    children: [
-                      CardHospital(onTap: () => handleCardTap('Hospital', 1)),
-                      CardFinancial(onTap: () => handleCardTap('Financial', 3)),
-                      CardBlogs(onTap: () => handleCardTap('Blogs', 2)),
-                      CardClinic(onTap: () => handleCardTap('Clinics', 0)),
-                    ],
-                  )
-                : ListView(
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      CardHospital(onTap: () => handleCardTap('Hospital', 1)),
-                      CardFinancial(onTap: () => handleCardTap('Financial', 3)),
-                      CardBlogs(onTap: () => handleCardTap('Blogs', 2)),
-                      CardClinic(onTap: () => handleCardTap('Clinics', 0)),
-                    ],
-                  ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      margin:
+                          const EdgeInsets.only(right: 10.0), // Add margin here
+                      child: IconButton(
+                        icon: Icon(
+                          isGrid ? Icons.view_list : Icons.grid_view,
+                          color: const Color(0xFF5B50A0),
+                          size: 30.0,
+                        ),
+                        onPressed: toggleLayout,
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: isGrid
+                      ? GridView.count(
+                          crossAxisCount: isPortrait ? 2 : 4,
+                          crossAxisSpacing: 2.0,
+                          mainAxisSpacing: 2.0,
+                          childAspectRatio: 160.0 / 185.0,
+                          children: [
+                            CardHospital(
+                                onTap: () => handleCardTap('Hospital', 1)),
+                            CardFinancial(
+                                onTap: () => handleCardTap('Financial', 3)),
+                            CardBlogs(onTap: () => handleCardTap('Blogs', 2)),
+                            CardClinic(
+                                onTap: () => handleCardTap('Clinics', 0)),
+                          ],
+                        )
+                      : ListView(
+                          physics: const BouncingScrollPhysics(),
+                          children: [
+                            CardHospital(
+                                onTap: () => handleCardTap('Hospital', 1)),
+                            CardFinancial(
+                                onTap: () => handleCardTap('Financial', 3)),
+                            CardBlogs(onTap: () => handleCardTap('Blogs', 2)),
+                            CardClinic(
+                                onTap: () => handleCardTap('Clinics', 0)),
+                          ],
+                        ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

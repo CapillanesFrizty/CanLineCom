@@ -22,6 +22,9 @@ flutter:
     - lib/assets/images/logo/introduction.png
     - lib/assets/images/logo/LogoText.svg
     - lib/assets/images/logo/HeartLogo.svg
+    - lib/assets/icons/Hospital.svg
+    - lib/assets/icons/Financial.svg
+    - lib/assets/icons/Clinic.svg
 
   fonts:
     - family: Gilroy

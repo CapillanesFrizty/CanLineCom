@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CardFinancial extends StatelessWidget {
   final VoidCallback onTap;
@@ -13,22 +14,27 @@ class CardFinancial extends StatelessWidget {
         margin: const EdgeInsets.all(8.0),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.green[200],
+          color: const Color(0xFFCBFFD2),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.local_atm,
-              color: Colors.white,
-              size: 40.0,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'Financial Assistance',
-              style: TextStyle(color: Colors.white, fontSize: 16.0),
-            ),
+            SvgPicture.asset(
+                'lib/assets/icons/Financial.svg', 
+                color: const Color(0xFF3CC34F),
+                width: 69.0,
+                height: 62.0,
+              ),
+            const SizedBox(height: 20.0),
+              const Text(
+                'Financial',
+                style: TextStyle(fontFamily: 'GilroyLight', fontWeight: FontWeight.bold, color: Color(0xFF3CC34F), fontSize: 14.0),
+              ),
+              const Text(
+                'Institutions',
+                style: TextStyle(fontFamily: 'GilroyLight', fontWeight: FontWeight.bold, color: Color(0xFF3CC34F), fontSize: 14.0),
+              ),
           ],
         ),
       ),
