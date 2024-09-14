@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_svg: ^0.22.0
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:
@@ -24,7 +24,9 @@ flutter:
     - lib/assets/images/logo/HeartLogo.svg
     - lib/assets/icons/Hospital.svg
     - lib/assets/icons/Financial.svg
-    - lib/assets/icons/Clinic.svg
+    - lib/assets/icons/Clinics.svg
+    - lib/assets/icons/Blogs.svg
+    - lib/assets/icons/Bell.svg
 
   fonts:
     - family: Gilroy
