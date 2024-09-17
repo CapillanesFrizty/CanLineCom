@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class GridViewLayout extends StatelessWidget {
+class GridLayout extends StatelessWidget {
   final List<Widget> childrenPorps;
-  const GridViewLayout({super.key, required this.childrenPorps});
+  const GridLayout({super.key, required this.childrenPorps});
 
   @override
   Widget build(BuildContext context) {

@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.10+1
+  go_router: ^14.2.7
+
 
 dev_dependencies:
   flutter_test:
@@ -27,6 +29,7 @@ flutter:
     - lib/assets/icons/Clinics.svg
     - lib/assets/icons/Blogs.svg
     - lib/assets/icons/Bell.svg
+    - lib\assets\images\jpeg\spmc.jpg
 
   fonts:
     - family: Gilroy
