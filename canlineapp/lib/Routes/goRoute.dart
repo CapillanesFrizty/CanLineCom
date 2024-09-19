@@ -44,5 +44,18 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
+    GoRoute(
+      path: '/Blog',
+      builder: (context, state) => ScaffoldLayoutWidget(
+        leadingWidget: TextButton(
+          onPressed: () {
+            context.go('/');
+          },
+          child: Icon(Icons.arrow_back),
+        ),
+        bodyWidget: BlogsScreen(),
+        actionsWidget: const [ScaffoldActionsButtons1()],
+      ),
+    )
   ],
 );

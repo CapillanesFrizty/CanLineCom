@@ -1,4 +1,4 @@
-import 'package:canerline_app/widgets/Card/CardDesign1.dart';
+import '../../widgets/BarrelFileWidget..dart';
 import 'package:flutter/material.dart';
 import '../../Layouts/BarrelFileLayouts.dart';
 
@@ -45,7 +45,7 @@ class HealthInstitutionScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Expanded(
             child: GridLayout(
-              childrenPorps: const [
+              childrenProps: const [
                 Carddesign1(),
               ],
             ),
