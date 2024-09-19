@@ -46,7 +46,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Expanded(
             child: GridLayout(
-              childrenPorps: [
+              childrenProps: [
                 Inkwellcardwidget(
                   label: "Health\nInstitution",
                   iconAsset: 'lib/assets/icons/Hospital.svg',
@@ -54,6 +54,7 @@ class HomeScreen extends StatelessWidget {
                   bgColor: 0xffffd7db,
                   iconColor: 0xffff5267,
                   goto: () => context.go('/Health-Insititution'),
+                  
                 ),
                 Inkwellcardwidget(
                   label: "Financial\nSupport",
@@ -63,18 +64,22 @@ class HomeScreen extends StatelessWidget {
                   iconColor: 0xff3cc34f,
                   goto: () {},
                 ),
-                //   Inkwellcardwidget(
-                //       label: "Blogs/News",
-                //       iconAsset: 'lib/assets/icons/Blogs.svg',
-                //       textColor: 0xffffa133,
-                //       bgColor: 0xffffead1,
-                //       iconColor: 0xffffa133),
-                //   Inkwellcardwidget(
-                //       label: "Clinics\n(External)",
-                //       iconAsset: 'lib/assets/icons/Clinics.svg',
-                //       textColor: 0xff3f52ff,
-                //       bgColor: 0xffd9ddff,
-                //       iconColor: 0xffff5267),
+                Inkwellcardwidget(
+                  label: "Blogs/News",
+                  iconAsset: 'lib/assets/icons/Blogs.svg',
+                  textColor: 0xffffa133,
+                  bgColor: 0xffffead1,
+                  iconColor: 0xffffa133,
+                  goto: () => context.go('/Blog'),
+                ),
+                Inkwellcardwidget(
+                  label: "Clinics\n(External)",
+                  iconAsset: 'lib/assets/icons/Clinics.svg',
+                  textColor: 0xff3f52ff,
+                  bgColor: 0xffd9ddff,
+                  iconColor: 0xffff5267,
+                  goto: () {},
+                ),
               ],
             ),
           ),
