@@ -27,7 +27,6 @@ class MoreInfoInstitutionScreen extends StatelessWidget {
         Container(
           height: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
-            // borderRadius: BorderRadius.circular(30),
             boxShadow: const [
               BoxShadow(
                 color: Colors.black,
@@ -37,7 +36,6 @@ class MoreInfoInstitutionScreen extends StatelessWidget {
             ],
           ),
           child: ClipRRect(
-            // borderRadius: BorderRadius.circular(30),
             child: Image.asset(
               'lib/assets/images/jpeg/spmc.jpg',
               fit: BoxFit.cover,

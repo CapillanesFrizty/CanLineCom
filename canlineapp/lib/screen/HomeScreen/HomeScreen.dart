@@ -9,7 +9,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(30.0),
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,7 +54,6 @@ class HomeScreen extends StatelessWidget {
                   bgColor: 0xffffd7db,
                   iconColor: 0xffff5267,
                   goto: () => context.go('/Health-Insititution'),
-                  
                 ),
                 Inkwellcardwidget(
                   label: "Financial\nSupport",
