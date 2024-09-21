@@ -44,6 +44,18 @@ final GoRouter linkrouter = GoRouter(
         ),
         bodyWidget: BlogsScreen(),
       ),
-    )
+    ),
+    GoRoute(
+      path: '/Financial-Support',
+      builder: (context, state) => ScaffoldLayoutWidget(
+        bodyWidget: FinancialSupportScreen(),
+        leadingWidget: TextButton(
+          onPressed: () {
+            context.go('/');
+          },
+          child: Icon(Icons.arrow_back),
+        ),
+      ),
+    ),
   ],
 );

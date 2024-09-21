@@ -7,3 +7,7 @@ export './HealthInstitution/MoreInfo_IntitutionScreen.dart';
 
 // ! Blogs Screen 
 export './Blogs/BlogsScreen.dart';
+
+
+// ! Financial Support Screen
+export './FinancialSupport/FinancialSupportScreen.dart';
