@@ -9,6 +9,7 @@ class GridLayout extends StatelessWidget {
     return GridView.count(
       crossAxisCount: 2,
       physics: NeverScrollableScrollPhysics(),
+      childAspectRatio: 0.90,
       children: childrenProps,
     );
   }

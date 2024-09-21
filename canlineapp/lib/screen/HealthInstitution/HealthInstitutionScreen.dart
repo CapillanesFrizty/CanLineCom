@@ -2,7 +2,6 @@ import '../../widgets/BarrelFileWidget..dart';
 import 'package:flutter/material.dart';
 import '../../Layouts/BarrelFileLayouts.dart';
 
-
 class HealthInstitutionScreen extends StatelessWidget {
   const HealthInstitutionScreen({super.key});
 
@@ -44,9 +43,12 @@ class HealthInstitutionScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Expanded(
+            flex: 1,
             child: GridLayout(
               childrenProps: const [
-                Carddesign1(),
+                CardDesign1(),
+                CardDesign1(),
+                CardDesign1(),
               ],
             ),
           ),
