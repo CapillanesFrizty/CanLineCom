@@ -1,7 +1,7 @@
 //! Card Widgets
 export 'Card/CardDesign1.dart';
 export 'Card/InkwellcardwidgetWidget.dart';
-export 'Card/CardDesign2List.dart';
+export 'Card/CardDesign2CarouselList.dart';
 
 //! Scaffold Widgets
 export 'Scaffold/ScaffoldActionsButtons.dart';
