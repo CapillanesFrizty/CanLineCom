@@ -32,15 +32,8 @@ class Inkwellcardwidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset(
-                  iconAsset,
-                  color: Color(iconColor),
-                ),
-                Text(
-                  label,
-                  style: TextStyle(color: Color(textColor)),
-                  textAlign: TextAlign.center,
-                ),
+                _cardImage(iconAsset, iconColor),
+                _cardTiteAndSecondaryText(label, textColor),
               ],
             ),
           ),
@@ -48,4 +41,21 @@ class Inkwellcardwidget extends StatelessWidget {
       ),
     );
   }
+}
+
+// Method to build the Card image
+Widget _cardImage(String iconAsset, int iconColor) {
+  return SvgPicture.asset(
+    iconAsset,
+    color: Color(iconColor),
+  );
+}
+
+// Method to build the Card Title
+Widget _cardTiteAndSecondaryText(String label, int textColor) {
+  return Text(
+    label,
+    style: TextStyle(color: Color(textColor)),
+    textAlign: TextAlign.center,
+  );
 }

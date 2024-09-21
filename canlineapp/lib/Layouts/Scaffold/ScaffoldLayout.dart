@@ -21,6 +21,7 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        
         backgroundColor: Colors.white,
         actions: widget.actionsWidget,
         leading: widget.leadingWidget,  

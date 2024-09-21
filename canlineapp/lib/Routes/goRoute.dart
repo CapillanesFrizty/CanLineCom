@@ -31,16 +31,7 @@ final GoRouter linkrouter = GoRouter(
         // ! More Info Intended for Health Institution Route
         GoRoute(
           path: 'More-Info',
-          builder: (context, state) => ScaffoldLayoutWidget(
-            bodyWidget: const MoreinfoIntitutionscreen(),
-            leadingWidget: TextButton(
-              onPressed: () {
-                context.go('/Health-Insititution');
-              },
-              child: const Icon(Icons.arrow_back),
-            ),
-            actionsWidget: const [ScaffoldActionsButtons2()],
-          ),
+          builder: (context, state) => MoreInfoInstitutionScreen(),
         ),
       ],
     ),
