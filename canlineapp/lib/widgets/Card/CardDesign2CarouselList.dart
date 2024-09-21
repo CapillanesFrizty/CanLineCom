@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Carddesign2list extends StatelessWidget {
-  const Carddesign2list({super.key});
+class Carddesign2Carousellist extends StatelessWidget {
+  const Carddesign2Carousellist({super.key});
 
   // Define constants for reuse
   static const double _borderRadius = 15.0;
@@ -11,19 +11,17 @@ class Carddesign2list extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 260.0, // Fixed height for the carousel
-      child: PageView.builder(
-        controller: PageController(
-            viewportFraction: 0.9), // Shows adjacent cards on screen edge
-        scrollDirection: Axis.horizontal,
-        itemCount: 5, // Number of cards
-        itemBuilder: (context, index) => _buildCard(),
+      height: 230.0, // Fixed height for the horizontal list
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal, // Keep horizontal scrolling
+        itemCount: 10, // Set this to null for infinite items
+        itemBuilder: (context, index) => _buildCard(index),
       ),
     );
   }
 
   // Method to build the card widget
-  Widget _buildCard() {
+  Widget _buildCard(int index) {
     return Padding(
       padding:
           const EdgeInsets.symmetric(horizontal: 10.0), // Space between cards
@@ -31,14 +29,14 @@ class Carddesign2list extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
         ),
-        elevation: 4.0, // Optional: Adds a shadow effect
+        elevation: 4.0, // Adds a shadow effect
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_borderRadius),
           child: Stack(
             children: [
               _buildImage(),
               _buildOverlay(),
-              _buildPositionedText(),
+              _buildPositionedText(index),
             ],
           ),
         ),
@@ -51,8 +49,8 @@ class Carddesign2list extends StatelessWidget {
     return Image.asset(
       'lib/assets/images/jpeg/spmc.jpg',
       fit: BoxFit.cover, // Ensures the image fits properly
-      height: 300.0,
-      width: double.infinity,
+      height: 200.0,
+      width: 300.0, // Set fixed width for each card in the horizontal list
     );
   }
 
@@ -66,22 +64,22 @@ class Carddesign2list extends StatelessWidget {
   }
 
   // Method to build the positioned text widget
-  Widget _buildPositionedText() {
+  Widget _buildPositionedText(int index) {
     return Positioned(
       bottom: _padding, // Adjust text position
       left: _padding,
       right: _padding,
-      child: _buildTextContainer(),
+      child: _buildTextContainer(index),
     );
   }
 
   // Method to build the text container
-  Widget _buildTextContainer() {
+  Widget _buildTextContainer(int index) {
     return Container(
       padding: const EdgeInsets.all(_padding), // Padding around text
-      child: const Text(
-        'Southern Philippines Medical Center',
-        style: TextStyle(
+      child: Text(
+        'Blog Card $index', // Display index for infinite cards
+        style: const TextStyle(
           fontSize: 18.0,
           fontWeight: FontWeight.bold,
           color: Colors.white, // White text for contrast
