@@ -4,11 +4,13 @@ export './HomeScreen/HomeScreen.dart';
 export './HealthInstitution/HealthInstitutionScreen.dart';
 export './HealthInstitution/MoreInfo_IntitutionScreen.dart';
 
-
-// ! Blogs Screen 
+// ! Blogs Screen
 export './Blogs/BlogsScreen.dart';
 export '../screen/Blogs/MoreInfo_BlogsScreen.dart';
 
-
 // ! Financial Support Screen
 export './FinancialSupport/FinancialSupportScreen.dart';
+
+// ! Clinic Screen
+export './clinics/ClinicsScreen.dart';
+export './clinics/Moreinfo_ClinicsScreen.dart';

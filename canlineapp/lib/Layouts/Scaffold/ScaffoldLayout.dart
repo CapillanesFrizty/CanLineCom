@@ -4,12 +4,14 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget bodyWidget;
   final List<Widget>? actionsWidget;
   final Widget? leadingWidget;
+  final double? elevation;
 
   const ScaffoldLayoutWidget(
       {super.key,
       required this.bodyWidget,
       this.actionsWidget,
-      this.leadingWidget});
+      this.leadingWidget,
+      this.elevation});
 
   @override
   State<ScaffoldLayoutWidget> createState() => _ScaffoldLayoutWidgetState();
@@ -32,6 +34,7 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        elevation: widget.elevation,
         backgroundColor: Colors.white,
         actions: widget.actionsWidget,
         leading: widget.leadingWidget,
