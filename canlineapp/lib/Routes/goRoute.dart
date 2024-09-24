@@ -5,8 +5,8 @@ import '../Layouts/BarrelFileLayouts.dart';
 // import '../widgets/BarrelFileWidget..dart';
 
 final GoRouter linkrouter = GoRouter(
-  //! Home Route
   routes: [
+    //! Home Route  
     GoRoute(
       path: '/',
       builder: (context, state) => ScaffoldLayoutWidget(
@@ -26,7 +26,7 @@ final GoRouter linkrouter = GoRouter(
         bodyWidget: HealthInstitutionScreen(),
       ),
       routes: [
-        // ! More Info Intended for Health Institution Route
+      // ! More Info Intended for Health Institution Route
         GoRoute(
           path: 'More-Info',
           builder: (context, state) => MoreInfoInstitutionScreen(),

@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class Inkwellcardwidget extends StatelessWidget {
   final String label, iconAsset;
   final int textColor, bgColor, iconColor;
-  final VoidCallback goto;
+  final VoidCallback? goto;
 
   const Inkwellcardwidget(
       {super.key,
@@ -13,7 +13,7 @@ class Inkwellcardwidget extends StatelessWidget {
       required this.textColor,
       required this.bgColor,
       required this.iconColor,
-      required this.goto});
+      this.goto});
 
   @override
   Widget build(BuildContext context) {
