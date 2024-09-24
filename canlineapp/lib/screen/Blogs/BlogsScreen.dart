@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../Layouts/ListViewLayout/ListViewLayout.dart';
 import '../../widgets/BarrelFileWidget..dart';
 
@@ -35,7 +36,12 @@ class BlogsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
             ),
           ),
-          Carddesign2Carousellist(),
+          Carddesign2Carousellist(
+            onTap: () {
+              // Use GoRouter for navigation
+              context.go('/more-info-blogs'); // This route should be defined in your router
+            },
+          ),
           Padding(
             padding: EdgeInsets.all(30.0),
             child: Text(
@@ -43,7 +49,9 @@ class BlogsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
             ),
           ),
-          CardDesign3List() // Your card carousel goes here
+          CardDesign3List(
+            
+          ) // Your card carousel goes here
         ],
       ),
     );

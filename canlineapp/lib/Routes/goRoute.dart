@@ -44,7 +44,15 @@ final GoRouter linkrouter = GoRouter(
         ),
         bodyWidget: BlogsScreen(),
       ),
+      routes: [
+        // ! More Info Intended for Blogs Route
+        GoRoute(
+          path: 'More-Info-Blogs',
+          builder: (context, state) => MoreinfoBlogsscreen(),
+        ),
+      ],
     ),
+    
     GoRoute(
       path: '/Financial-Support',
       builder: (context, state) => ScaffoldLayoutWidget(
