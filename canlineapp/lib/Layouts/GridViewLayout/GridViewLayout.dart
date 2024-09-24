@@ -6,11 +6,14 @@ class GridLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      physics: NeverScrollableScrollPhysics(),
-      childAspectRatio: 0.90,
-      children: childrenProps,
+    return Expanded(
+      // Wrap GridView with Expanded
+      child: GridView.count(
+        crossAxisCount: 2,
+        physics: NeverScrollableScrollPhysics(), // Disable scrolling
+        childAspectRatio: 0.90,
+        children: childrenProps,
+      ),
     );
   }
 }

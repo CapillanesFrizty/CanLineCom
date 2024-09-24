@@ -21,21 +21,22 @@ class Inkwellcardwidget extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Color(bgColor),
-          borderRadius: BorderRadius.circular(20), // Circular border radius
+          borderRadius: BorderRadius.circular(10), // Circular border radius
         ),
         child: InkWell(
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
           onTap: goto,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _cardImage(iconAsset, iconColor),
-                _cardTiteAndSecondaryText(label, textColor),
-              ],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _cardImage(iconAsset, iconColor),
+              SizedBox(
+                height: 30,
+              ),
+              _cardTiteAndSecondaryText(label, textColor),
+            ],
           ),
         ),
       ),

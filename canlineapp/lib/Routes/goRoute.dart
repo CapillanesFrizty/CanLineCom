@@ -78,5 +78,21 @@ final GoRouter linkrouter = GoRouter(
         ),
       ),
     ),
+      GoRoute(
+        path: '/clinic',
+        builder: (context, state) =>   ScaffoldLayoutWidget(
+        bodyWidget: ClinicScreen(),
+        leadingWidget: TextButton(
+          onPressed: () {
+            context.go('/');
+          },
+          child: Icon(Icons.arrow_back),
+        ),
+      ),
+        routes: [
+          GoRoute(
+              path: './clinicInfo',
+              builder: (context, state) => MoreinfoClinicsscreen()),
+        ]),
   ],
 );
