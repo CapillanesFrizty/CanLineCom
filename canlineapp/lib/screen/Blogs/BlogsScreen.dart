@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../Layouts/ListViewLayout/ListViewLayout.dart';
 import '../../widgets/BarrelFileWidget..dart';
+import 'package:go_router/go_router.dart';
 
 class BlogsScreen extends StatelessWidget {
   const BlogsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Expanded(
+    return Expanded(
       child: Listviewlayout(
         childrenProps: [
           Padding(
@@ -36,11 +36,11 @@ class BlogsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
             ),
           ),
-          Carddesign2Carousellist(
+          GestureDetector(
             onTap: () {
-              // Use GoRouter for navigation
-              context.go('/more-info-blogs'); // This route should be defined in your router
+              context.go('/Blog/More-Info-Blogs'); // Navigate to the details page for popular blogs
             },
+            child: Carddesign2Carousellist(),
           ),
           Padding(
             padding: EdgeInsets.all(30.0),
@@ -49,9 +49,12 @@ class BlogsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
             ),
           ),
-          CardDesign3List(
-            
-          ) // Your card carousel goes here
+          GestureDetector(
+            onTap: () {
+              context.go('/Blog/More-Info-Blogs'); // Navigate to the details page for recent blogs
+            },
+            child: CardDesign3List(),
+          ) 
         ],
       ),
     );

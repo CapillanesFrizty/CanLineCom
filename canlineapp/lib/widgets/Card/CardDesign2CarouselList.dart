@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class Carddesign2Carousellist extends StatelessWidget {
-  const Carddesign2Carousellist({super.key});
-
   // Define constants for reuse
   static const double _borderRadius = 15.0;
   static const double _padding = 10.0;
   static const double _opacity = 0.2;
+  final VoidCallback? goto;
+  const Carddesign2Carousellist({super.key, this.goto});
 
   @override
   Widget build(BuildContext context) {
