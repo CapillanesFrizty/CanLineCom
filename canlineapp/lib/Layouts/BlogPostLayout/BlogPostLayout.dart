@@ -21,11 +21,9 @@ class BlogPostLayout extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 16), // Space before title
-
         // Title
         Padding(
-          padding: const EdgeInsets.fromLTRB(30.0, 50.0, 30.0, 30.0),
+          padding: const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 30.0),
           child: Text(
             title,
             style: TextStyle(
@@ -40,7 +38,8 @@ class BlogPostLayout extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.0), // Optional: Add rounded corners to the image
+            borderRadius: BorderRadius.circular(
+                10.0), // Optional: Add rounded corners to the image
             child: Image.asset(
               imagePath,
               fit: BoxFit.cover,

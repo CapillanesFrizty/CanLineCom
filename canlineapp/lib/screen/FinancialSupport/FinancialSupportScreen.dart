@@ -9,23 +9,33 @@ class FinancialSupportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: const Listviewlayout(
+      child: Listviewlayout(
         childrenProps: [
           Padding(
             padding: EdgeInsets.all(30.0),
             child: Text(
               "Financial Support",
-              style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.w400),
             ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 30.0),
-            child: SearchBar(
-              autoFocus: false,
-              leading: Icon(Icons.search),
-              hintText: "Search",
-              padding: MaterialStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 20.0),
+            child: TextField(
+              autofocus: false,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                contentPadding: EdgeInsets.all(0),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey.shade500,
+                ),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(50.0),
+                    borderSide: BorderSide.none),
+                hintText: "Search",
+                hintStyle:
+                    TextStyle(color: Colors.grey.shade500, fontSize: 14.0),
               ),
             ),
           ),

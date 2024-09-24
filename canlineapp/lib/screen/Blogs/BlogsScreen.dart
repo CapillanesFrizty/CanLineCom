@@ -15,19 +15,30 @@ class BlogsScreen extends StatelessWidget {
             padding: EdgeInsets.all(30.0),
             child: Text(
               "Blogs",
-              style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 30.0,
+              ),
             ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 30.0),
-            child: SearchBar(
-              autoFocus: false,
-              leading: Icon(Icons.search),
-              hintText: "Search",
-              padding: MaterialStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 20.0),
-              ),
-            ),
+            child: TextField(
+                autofocus: false,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: EdgeInsets.all(0),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.grey.shade500,
+                  ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                      borderSide: BorderSide.none),
+                  hintText: "Search",
+                  hintStyle:
+                      TextStyle(color: Colors.grey.shade500, fontSize: 14.0),
+                )),
           ),
           Padding(
             padding: EdgeInsets.all(30.0),
@@ -38,7 +49,8 @@ class BlogsScreen extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              context.go('/Blog/More-Info-Blogs'); // Navigate to the details page for popular blogs
+              context.go(
+                  '/Blog/More-Info-Blogs'); // Navigate to the details page for popular blogs
             },
             child: Carddesign2Carousellist(),
           ),
@@ -51,13 +63,13 @@ class BlogsScreen extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              context.go('/Blog/More-Info-Blogs'); // Navigate to the details page for recent blogs
+              context.go(
+                  '/Blog/More-Info-Blogs'); // Navigate to the details page for recent blogs
             },
             child: CardDesign3List(),
-          ) 
+          )
         ],
       ),
     );
   }
 }
-
