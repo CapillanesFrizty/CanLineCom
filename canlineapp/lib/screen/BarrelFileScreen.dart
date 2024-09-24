@@ -12,3 +12,6 @@ export '../screen/Blogs/MoreInfo_BlogsScreen.dart';
 
 // ! Financial Support Screen
 export './FinancialSupport/FinancialSupportScreen.dart';
+
+// ! Clinics Screen
+export './Clinics/ClinicsScreen.dart';

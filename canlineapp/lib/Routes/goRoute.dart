@@ -52,7 +52,20 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
-    
+    // ! Clinics Route
+    GoRoute(
+      path: '/Clinics',
+      builder: (context, state) => ScaffoldLayoutWidget(
+        leadingWidget: TextButton(
+          onPressed: () {
+            context.go('/');
+          },
+          child: Icon(Icons.arrow_back),
+        ),
+        bodyWidget: Clinicsscreen(),
+      ),
+    ),
+    // ! Financial Support Route
     GoRoute(
       path: '/Financial-Support',
       builder: (context, state) => ScaffoldLayoutWidget(

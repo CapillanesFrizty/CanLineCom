@@ -79,7 +79,7 @@ class HomeScreen extends StatelessWidget {
                   textColor: 0xff3f52ff,
                   bgColor: 0xffd9ddff,
                   iconColor: 0xffff5267,
-                  goto: () {},
+                  goto: () => context.go('/Clinics'),
                 ),
               ],
             ),
