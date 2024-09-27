@@ -1,8 +1,6 @@
 import 'package:go_router/go_router.dart';
-
 import '../../widgets/BarrelFileWidget..dart';
 import 'package:flutter/material.dart';
-import '../../Layouts/BarrelFileLayouts.dart';
 
 class HealthInstitutionScreen extends StatelessWidget {
   const HealthInstitutionScreen({super.key});
@@ -63,7 +61,7 @@ class HealthInstitutionScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 30.0),
               child: SizedBox(
-                height: 400, // Set a fixed height or use shrinkWrap
+                height: 428, // Set a fixed height or use shrinkWrap
                 child: GridView.count(
                   crossAxisCount: 2,
                   crossAxisSpacing: 8,

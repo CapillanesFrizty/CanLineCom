@@ -45,9 +45,9 @@ class ClinicScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(30.0),
+              padding: EdgeInsets.fromLTRB(30.0,30.0,30.0,0.0),
               child: SizedBox(
-                height: 400, // Set a fixed height or use shrinkWrap
+                height: 450, // Set a fixed height or use shrinkWrap
                 child: GridView.count(
                   crossAxisCount: 2,
                   crossAxisSpacing: 8,
