@@ -55,6 +55,7 @@ class FinancialSupportScreen extends StatelessWidget {
             ),
           ),
           Carddesign2Carousellist(),
+          SizedBox(height: 30.0),
         ],
       ),
     );

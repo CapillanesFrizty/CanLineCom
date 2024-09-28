@@ -61,12 +61,16 @@ class BlogsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              context.go(
-                  '/Blog/More-Info-Blogs'); // Navigate to the details page for recent blogs
-            },
-            child: CardDesign3List(),
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  context.go(
+                      '/Blog/More-Info-Blogs'); // Navigate to the details page for recent blogs
+                },
+                child: CardDesign3List(),
+              ),
+            ],
           )
         ],
       ),

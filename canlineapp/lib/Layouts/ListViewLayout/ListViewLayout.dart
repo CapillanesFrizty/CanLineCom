@@ -7,7 +7,7 @@ class Listviewlayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      physics: const BouncingScrollPhysics(),
+      physics: const ClampingScrollPhysics(),
       children: childrenProps,
     );
   }

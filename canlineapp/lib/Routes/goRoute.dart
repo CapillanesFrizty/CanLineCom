@@ -62,7 +62,7 @@ final GoRouter linkrouter = GoRouter(
           },
           child: Icon(Icons.arrow_back),
         ),
-        bodyWidget: Clinicsscreen(),
+        bodyWidget: ClinicScreen(),
       ),
     ),
     // ! Financial Support Route
