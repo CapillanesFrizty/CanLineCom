@@ -6,22 +6,13 @@ class Carddesign2Carousellist extends StatelessWidget {
   static const double _padding = 10.0;
   static const double _opacity = 0.2;
   final VoidCallback? goto;
-  const Carddesign2Carousellist({super.key, this.goto});
+
+  final String title;
+
+  const Carddesign2Carousellist({super.key, this.goto, required this.title});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 230.0, // Fixed height for the horizontal list
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal, // Keep horizontal scrolling
-        itemCount: 10, // Set this to null for infinite items
-        itemBuilder: (context, index) => _buildCard(index),
-      ),
-    );
-  }
-
-  // Method to build the card widget
-  Widget _buildCard(int index) {
     return Padding(
       padding:
           const EdgeInsets.symmetric(horizontal: 10.0), // Space between cards
@@ -36,7 +27,7 @@ class Carddesign2Carousellist extends StatelessWidget {
             children: [
               _buildImage(),
               _buildOverlay(),
-              _buildPositionedText(index),
+              _buildPositionedText(title),
             ],
           ),
         ),
@@ -64,21 +55,21 @@ class Carddesign2Carousellist extends StatelessWidget {
   }
 
   // Method to build the positioned text widget
-  Widget _buildPositionedText(int index) {
+  Widget _buildPositionedText(String title) {
     return Positioned(
       bottom: _padding, // Adjust text position
       left: _padding,
       right: _padding,
-      child: _buildTextContainer(index),
+      child: _buildTextContainer(title),
     );
   }
 
   // Method to build the text container
-  Widget _buildTextContainer(int index) {
+  Widget _buildTextContainer(String title) {
     return Container(
       padding: const EdgeInsets.all(_padding), // Padding around text
       child: Text(
-        'Blog Card $index', // Display index for infinite cards
+        title, // Display index for infinite cards
         style: const TextStyle(
           fontSize: 18.0,
           fontWeight: FontWeight.bold,

@@ -6,13 +6,15 @@ import '../Layouts/BarrelFileLayouts.dart';
 
 final GoRouter linkrouter = GoRouter(
   routes: [
-    //! Home Route  
+    //! Home Route
     GoRoute(
       path: '/',
       builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: HomeScreen(),
       ),
     ),
+
+    //? Information Hub Routes
     // ! Health Institution Route
     GoRoute(
       path: '/Health-Insititution',
@@ -26,10 +28,12 @@ final GoRouter linkrouter = GoRouter(
         bodyWidget: HealthInstitutionScreen(),
       ),
       routes: [
-      // ! More Info Intended for Health Institution Route
+        // ! More Info Intended for Health Institution Route
         GoRoute(
-          path: 'More-Info',
-          builder: (context, state) => MoreInfoInstitutionScreen(),
+          name: 'id',
+          path: ':id',
+          builder: (context, state) =>
+              MoreInfoInstitutionScreen(id: state.pathParameters['id']!),
         ),
       ],
     ),
@@ -62,7 +66,7 @@ final GoRouter linkrouter = GoRouter(
           },
           child: Icon(Icons.arrow_back),
         ),
-        bodyWidget: Clinicsscreen(),
+        bodyWidget: ClinicScreen(),
       ),
     ),
     // ! Financial Support Route
@@ -78,17 +82,17 @@ final GoRouter linkrouter = GoRouter(
         ),
       ),
     ),
-      GoRoute(
+    GoRoute(
         path: '/clinic',
-        builder: (context, state) =>   ScaffoldLayoutWidget(
-        bodyWidget: ClinicScreen(),
-        leadingWidget: TextButton(
-          onPressed: () {
-            context.go('/');
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-      ),
+        builder: (context, state) => ScaffoldLayoutWidget(
+              bodyWidget: ClinicScreen(),
+              leadingWidget: TextButton(
+                onPressed: () {
+                  context.go('/');
+                },
+                child: Icon(Icons.arrow_back),
+              ),
+            ),
         routes: [
           GoRoute(
               path: './clinicInfo',

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
-
 class CardDesign1 extends StatelessWidget {
   static const double _width = 146; // Fixed width for the card
   static const double _imageHeight = 122; // Height for the image
   static const double _cardHeight = 177; // Total height for the card
   final VoidCallback? goto;
-  const CardDesign1({super.key, this.goto});
+
+  final String title;
+  final String subtitle;
+
+  const CardDesign1(
+      {super.key, this.goto, required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +31,8 @@ class CardDesign1 extends StatelessWidget {
               _cardImage('lib/assets/images/jpeg/spmc.jpg'),
               const SizedBox(height: 10),
               _cardTitleAndSecondaryText(
-                'Sylhet MAG Osmani Medical College',
-                'Government Hospital',
+                title,
+                subtitle,
               ),
             ],
           ),

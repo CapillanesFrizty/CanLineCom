@@ -1,19 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class MoreInfoInstitutionScreen extends StatelessWidget {
-  const MoreInfoInstitutionScreen({super.key});
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class MoreInfoInstitutionScreen extends StatefulWidget {
+  final String id;
+  const MoreInfoInstitutionScreen({super.key, required this.id});
+
+  @override
+  State<MoreInfoInstitutionScreen> createState() =>
+      _MoreInfoInstitutionScreenState();
+}
+
+class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
+  // Set the value as needed
+  late Future _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = Supabase.instance.client
+        .from('health_institutions')
+        .select()
+        .eq('id', widget.id)
+        .single();
+
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: ListView(
         children: [
-          // Image section at the top
-          _buildImageSection(context),
-          const SizedBox(height: 20), // Space below the image
-          // Details section containing title, subtitle, facilities box, and about us
-          _buildDetailsSection(),
+          FutureBuilder(
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // Show a loading indicator while waiting for data
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                // Handle any errors that occur
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (snapshot.hasData) {
+                // Render the fetched data
+                final data = snapshot.data;
+
+                return Column(
+                  children: [
+                    // Image section at the top
+                    _buildImageSection(context),
+                    const SizedBox(height: 20), // Space below the image
+                    // Details section containing title, subtitle, facilities box, and about us
+                    _buildDetailsSection(data["name_of_health_institution"],
+                        data["description"], data["type_of_hospital"]),
+                    SizedBox(height: 50), // Space below the details section
+
+                    // TODO: Add more here sections as needed
+                  ],
+                );
+              } else {
+                // Handle case where there is no data
+                return Center(child: Text('No data found'));
+              }
+            },
+          ),
         ],
       ),
     );
@@ -91,22 +141,23 @@ class MoreInfoInstitutionScreen extends StatelessWidget {
   }
 
   // Widget to build the details section containing title, subtitle, and facilities
-  Widget _buildDetailsSection() {
+  Widget _buildDetailsSection(
+      String name, String description, String type_of_hospital) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          _buildTitle('SPMC Cancer Institute'),
+          _buildTitle(name),
           // Subtitle
-          _buildSubtitle('Government Hospital'),
+          _buildSubtitle(type_of_hospital),
           const SizedBox(height: 16), // Space below subtitle
           // Facilities box with info columns
           _buildFacilitiesBox(),
           const SizedBox(height: 16), // Space below facilities box
           // About Us section
-          _buildAboutUsSection(),
+          _buildAboutUsSection(description),
         ],
       ),
     );
@@ -154,17 +205,17 @@ class MoreInfoInstitutionScreen extends StatelessWidget {
   }
 
   // Widget to build the About Us section
-  Widget _buildAboutUsSection() {
+  Widget _buildAboutUsSection(String description) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
           'About Us',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 8), // Space below the heading
         Text(
-          'SPMC Cancer Institute is dedicated to providing the best care for cancer patients through state-of-the-art facilities and experienced medical staff.',
+          description,
           style: TextStyle(fontSize: 16),
         ),
       ],

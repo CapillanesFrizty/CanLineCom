@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../Layouts/GridViewLayout/GridViewLayout.dart';
 import '../../widgets/BarrelFileWidget..dart';
 import 'package:go_router/go_router.dart';
 
@@ -54,15 +53,13 @@ class ClinicScreen extends StatelessWidget {
                   mainAxisSpacing: 8,
                   childAspectRatio: 1 / 1.2,
                   children: [
-                    CardDesign1(goto: () {
-                      context.go('/Health-Insititution/More-Info');
-                    }),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                    const CardDesign1(),
+                    CardDesign1(
+                      goto: () {
+                        context.go('/Health-Insititution/More-Info');
+                      },
+                      title: 'Clinic1',
+                      subtitle: 'Government Clinic',
+                    )
                   ],
                 ),
               ),

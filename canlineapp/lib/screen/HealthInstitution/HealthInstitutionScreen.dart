@@ -1,11 +1,13 @@
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../widgets/BarrelFileWidget..dart';
 import 'package:flutter/material.dart';
-import '../../Layouts/BarrelFileLayouts.dart';
 
 class HealthInstitutionScreen extends StatelessWidget {
-  const HealthInstitutionScreen({super.key});
+  HealthInstitutionScreen({super.key});
+
+  final _future = Supabase.instance.client.from('health_institutions').select();
 
   @override
   Widget build(BuildContext context) {
@@ -60,27 +62,52 @@ class HealthInstitutionScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.0),
-              child: SizedBox(
-                height: 400, // Set a fixed height or use shrinkWrap
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 1 / 1.2,
-                  children: [
-                    CardDesign1(goto: () {
-                      context.go('/Health-Insititution/More-Info');
-                    }),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                    const CardDesign1(),
-                  ],
-                ),
-              ),
+            // FutureBuilder to handle fetching data and rendering the cards
+            FutureBuilder(
+              future: _future,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                // Cast snapshot.data to List<Map<String, dynamic>>
+                final List<Map<String, dynamic>> healthinst =
+                    snapshot.data as List<Map<String, dynamic>>;
+
+                if (healthinst.isEmpty) {
+                  return Center(child: Text('No data available'));
+                }
+
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30.0),
+                  child: SizedBox(
+                    height: 500, // Set a fixed height or use shrinkWrap
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: 1 / 1.2,
+                      ),
+                      itemCount: healthinst.length,
+                      itemBuilder: (context, index) {
+                        final healthinstdata = healthinst[index];
+                        return CardDesign1(
+                          goto: () {
+                            debugPrint('ID:${healthinstdata['id']}');
+                            context.go(
+                                '/Health-Insititution/${healthinstdata['id']}');
+                          },
+                          title: healthinstdata['name_of_health_institution'] ??
+                              'Unknown Name',
+                          subtitle: healthinstdata['type_of_hospital'] ??
+                              'Unknown Type',
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),

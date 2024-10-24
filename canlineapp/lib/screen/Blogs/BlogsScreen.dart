@@ -52,7 +52,7 @@ class BlogsScreen extends StatelessWidget {
               context.go(
                   '/Blog/More-Info-Blogs'); // Navigate to the details page for popular blogs
             },
-            child: Carddesign2Carousellist(),
+            child: Text("Hello"),
           ),
           Padding(
             padding: EdgeInsets.all(30.0),

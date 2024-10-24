@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+// import '../../screen/BarrelFileScreen.dart';
 
 class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget bodyWidget;
@@ -18,19 +20,26 @@ class ScaffoldLayoutWidget extends StatefulWidget {
 }
 
 class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
-  // ignore: unused_field
   int _currentIndex = 0;
 
-  void _updateState(int newState) {
-    setState(() {
-      _currentIndex = newState;
-    });
-
-    print("Current Index: $_currentIndex");
-  }
+  final List<String> _routes = [
+    '/', // Home route
+    '/favorites',
+  ];
 
   @override
   Widget build(BuildContext context) {
+    // Determine the current location
+    String currentLocation;
+
+    currentLocation =
+        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
+
+    // Map the current location to the corresponding index
+    if (_routes.contains(currentLocation)) {
+      _currentIndex = _routes.indexOf(currentLocation);
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -39,51 +48,53 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
         actions: widget.actionsWidget,
         leading: widget.leadingWidget,
       ),
-      bottomNavigationBar: buttomNavigationbar(_updateState),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined, size: 30, color: Colors.purple),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_outline, size: 30, color: Colors.purple),
+            label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+            icon:
+                Icon(Icons.smart_toy_outlined, size: 30, color: Colors.purple),
+            label: 'Smart Toy',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_outlined,
+                size: 30, color: Colors.purple),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline, size: 30, color: Colors.purple),
+            label: 'Profile',
+          ),
+        ],
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+
+          // Navigate to the selected route using GoRouter
+          switch (index) {
+            case 0:
+              context.go('/');
+              break;
+            case 1:
+              context.go('/favorites');
+              break;
+            default:
+              break;
+          }
+        },
+      ),
       body: widget.bodyWidget,
     );
   }
-}
-
-// ! ButtonNavBar builder
-
-Widget buttomNavigationbar(Function(int) updateState) {
-  return BottomAppBar(
-    shape: const CircularNotchedRectangle(),
-    notchMargin: 20, // Adds space between FAB and BottomAppBar
-    child: Row(
-      mainAxisAlignment:
-          MainAxisAlignment.spaceAround, // Evenly space the icons
-      children: [
-        IconButton(
-          icon: const Icon(Icons.home_outlined, size: 30),
-          onPressed: () {
-            updateState(0); // Call updateState with index 0
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.favorite_outline, size: 30),
-          onPressed: () {
-            updateState(1); // Call updateState with index 1
-          },
-        ),
-        IconButton(
-          onPressed: () => print("Bot is Clicked"),
-          icon: Icon(Icons.smart_toy_outlined, size: 30),
-        ),
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, size: 30),
-          onPressed: () {
-            updateState(2); // Call updateState with index 2
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.person_outline, size: 30),
-          onPressed: () {
-            updateState(3); // Call updateState with index 3
-          },
-        ),
-      ],
-    ),
-  );
 }

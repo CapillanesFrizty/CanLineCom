@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '../../Layouts/BarrelFileLayouts.dart';
-import '../../widgets/BarrelFileWidget..dart';
+// import '../../widgets/BarrelFileWidget..dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FinancialSupportScreen extends StatelessWidget {
-  const FinancialSupportScreen({super.key});
+  FinancialSupportScreen({super.key});
+
+  // Select all Public Institutions
+  final _future_Public_Institutions = Supabase.instance.client
+      .from('financial_institutions')
+      .select()
+      .eq('type_of_assistance', 'Public Institution');
+
+  // Select all Private Institutions
+  final _future_Private_Institutions = Supabase.instance.client
+      .from('financial_institutions')
+      .select()
+      .eq("type_of_assistance", "Private Institution");
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +59,25 @@ class FinancialSupportScreen extends StatelessWidget {
               style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
             ),
           ),
-          Carddesign2Carousellist(),
+          //! FutureBuilder for the Public Institutions
+          FutureBuilder(
+            future: _future_Public_Institutions,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              final List<Map<String, dynamic>> healthinst =
+                  snapshot.data as List<Map<String, dynamic>>;
+
+              if (healthinst.isEmpty) {
+                return Center(child: Text('No data available'));
+              }
+
+              // Enter the Card here for the Public Institutions
+              return SizedBox();
+            },
+          ),
           Padding(
             padding: EdgeInsets.all(30.0),
             child: Text(
@@ -54,7 +85,25 @@ class FinancialSupportScreen extends StatelessWidget {
               style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
             ),
           ),
-          Carddesign2Carousellist(),
+          //! FutureBuilder for the Private Institutions
+          FutureBuilder(
+            future: _future_Private_Institutions,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              final List<Map<String, dynamic>> healthinst =
+                  snapshot.data as List<Map<String, dynamic>>;
+
+              if (healthinst.isEmpty) {
+                return Center(child: Text('No data available'));
+              }
+
+              // Enter the Card here for the Public Institutions
+              return SizedBox();
+            },
+          ),
         ],
       ),
     );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../Layouts/BarrelFileLayouts.dart';
 import '../../widgets/BarrelFileWidget..dart';
 
 class HomeScreen extends StatelessWidget {
@@ -81,6 +80,9 @@ class HomeScreen extends StatelessWidget {
                 iconColor: 0xff3cc34f,
                 goto: () {
                   context.go('/Financial-Support');
+
+                  debugPrint(
+                      "Current route before navigation: ${GoRouter.of(context)}");
                 },
               ),
               Inkwellcardwidget(
