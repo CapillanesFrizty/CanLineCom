@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../Layouts/BarrelFileLayouts.dart';
-// import '../../widgets/BarrelFileWidget..dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FinancialSupportScreen extends StatelessWidget {

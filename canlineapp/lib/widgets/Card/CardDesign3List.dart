@@ -47,8 +47,8 @@ class CardDesign3List extends StatelessWidget {
       child: Image.asset(
         'lib/assets/images/jpeg/spmc.jpg',
         fit: BoxFit.cover,
-        height: 150.0,
-        width: 150.0, // Fixed width for the image
+        height: 145.0,
+        width: 130.0, // Fixed width for the image
       ),
     );
   }
