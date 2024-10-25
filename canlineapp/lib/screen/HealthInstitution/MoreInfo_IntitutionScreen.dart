@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MoreInfoInstitutionScreen extends StatefulWidget {
@@ -8,131 +7,99 @@ class MoreInfoInstitutionScreen extends StatefulWidget {
   const MoreInfoInstitutionScreen({super.key, required this.id});
 
   @override
-  State<MoreInfoInstitutionScreen> createState() =>
-      _MoreInfoInstitutionScreenState();
+  State<MoreInfoInstitutionScreen> createState() => _MoreInfoInstitutionScreenState();
 }
 
 class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
-  // Set the value as needed
   late Future _future;
 
   @override
   void initState() {
     super.initState();
-    _future = Supabase.instance.client
+    _future = _fetchInstitutionDetails();
+  }
+
+  Future _fetchInstitutionDetails() {
+    return Supabase.instance.client
         .from('health_institutions')
         .select()
         .eq('id', widget.id)
         .single();
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        children: [
-          FutureBuilder(
-            future: _future,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // Show a loading indicator while waiting for data
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                // Handle any errors that occur
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (snapshot.hasData) {
-                // Render the fetched data
-                final data = snapshot.data;
-
-                return Column(
-                  children: [
-                    // Image section at the top
-                    _buildImageSection(context),
-                    const SizedBox(height: 20), // Space below the image
-                    // Details section containing title, subtitle, facilities box, and about us
-                    _buildDetailsSection(data["name_of_health_institution"],
-                        data["description"], data["type_of_hospital"]),
-                    SizedBox(height: 50), // Space below the details section
-
-                    // TODO: Add more here sections as needed
-                  ],
-                );
-              } else {
-                // Handle case where there is no data
-                return Center(child: Text('No data found'));
-              }
-            },
-          ),
-        ],
+      body: FutureBuilder(
+        future: _future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            final data = snapshot.data;
+            return ListView(
+              children: [
+                _buildImageSection(),
+                const SizedBox(height: 20),
+                _buildDetailsSection(
+                  data['name_of_health_institution'] ?? 'Unknown Name',
+                  data['description'] ?? 'No description available',
+                  data['type_of_hospital'] ?? 'Unknown Type',
+                ),
+                const SizedBox(height: 50),
+              ],
+            );
+          } else {
+            return const Center(child: Text('No data found'));
+          }
+        },
       ),
     );
   }
 
-  // Widget to build the image section with an overlay for icons
-  Widget _buildImageSection(BuildContext context) {
+  Widget _buildImageSection() {
     return Stack(
       children: [
-        // Background image
-        Container(
-          height: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black,
-                offset: Offset(0.0, 2.0),
-                blurRadius: 6.0,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            child: Image.asset(
-              'lib/assets/images/jpeg/spmc.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        // Overlay icons for navigation and actions
-        _buildTopIcons(context),
+        _buildBackgroundImage(),
+        _buildTopIcons(),
       ],
     );
   }
 
-  // Widget to build the top action icons
-  Widget _buildTopIcons(BuildContext context) {
+  Widget _buildBackgroundImage() {
+    return Container(
+      height: MediaQuery.of(context).size.width,
+      decoration: const BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black,
+            offset: Offset(0.0, 2.0),
+            blurRadius: 6.0,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        child: Image.asset(
+          'lib/assets/images/jpeg/spmc.jpg',
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopIcons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 40.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Back button
-          IconButton(
-            onPressed: () {
-              context.go('/Health-Insititution');
-            },
-            icon: const Icon(Icons.arrow_back),
-            iconSize: 30,
-            color: Colors.black,
-          ),
-          // Share and favorite buttons
+          _buildIconButton(Icons.arrow_back, () => context.go('/Health-Insititution')),
           Row(
             children: [
-              IconButton(
-                onPressed: () {
-                  // Handle share action
-                },
-                icon: const Icon(Icons.share),
-                iconSize: 30,
-                color: Colors.black,
-              ),
-              IconButton(
-                onPressed: () {
-                  // Handle favorite action
-                },
-                icon: const Icon(Icons.favorite_outline),
-                iconSize: 30,
-                color: Colors.black,
-              ),
+              _buildIconButton(Icons.share, () {}), // Placeholder for share action
+              _buildIconButton(Icons.favorite_outline, () {}), // Placeholder for favorite action
             ],
           ),
         ],
@@ -140,30 +107,32 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  // Widget to build the details section containing title, subtitle, and facilities
-  Widget _buildDetailsSection(
-      String name, String description, String type_of_hospital) {
+  Widget _buildIconButton(IconData icon, VoidCallback onPressed) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      iconSize: 30,
+      color: Colors.black,
+    );
+  }
+
+  Widget _buildDetailsSection(String name, String description, String hospitalType) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
           _buildTitle(name),
-          // Subtitle
-          _buildSubtitle(type_of_hospital),
-          const SizedBox(height: 16), // Space below subtitle
-          // Facilities box with info columns
+          _buildSubtitle(hospitalType),
+          const SizedBox(height: 16),
           _buildFacilitiesBox(),
-          const SizedBox(height: 16), // Space below facilities box
-          // About Us section
+          const SizedBox(height: 16),
           _buildAboutUsSection(description),
         ],
       ),
     );
   }
 
-  // Widget to build the title
   Widget _buildTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -174,7 +143,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  // Widget to build the subtitle
   Widget _buildSubtitle(String subtitle) {
     return Text(
       subtitle,
@@ -182,59 +150,43 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  // Widget to build the facilities box
   Widget _buildFacilitiesBox() {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.0),
         border: Border.all(color: Colors.grey.shade300),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _infoColumn('Facilities', '10'), // Facilities count
-          const VerticalDivider(), // Divider between info columns
-          _infoColumn(
-              'Accredited Insurance', '5'), // Accredited insurance count
-          const VerticalDivider(), // Divider
-          _infoColumn('Doctors', '20'), // Doctors count
+          _buildInfoColumn('Facilities', '10'),
+          const VerticalDivider(thickness: 5, color: Colors.black),
+          _buildInfoColumn('Accredited Insurance', '5'),
+          const VerticalDivider(),
+          _buildInfoColumn('Doctors', '20'),
         ],
       ),
     );
   }
 
-  // Widget to build the About Us section
-  Widget _buildAboutUsSection(String description) {
+  Widget _buildInfoColumn(String title, String value) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'About Us',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 8), // Space below the heading
-        Text(
-          description,
-          style: TextStyle(fontSize: 16),
-        ),
+        Text(value, style: const TextStyle(fontSize: 16)),
+        Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
       ],
     );
   }
 
-  // Helper method to build info columns for facilities
-  Widget _infoColumn(String title, String value) {
+  Widget _buildAboutUsSection(String description) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16),
-        ),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
+        const Text('About Us', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Text(description, style: const TextStyle(fontSize: 16)),
       ],
     );
   }
