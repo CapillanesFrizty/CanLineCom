@@ -6,9 +6,19 @@ import '../Layouts/BarrelFileLayouts.dart';
 
 final GoRouter linkrouter = GoRouter(
   routes: [
-    //! Home Route
+    //! Intro Login Route
     GoRoute(
       path: '/',
+      builder: (context, state) => IntroLogin(),
+    ),
+    //! Login Route
+    GoRoute(
+      path: '/Login-Screen',
+      builder: (context, state) => LoginScreen(),
+    ),
+    //! Home Route
+    GoRoute(
+      path: '/Home-Screen',
       builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: HomeScreen(),
       ),
