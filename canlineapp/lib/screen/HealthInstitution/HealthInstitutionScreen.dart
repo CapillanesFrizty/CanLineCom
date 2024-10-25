@@ -28,7 +28,7 @@ class HealthInstitutionScreen extends StatelessWidget {
       padding: EdgeInsets.all(30.0),
       child: Text(
         "Health Institution",
-        style: TextStyle(fontSize: 30.0, color: Colors.black),
+        style: TextStyle(fontFamily: "Gilroy-Medium", fontWeight: FontWeight.w500, fontSize: 30.0, color: Color(0xFF5B50A0)),
       ),
     );
   }
@@ -86,7 +86,7 @@ class HealthInstitutionScreen extends StatelessWidget {
           return const Center(child: Text('Error fetching data'));
         }
 
-        final List<Map<String, dynamic>> healthInst = snapshot.data as List<Map<String, dynamic>>? ?? [];
+        final List<Map<String, dynamic>> healthInst = snapshot.data ?? [];
 
         if (healthInst.isEmpty) {
           return const Center(child: Text('No data available'));

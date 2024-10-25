@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../Layouts/ListViewLayout/ListViewLayout.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../widgets/BarrelFileWidget..dart';
 import 'package:go_router/go_router.dart';
 
@@ -30,7 +30,10 @@ class BlogsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(30.0),
       child: Text(
         "Blogs",
-        style: TextStyle(fontSize: 30.0),
+        style: GoogleFonts.poppins(
+            fontSize: 30.0,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF5B50A0)),
       ),
     );
   }
@@ -53,7 +56,8 @@ class BlogsScreen extends StatelessWidget {
             borderSide: BorderSide.none,
           ),
           hintText: "Search",
-          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14.0),
+          hintStyle:
+              GoogleFonts.poppins(color: Colors.grey.shade500, fontSize: 14.0),
         ),
       ),
     );
@@ -64,7 +68,10 @@ class BlogsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(30.0),
       child: Text(
         title,
-        style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
+        style: GoogleFonts.poppins(
+            fontSize: 17.0,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF5B50A0)),
       ),
     );
   }
@@ -79,7 +86,8 @@ class BlogsScreen extends StatelessWidget {
           return GestureDetector(
             onTap: () => context.go('/Blog/More-Info-Blogs'),
             child: Card(
-              margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15.0),
               ),
@@ -88,7 +96,7 @@ class BlogsScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20.0),
                 child: Text(
                   'Popular Blog ${index + 1}',
-                  style: TextStyle(fontSize: 16.0),
+                  style: GoogleFonts.poppins(fontSize: 16.0),
                 ),
               ),
             ),
