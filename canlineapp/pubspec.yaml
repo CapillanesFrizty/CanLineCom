@@ -12,6 +12,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   go_router: ^14.2.7
   supabase_flutter: ^2.7.0
+  google_fonts: ^6.0.0
 
 
 dev_dependencies:
@@ -31,29 +32,6 @@ flutter:
     - lib/assets/icons/Blogs.svg
     - lib/assets/icons/Bell.svg
     - lib\assets\images\jpeg\spmc.jpg
-
-  fonts:
-    - family: Gilroy
-      fonts:
-        - asset: lib/assets/fonts/Gilroy-Black.ttf
-        - asset: lib/assets/fonts/Gilroy-BlackItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-Bold.ttf
-        - asset: lib/assets/fonts/Gilroy-BoldItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-ExtraBold.ttf
-        - asset: lib/assets/fonts/Gilroy-ExtraBoldItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-Heavy.ttf
-        - asset: lib/assets/fonts/Gilroy-HeavyItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-Light.ttf
-        - asset: lib/assets/fonts/Gilroy-LightItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-Medium.ttf
-        - asset: lib/assets/fonts/Gilroy-MediumItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-Regular.ttf
-        - asset: lib/assets/fonts/Gilroy-RegularItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-SemiBold.ttf
-        - asset: lib/assets/fonts/Gilroy-SemiBoldItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-Thin.ttf
-        - asset: lib/assets/fonts/Gilroy-ThinItalic.ttf
-        - asset: lib/assets/fonts/Gilroy-UltraLight.ttf
-        - asset: lib/assets/fonts/Gilroy-UltraLightItalic.ttf
+  
 
   uses-material-design: true

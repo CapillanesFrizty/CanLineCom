@@ -56,7 +56,7 @@ Widget _cardImage(String iconAsset, int iconColor) {
 Widget _cardTiteAndSecondaryText(String label, int textColor) {
   return Text(
     label,
-    style: TextStyle(color: Color(textColor)),
+    style: TextStyle(fontFamily: "Gilroy-HeavyItalic",color: Color(textColor)),
     textAlign: TextAlign.center,
   );
 }

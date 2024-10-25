@@ -41,7 +41,7 @@ class Carddesign2Carousellist extends StatelessWidget {
       'lib/assets/images/jpeg/spmc.jpg',
       fit: BoxFit.cover, // Ensures the image fits properly
       height: 200.0,
-      width: 300.0, // Set fixed width for each card in the horizontal list
+      width: 400.0, // Set fixed width for each card in the horizontal list
     );
   }
 
