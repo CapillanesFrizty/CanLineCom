@@ -6,21 +6,19 @@ class Carddesign2Carousellist extends StatelessWidget {
   static const double _padding = 10.0;
   static const double _opacity = 0.2;
   final VoidCallback? goto;
-
+  final String image;
   final String title;
 
-  const Carddesign2Carousellist({super.key, this.goto, required this.title});
+  const Carddesign2Carousellist(
+      {super.key, this.goto, required this.title, required this.image});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding:
           const EdgeInsets.symmetric(horizontal: 10.0), // Space between cards
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_borderRadius),
-        ),
-        elevation: 4.0, // Adds a shadow effect
+      child: InkWell(
+        onTap: goto,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_borderRadius),
           child: Stack(
@@ -37,12 +35,21 @@ class Carddesign2Carousellist extends StatelessWidget {
 
   // Method to build the image widget
   Widget _buildImage() {
-    return Image.asset(
-      'lib/assets/images/jpeg/spmc.jpg',
-      fit: BoxFit.cover, // Ensures the image fits properly
-      height: 200.0,
-      width: 400.0, // Set fixed width for each card in the horizontal list
-    );
+    return image.isNotEmpty
+        ? Image.network(
+            image, // Use NetworkImage with the URL
+            fit: BoxFit.cover, // Ensures the image fits properly
+            height: 300.0,
+            width:
+                300.0, // Set fixed width for each card in the horizontal list
+          )
+        : Container(
+            height: 300.0, // Placeholder for missing image
+            width:
+                300.0, // Set fixed width for each card in the horizontal list
+            color: Colors.grey,
+            child: Icon(Icons.image_not_supported),
+          );
   }
 
   // Method to build the semi-transparent overlay

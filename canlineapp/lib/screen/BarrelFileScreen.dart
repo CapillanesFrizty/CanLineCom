@@ -10,6 +10,7 @@ export '../screen/Blogs/MoreInfo_BlogsScreen.dart';
 
 // ! Financial Support Screen
 export './FinancialSupport/FinancialSupportScreen.dart';
+export './FinancialSupport/FinancialDetails.dart';
 
 // ! Clinic Screen
 export './clinics/ClinicsScreen.dart';

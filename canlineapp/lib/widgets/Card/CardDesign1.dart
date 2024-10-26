@@ -8,9 +8,14 @@ class CardDesign1 extends StatelessWidget {
 
   final String title;
   final String subtitle;
+  final String image;
 
   const CardDesign1(
-      {super.key, this.goto, required this.title, required this.subtitle});
+      {super.key,
+      this.goto,
+      required this.title,
+      required this.subtitle,
+      required this.image});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,14 @@ class CardDesign1 extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _cardImage('lib/assets/images/jpeg/spmc.jpg'),
+              if (image.isNotEmpty)
+                Image.network(image) // Use NetworkImage with the URL
+              else
+                Container(
+                  height: 100, // Placeholder for missing image
+                  color: Colors.grey,
+                  child: Icon(Icons.image_not_supported),
+                ),
               const SizedBox(height: 10),
               _cardTitleAndSecondaryText(
                 title,
@@ -48,7 +60,7 @@ class CardDesign1 extends StatelessWidget {
       child: SizedBox(
         width: _width,
         height: _imageHeight,
-        child: Image.asset(
+        child: Image.network(
           image,
           fit: BoxFit.cover,
         ),

@@ -7,18 +7,18 @@ import '../Layouts/BarrelFileLayouts.dart';
 final GoRouter linkrouter = GoRouter(
   routes: [
     //! Intro Login Route
-    GoRoute(
-      path: '/',
-      builder: (context, state) => IntroLogin(),
-    ),
-    //! Login Route
-    GoRoute(
-      path: '/Login-Screen',
-      builder: (context, state) => LoginScreen(),
-    ),
+    // GoRoute(
+    //   path: '/',
+    //   builder: (context, state) => IntroLogin(),
+    // ),
+    // //! Login Route
+    // GoRoute(
+    //   path: '/Login-Screen',
+    //   builder: (context, state) => LoginScreen(),
+    // ),
     //! Home Route
     GoRoute(
-      path: '/Home-Screen',
+      path: '/',
       builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: HomeScreen(),
       ),
@@ -81,7 +81,7 @@ final GoRouter linkrouter = GoRouter(
     ),
     // ! Financial Support Route
     GoRoute(
-      path: '/Financial-Support',
+      path: '/Financial-Institution',
       builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: FinancialSupportScreen(),
         leadingWidget: TextButton(
@@ -91,6 +91,15 @@ final GoRouter linkrouter = GoRouter(
           child: Icon(Icons.arrow_back),
         ),
       ),
+      routes: [
+        // ! More Info Intended for Health Institution Route
+        GoRoute(
+          name: 'fid',
+          path: ':fid',
+          builder: (context, state) =>
+              Financialdetails(id: state.pathParameters['fid']!),
+        ),
+      ],
     ),
     GoRoute(
         path: '/clinic',

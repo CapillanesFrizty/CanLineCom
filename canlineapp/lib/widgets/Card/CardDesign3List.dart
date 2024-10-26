@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
 
 class CardDesign3List extends StatelessWidget {
-  const CardDesign3List({super.key});
+  const CardDesign3List({super.key, required this.title});
+  final String title;
 
   static const double _borderRadius = 15.0;
   static const double _padding = 10.0;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 350.0, // Fixed height for the cards
-      child: ListView.builder(
-        scrollDirection: Axis.vertical, // Vertical scrolling
-        itemCount: 5, // Number of cards
-        itemBuilder: (context, index) => _buildCard(),
-      ),
-    );
+    return _buildCard();
   }
 
   // Method to build each card
@@ -30,7 +24,7 @@ class CardDesign3List extends StatelessWidget {
         child: Row(
           children: [
             _buildImage(), // Image on the left side
-            Expanded(child: _buildCardDetails()), // Text on the right side
+            Expanded(child: _buildCardDetails(title)), // Text on the right side
           ],
         ),
       ),
@@ -54,15 +48,16 @@ class CardDesign3List extends StatelessWidget {
   }
 
   // Method to build the entire card details
-  Widget _buildCardDetails() {
+  Widget _buildCardDetails(String title) {
     return Padding(
       padding: const EdgeInsets.all(_padding),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+        crossAxisAlignment: CrossAxisAlignment.start,
+        // Align text to the left
         children: [
           _buildExpertOpinionRow(),
           const SizedBox(height: 8.0), // Spacing between elements
-          _buildTitle(),
+          _buildTitle(title),
           const SizedBox(height: 8.0),
           _buildDate(),
         ],
@@ -74,7 +69,8 @@ class CardDesign3List extends StatelessWidget {
   Widget _buildExpertOpinionRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start, // Aligns the row items at the start
+      crossAxisAlignment: CrossAxisAlignment.start,
+      // Aligns the row items at the start
       children: [
         _buildExpertOpinionText(),
         _buildFavoriteIcon(), // Call the new widget for the icon
@@ -105,10 +101,10 @@ class CardDesign3List extends StatelessWidget {
   }
 
   // Method to build the title
-  Widget _buildTitle() {
-    return const Text(
-      'The Latest Health Insights', // Title
-      style: TextStyle(
+  Widget _buildTitle(String title) {
+    return Text(
+      title, // Title
+      style: const TextStyle(
         fontSize: 16.0,
         fontWeight: FontWeight.bold,
       ),

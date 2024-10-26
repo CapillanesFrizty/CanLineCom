@@ -107,8 +107,7 @@ class HomeScreen extends StatelessWidget {
         bgColor: 0xffcbffd2,
         iconColor: 0xff3cc34f,
         onTap: () {
-          context.go('/Financial-Support');
-          debugPrint("Navigated to Financial Support");
+          context.go('/Financial-Institution');
         },
       ),
       _buildGridItem(

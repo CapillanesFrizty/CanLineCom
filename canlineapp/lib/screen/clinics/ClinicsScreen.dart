@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../widgets/BarrelFileWidget..dart';
-import 'package:go_router/go_router.dart';
 
 class ClinicScreen extends StatelessWidget {
   const ClinicScreen({super.key});
@@ -44,7 +42,7 @@ class ClinicScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(30.0,30.0,30.0,0.0),
+              padding: EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 0.0),
               child: SizedBox(
                 height: 450, // Set a fixed height or use shrinkWrap
                 child: GridView.count(
@@ -52,14 +50,15 @@ class ClinicScreen extends StatelessWidget {
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
                   childAspectRatio: 1 / 1.2,
-                  children: [
-                    CardDesign1(
-                      goto: () {
-                        context.go('/Health-Insititution/More-Info');
-                      },
-                      title: 'Clinic1',
-                      subtitle: 'Government Clinic',
-                    )
+                  children: const [
+                    // CardDesign1(
+                    //   goto: () {
+                    //     context.go('/Health-Insititution/More-Info');
+                    //   },
+                    //   image: ''const Icon(Icons.broken_image),
+                    //   title: 'Clinic1',
+                    //   subtitle: 'Government Clinic',
+                    // )
                   ],
                 ),
               ),

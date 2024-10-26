@@ -1,14 +1,24 @@
+import 'package:canerline_app/widgets/Card/CardDesign3List.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../widgets/BarrelFileWidget..dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 
-class BlogsScreen extends StatelessWidget {
+class BlogsScreen extends StatefulWidget {
   const BlogsScreen({super.key});
+
+  @override
+  State<BlogsScreen> createState() => _BlogsScreenState();
+}
+
+class _BlogsScreenState extends State<BlogsScreen> {
+  // Future to get blogs from Supabase
+  final _future = Supabase.instance.client.from('Blogs').select();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -18,7 +28,7 @@ class BlogsScreen extends StatelessWidget {
             _buildSectionTitle("Popular Blogs"),
             _buildPopularBlogsList(context),
             _buildSectionTitle("Recent Blogs"),
-            _buildRecentBlogs(context),
+            _buildRecentBlogs(context, _future), // Passing future here
           ],
         ),
       ),
@@ -31,9 +41,10 @@ class BlogsScreen extends StatelessWidget {
       child: Text(
         "Blogs",
         style: GoogleFonts.poppins(
-            fontSize: 30.0,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF5B50A0)),
+          fontSize: 30.0,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF5B50A0),
+        ),
       ),
     );
   }
@@ -56,8 +67,10 @@ class BlogsScreen extends StatelessWidget {
             borderSide: BorderSide.none,
           ),
           hintText: "Search",
-          hintStyle:
-              GoogleFonts.poppins(color: Colors.grey.shade500, fontSize: 14.0),
+          hintStyle: GoogleFonts.poppins(
+            color: Colors.grey.shade500,
+            fontSize: 14.0,
+          ),
         ),
       ),
     );
@@ -69,9 +82,10 @@ class BlogsScreen extends StatelessWidget {
       child: Text(
         title,
         style: GoogleFonts.poppins(
-            fontSize: 17.0,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF5B50A0)),
+          fontSize: 17.0,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF5B50A0),
+        ),
       ),
     );
   }
@@ -106,14 +120,44 @@ class BlogsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentBlogs(BuildContext context) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () => context.go('/Blog/More-Info-Blogs'),
-          child: CardDesign3List(),
-        ),
-      ],
+  Widget _buildRecentBlogs(
+      BuildContext context, Future<List<Map<String, dynamic>>> blogsFuture) {
+    return FutureBuilder(
+      future: blogsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error fetching data'));
+        }
+
+        final List<Map<String, dynamic>> blog = snapshot.data ?? [];
+
+        if (blog.isEmpty) {
+          return const Center(child: Text('No data available'));
+        }
+
+        return Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true, // Prevents scrolling conflicts
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: blog.length,
+              itemBuilder: (context, index) {
+                final blogData = blog[index];
+                return GestureDetector(
+                  onTap: () => context.go('/Blog/More-Info-Blogs'),
+                  child: CardDesign3List(
+                    title: blogData['Blogs-Name'] ?? 'Unknown Name',
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

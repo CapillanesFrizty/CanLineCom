@@ -2,45 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-class MoreInfoInstitutionScreen extends StatefulWidget {
+class Financialdetails extends StatefulWidget {
   final String id;
-  const MoreInfoInstitutionScreen({super.key, required this.id});
+  const Financialdetails({super.key, required this.id});
 
   @override
-  State<MoreInfoInstitutionScreen> createState() =>
-      _MoreInfoInstitutionScreenState();
+  State<Financialdetails> createState() => _FinancialdetailsState();
 }
 
-class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
+class _FinancialdetailsState extends State<Financialdetails> {
   late Future<Map<String, dynamic>> _future;
 
-  static const LatLng _center = LatLng(7.099091, 125.616108);
-  late GoogleMapController mapController;
+  Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
+    final response = await Supabase.instance.client
+        .from('Financial-Institution')
+        .select()
+        .eq('Financial-Institution-ID', widget.id)
+        .single();
+
+    // Generate image URL
+    final fileName = "${response['Financial-Institution-Name']}.png";
+    final imageUrl = Supabase.instance.client.storage
+        .from('Assets')
+        .getPublicUrl("Financial-Institution/$fileName");
+
+    response['Financial-Institution-Image-Url'] = imageUrl;
+
+    return response;
+  }
 
   @override
   void initState() {
     super.initState();
     _future = _fetchInstitutionDetails();
-  }
-
-  Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
-    final response = await Supabase.instance.client
-        .from('Health-Institution')
-        .select()
-        .eq('Health-Institution-ID', widget.id)
-        .single();
-
-    // Generate image URL
-    final fileName = "${response['Health-Institution-Name']}.png";
-    final imageUrl = Supabase.instance.client.storage
-        .from('Assets')
-        .getPublicUrl("Health-Institution/$fileName");
-
-    response['Health-Institution-Image-Url'] = imageUrl;
-
-    return response;
   }
 
   @override
@@ -57,12 +51,13 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             final data = snapshot.data!;
             return ListView(
               children: [
-                _buildImageSection(data['Health-Institution-Image-Url']),
+                _buildImageSection(data['Financial-Institution-Image-Url']),
                 const SizedBox(height: 20),
                 _buildDetailsSection(
-                  data['Health-Institution-Name'] ?? 'Unknown Name',
-                  data['Health-Institution-Desc'] ?? 'No description available',
-                  data['Health-Institution-Type'] ?? 'Unknown Type',
+                  data['Financial-Institution-Name'] ?? 'Unknown Name',
+                  data['Financial-Institution-Desc'] ??
+                      'No description available',
+                  data['Financial-Institution-Type'] ?? 'Unknown Type',
                 ),
                 const SizedBox(height: 50),
 
@@ -115,7 +110,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildIconButton(
-              Icons.arrow_back, () => context.go('/Health-Insititution')),
+              Icons.arrow_back, () => context.go('/Financial-Institution')),
           Row(
             children: [
               _buildIconButton(
@@ -148,8 +143,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildTitle(name),
           _buildSubtitle(hospitalType),
           const SizedBox(height: 16),
-          _buildFacilitiesBox(),
-          const SizedBox(height: 16),
           _buildAboutUsSection(description),
         ],
       ),
@@ -173,37 +166,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  Widget _buildFacilitiesBox() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildInfoColumn('Facilities', '10'),
-          const VerticalDivider(thickness: 5, color: Colors.black),
-          _buildInfoColumn('Accredited Insurance', '5'),
-          const VerticalDivider(),
-          _buildInfoColumn('Doctors', '20'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoColumn(String title, String value) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(value, style: const TextStyle(fontSize: 16)),
-        Text(title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
   Widget _buildAboutUsSection(String description) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,24 +178,24 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
+  // void _onMapCreated(GoogleMapController controller) {
+  //   mapController = controller;
+  // }
 
-  Widget _MapBuilder() {
-    return GoogleMap(
-      onMapCreated: _onMapCreated,
-      initialCameraPosition: CameraPosition(
-        target: _center, // Coordinates for the physical address
-        zoom: 15.0, // Adjust the zoom level
-      ),
-      markers: {
-        Marker(
-          markerId: MarkerId('Health-Institution'),
-          position: _center,
-          infoWindow: const InfoWindow(title: 'Health Institution'),
-        ),
-      },
-    );
-  }
+  // Widget _MapBuilder() {
+  //   return GoogleMap(
+  //     onMapCreated: _onMapCreated,
+  //     initialCameraPosition: CameraPosition(
+  //       target: _center, // Coordinates for the physical address
+  //       zoom: 15.0, // Adjust the zoom level
+  //     ),
+  //     markers: {
+  //       Marker(
+  //         markerId: MarkerId('Health-Institution'),
+  //         position: _center,
+  //         infoWindow: const InfoWindow(title: 'Health Institution'),
+  //       ),
+  //     },
+  //   );
+  // }
 }

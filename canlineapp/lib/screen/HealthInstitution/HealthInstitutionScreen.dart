@@ -3,10 +3,21 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../widgets/BarrelFileWidget..dart';
 
-class HealthInstitutionScreen extends StatelessWidget {
-  HealthInstitutionScreen({super.key});
+class HealthInstitutionScreen extends StatefulWidget {
+  const HealthInstitutionScreen({super.key});
 
-  final _future = Supabase.instance.client.from('health_institutions').select();
+  @override
+  State<HealthInstitutionScreen> createState() =>
+      _HealthInstitutionScreenState();
+}
+
+class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
+  final _future = Supabase.instance.client.from('Health-Institution').select();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +39,11 @@ class HealthInstitutionScreen extends StatelessWidget {
       padding: EdgeInsets.all(30.0),
       child: Text(
         "Health Institution",
-        style: TextStyle(fontFamily: "Gilroy-Medium", fontWeight: FontWeight.w500, fontSize: 30.0, color: Color(0xFF5B50A0)),
+        style: TextStyle(
+            fontFamily: "Gilroy-Medium",
+            fontWeight: FontWeight.w500,
+            fontSize: 30.0,
+            color: Color(0xFF5B50A0)),
       ),
     );
   }
@@ -40,7 +55,7 @@ class HealthInstitutionScreen extends StatelessWidget {
         autofocus: false,
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.grey.shade100,
+          fillColor: const Color.fromRGBO(245, 245, 245, 1),
           contentPadding: EdgeInsets.zero,
           prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
           border: OutlineInputBorder(
@@ -115,15 +130,38 @@ class HealthInstitutionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHealthInstitutionCard(Map<String, dynamic> healthInstData, BuildContext context) {
-    return CardDesign1(
-      goto: () {
-        final id = healthInstData['id'];
-        debugPrint('ID: $id');
-        context.go('/Health-Insititution/$id');
+  Future<String> _getImageUrl(Map<String, dynamic> healthInstData) async {
+    final fileName = "${healthInstData['Health-Institution-Name']}.png";
+    final response = Supabase.instance.client.storage
+        .from('Assets')
+        .getPublicUrl("Health-Institution/$fileName");
+    debugPrint("ERROR: $response and the filename is: $fileName");
+
+    return response;
+  }
+
+  Widget _buildHealthInstitutionCard(
+      Map<String, dynamic> healthInstData, BuildContext context) {
+    return FutureBuilder(
+      future: _getImageUrl(healthInstData),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final imageUrl = snapshot.data ?? '';
+
+        return CardDesign1(
+          goto: () {
+            final id = healthInstData['Health-Institution-ID'];
+            debugPrint('ID: $id');
+            context.go('/Health-Insititution/$id');
+          },
+          image: imageUrl.isEmpty ? '' : imageUrl,
+          title: healthInstData['Health-Institution-Name'] ?? 'Unknown Name',
+          subtitle: healthInstData['Health-Institution-Type'] ?? '',
+        );
       },
-      title: healthInstData['name_of_health_institution'] ?? 'Unknown Name',
-      subtitle: healthInstData['type_of_hospital'] ?? 'Unknown Type',
     );
   }
 }
