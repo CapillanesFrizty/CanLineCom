@@ -69,19 +69,7 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
-    // ! Clinics Route
-    GoRoute(
-      path: '/Clinics',
-      builder: (context, state) => ScaffoldLayoutWidget(
-        leadingWidget: TextButton(
-          onPressed: () {
-            context.go('/');
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-        bodyWidget: ClinicScreen(),
-      ),
-    ),
+
     // ! Financial Support Route
     GoRoute(
       path: '/Financial-Institution',
@@ -104,6 +92,7 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
+    // ! Clinics Route
     GoRoute(
         path: '/clinic',
         builder: (context, state) => ScaffoldLayoutWidget(

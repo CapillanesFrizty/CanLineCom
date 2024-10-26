@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
 class CardDesign3List extends StatelessWidget {
-  const CardDesign3List({super.key, required this.title, required this.ImgURL});
+  const CardDesign3List(
+      {super.key,
+      required this.title,
+      required this.ImgURL,
+      required this.date_published,
+      required this.category});
   final String title;
   final String ImgURL;
+  final String date_published;
+  final String category;
 
   static const double _borderRadius = 15.0;
   static const double _padding = 10.0;
@@ -55,33 +62,33 @@ class CardDesign3List extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         // Align text to the left
         children: [
-          _buildExpertOpinionRow(),
+          _buildExpertOpinionRow(category),
           const SizedBox(height: 8.0), // Spacing between elements
           _buildTitle(title),
           const SizedBox(height: 8.0),
-          _buildDate(),
+          _buildDate(date_published),
         ],
       ),
     );
   }
 
   // Method to build the expert opinion row with text and icon
-  Widget _buildExpertOpinionRow() {
+  Widget _buildExpertOpinionRow(String category) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       // Aligns the row items at the start
       children: [
-        _buildExpertOpinionText(),
+        _buildExpertOpinionText(category),
         _buildFavoriteIcon(), // Call the new widget for the icon
       ],
     );
   }
 
   // Widget for the expert opinion text
-  Widget _buildExpertOpinionText() {
-    return const Text(
-      'Expert Opinion',
+  Widget _buildExpertOpinionText(String category) {
+    return Text(
+      category,
       style: TextStyle(
         fontSize: 14.0,
         fontWeight: FontWeight.bold,
@@ -112,9 +119,9 @@ class CardDesign3List extends StatelessWidget {
   }
 
   // Method to build the date
-  Widget _buildDate() {
-    return const Text(
-      'September 17, 2024', // Date
+  Widget _buildDate(String date_published) {
+    return Text(
+      date_published, // Date
       style: TextStyle(
         fontSize: 12.0,
         color: Colors.grey,

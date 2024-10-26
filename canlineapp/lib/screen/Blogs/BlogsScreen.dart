@@ -24,8 +24,8 @@ class _BlogsScreenState extends State<BlogsScreen> {
           children: [
             _buildHeader(),
             _buildSearchField(),
-            _buildSectionTitle("Popular Blogs"),
-            _buildPopularBlogsList(context),
+            // _buildSectionTitle("Trending Blogs"),
+            // _buildPopularBlogsList(context),
             _buildSectionTitle("Recent Blogs"),
             _buildRecentBlogs(context, _future),
           ],
@@ -89,35 +89,35 @@ class _BlogsScreenState extends State<BlogsScreen> {
     );
   }
 
-  Widget _buildPopularBlogsList(BuildContext context) {
-    return SizedBox(
-      height: 200.0,
-      child: ListView.builder(
-        itemCount: 5,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () => context.go('/Blog/More-Info-Blogs'),
-            child: Card(
-              margin:
-                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              elevation: 5.0,
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Text(
-                  'Popular Blog ${index + 1}',
-                  style: GoogleFonts.poppins(fontSize: 16.0),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  // Widget _buildPopularBlogsList(BuildContext context) {
+  //   return SizedBox(
+  //     height: 200.0,
+  //     child: ListView.builder(
+  //       itemCount: 5,
+  //       scrollDirection: Axis.horizontal,
+  //       itemBuilder: (context, index) {
+  //         return GestureDetector(
+  //           onTap: () => context.go('/Blog/More-Info-Blogs'),
+  //           child: Card(
+  //             margin:
+  //                 const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+  //             shape: RoundedRectangleBorder(
+  //               borderRadius: BorderRadius.circular(15.0),
+  //             ),
+  //             elevation: 5.0,
+  //             child: Padding(
+  //               padding: const EdgeInsets.all(20.0),
+  //               child: Text(
+  //                 'Popular Blog ${index + 1}',
+  //                 style: GoogleFonts.poppins(fontSize: 16.0),
+  //               ),
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildRecentBlogs(
       BuildContext context, Future<List<Map<String, dynamic>>> blogsFuture) {
@@ -155,9 +155,10 @@ class _BlogsScreenState extends State<BlogsScreen> {
 
                     final imageUrl = snapshot.data ?? '';
                     return GestureDetector(
-                      onTap: () => context
-                          .go('/More-Info-Blogs/${blogData['Blogs-ID']}'),
+                      onTap: () => context.go('/Blog/${blogData['Blog-ID']}'),
                       child: CardDesign3List(
+                        category: blogData['Blogs-Category'] ?? 'Unknown',
+                        date_published: blogData['Blog-Published'] ?? 'Unknown',
                         ImgURL: imageUrl,
                         title: blogData['Blogs-Name'] ?? 'Unknown Name',
                       ),

@@ -6,6 +6,7 @@ class BlogPostLayout extends StatelessWidget {
   final String publishDate;
   final String content;
   final String imagePath; // Add an image path
+  final List<String> link; // Add a link field
 
   const BlogPostLayout({
     super.key,
@@ -14,6 +15,7 @@ class BlogPostLayout extends StatelessWidget {
     required this.publishDate,
     required this.content,
     required this.imagePath, // Add imagePath to the constructor
+    required this.link,
   });
 
   @override
@@ -40,7 +42,7 @@ class BlogPostLayout extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(
                 10.0), // Optional: Add rounded corners to the image
-            child: Image.asset(
+            child: Image.network(
               imagePath,
               fit: BoxFit.cover,
             ),
@@ -101,6 +103,37 @@ class BlogPostLayout extends StatelessWidget {
             content,
             style: TextStyle(fontSize: 16),
             textAlign: TextAlign.justify,
+            softWrap: true,
+          ),
+        ),
+        SizedBox(height: 16), // Space after content
+
+        // Link
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "References",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              for (var i = 0; i < link.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    link[i],
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87, // Plain text color
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
         SizedBox(height: 16), // Space after content
