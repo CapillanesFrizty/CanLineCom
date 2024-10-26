@@ -19,12 +19,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   static const LatLng _center = LatLng(7.099091, 125.616108);
   late GoogleMapController mapController;
 
-  @override
-  void initState() {
-    super.initState();
-    _future = _fetchInstitutionDetails();
-  }
-
   Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
     final response = await Supabase.instance.client
         .from('Health-Institution')
@@ -41,6 +35,12 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     response['Health-Institution-Image-Url'] = imageUrl;
 
     return response;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _fetchInstitutionDetails();
   }
 
   @override

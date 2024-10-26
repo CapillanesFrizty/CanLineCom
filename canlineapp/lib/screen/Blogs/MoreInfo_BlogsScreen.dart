@@ -3,18 +3,39 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../Layouts/BarrelFileLayouts.dart';
 
 class MoreinfoBlogsscreen extends StatefulWidget {
-  const MoreinfoBlogsscreen({super.key});
+  final String id;
+  const MoreinfoBlogsscreen({super.key, required this.id});
 
   @override
   State<MoreinfoBlogsscreen> createState() => _MoreinfoBlogsscreenState();
 }
 
 class _MoreinfoBlogsscreenState extends State<MoreinfoBlogsscreen> {
-  final _future = Supabase.instance.client
-      .from('Blogs, Blogs-RefLink("Blog-ID")')
-      .select()
-      .eq('Blog-ID', '1')
-      .single();
+  late Future<Map<String, dynamic>> _future;
+
+  Future<Map<String, dynamic>> _fetchBlogs() async {
+    final response = await Supabase.instance.client
+        .from('Blogs, Blogs-RefLink("Blog-ID")')
+        .select()
+        .eq('Blog-ID', widget.id)
+        .single();
+
+    // Generate image URL
+    final fileName = "${response['Blogs-Name']}.png";
+    final imageUrl = Supabase.instance.client.storage
+        .from('Assets')
+        .getPublicUrl("Blogs-News/$fileName");
+
+    response['Blog-Image-Url'] = imageUrl;
+
+    return response;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _fetchBlogs();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +52,7 @@ class _MoreinfoBlogsscreenState extends State<MoreinfoBlogsscreen> {
             }
             final data = snapshot.data!;
             return BlogPostLayout(
-              imagePath: 'lib/assets/images/jpeg/spmc.jpg',
+              imagePath: data['Blog-Image-Url'] ?? '',
               title: data['Blogs-Title'] ?? 'No Title Available',
               author: data['Blogs-Author'] ?? 'No Author Available',
               publishDate: 'September 24, 2024',

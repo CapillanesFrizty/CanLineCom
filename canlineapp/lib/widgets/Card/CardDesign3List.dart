@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CardDesign3List extends StatelessWidget {
-  const CardDesign3List({super.key, required this.title});
+  const CardDesign3List({super.key, required this.title, required this.ImgURL});
   final String title;
+  final String ImgURL;
 
   static const double _borderRadius = 15.0;
   static const double _padding = 10.0;
@@ -23,7 +24,7 @@ class CardDesign3List extends StatelessWidget {
         elevation: 4.0,
         child: Row(
           children: [
-            _buildImage(), // Image on the left side
+            _buildImage(ImgURL), // Image on the left side
             Expanded(child: _buildCardDetails(title)), // Text on the right side
           ],
         ),
@@ -32,19 +33,18 @@ class CardDesign3List extends StatelessWidget {
   }
 
   // Method to build the image widget
-  Widget _buildImage() {
+  Widget _buildImage(String imgURL) {
     return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(_borderRadius),
-        bottomLeft: Radius.circular(_borderRadius),
-      ),
-      child: Image.asset(
-        'lib/assets/images/jpeg/spmc.jpg',
-        fit: BoxFit.cover,
-        height: 145.0,
-        width: 130.0, // Fixed width for the image
-      ),
-    );
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(_borderRadius),
+          bottomLeft: Radius.circular(_borderRadius),
+        ),
+        child: Image.network(
+          imgURL, // Image URL
+          fit: BoxFit.cover,
+          height: 145.0,
+          width: 130.0, // Fixed width for the image
+        ));
   }
 
   // Method to build the entire card details

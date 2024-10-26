@@ -12,7 +12,6 @@ class BlogsScreen extends StatefulWidget {
 }
 
 class _BlogsScreenState extends State<BlogsScreen> {
-  // Future to get blogs from Supabase
   final _future = Supabase.instance.client.from('Blogs').select();
 
   @override
@@ -28,7 +27,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
             _buildSectionTitle("Popular Blogs"),
             _buildPopularBlogsList(context),
             _buildSectionTitle("Recent Blogs"),
-            _buildRecentBlogs(context, _future), // Passing future here
+            _buildRecentBlogs(context, _future),
           ],
         ),
       ),
@@ -43,7 +42,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
         style: GoogleFonts.poppins(
           fontSize: 30.0,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF5B50A0),
+          color: const Color(0xFF5B50A0),
         ),
       ),
     );
@@ -84,7 +83,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
         style: GoogleFonts.poppins(
           fontSize: 17.0,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF5B50A0),
+          color: const Color(0xFF5B50A0),
         ),
       ),
     );
@@ -133,25 +132,37 @@ class _BlogsScreenState extends State<BlogsScreen> {
           return const Center(child: Text('Error fetching data'));
         }
 
-        final List<Map<String, dynamic>> blog = snapshot.data ?? [];
+        final List<Map<String, dynamic>> blogs = snapshot.data ?? [];
 
-        if (blog.isEmpty) {
+        if (blogs.isEmpty) {
           return const Center(child: Text('No data available'));
         }
 
         return Column(
           children: [
             ListView.builder(
-              shrinkWrap: true, // Prevents scrolling conflicts
+              shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: blog.length,
+              itemCount: blogs.length,
               itemBuilder: (context, index) {
-                final blogData = blog[index];
-                return GestureDetector(
-                  onTap: () => context.go('/Blog/More-Info-Blogs'),
-                  child: CardDesign3List(
-                    title: blogData['Blogs-Name'] ?? 'Unknown Name',
-                  ),
+                final blogData = blogs[index];
+                return FutureBuilder<String>(
+                  future: _getImageUrl(blogData['Blogs-Name']),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final imageUrl = snapshot.data ?? '';
+                    return GestureDetector(
+                      onTap: () => context
+                          .go('/More-Info-Blogs/${blogData['Blogs-ID']}'),
+                      child: CardDesign3List(
+                        ImgURL: imageUrl,
+                        title: blogData['Blogs-Name'] ?? 'Unknown Name',
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -159,5 +170,13 @@ class _BlogsScreenState extends State<BlogsScreen> {
         );
       },
     );
+  }
+
+  Future<String> _getImageUrl(String blogName) async {
+    final fileName = "$blogName.png";
+    final response = Supabase.instance.client.storage
+        .from('Assets')
+        .getPublicUrl("Blogs-News/$fileName");
+    return response;
   }
 }

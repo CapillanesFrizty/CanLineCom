@@ -61,8 +61,11 @@ final GoRouter linkrouter = GoRouter(
       routes: [
         // ! More Info Intended for Blogs Route
         GoRoute(
-          path: 'More-Info-Blogs',
-          builder: (context, state) => MoreinfoBlogsscreen(),
+          name: 'bid',
+          path: ':bid',
+          builder: (context, state) => MoreinfoBlogsscreen(
+            id: state.pathParameters['bid']!,
+          ),
         ),
       ],
     ),
