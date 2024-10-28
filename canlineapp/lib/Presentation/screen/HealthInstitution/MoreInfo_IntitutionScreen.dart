@@ -58,14 +58,13 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             return ListView(
               children: [
                 _buildImageSection(data['Health-Institution-Image-Url']),
+
                 const SizedBox(height: 20),
                 _buildDetailsSection(
                   data['Health-Institution-Name'] ?? 'Unknown Name',
                   data['Health-Institution-Desc'] ?? 'No description available',
                   data['Health-Institution-Type'] ?? 'Unknown Type',
                 ),
-                const SizedBox(height: 50),
-
                 // !! Uncomment the code below to display the map
                 // TODO: Add the map to the screen
                 // Expanded(
@@ -94,7 +93,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
 
   Widget _buildBackgroundImage(String imageUrl) {
     return Container(
-      height: MediaQuery.of(context).size.width,
+      // height: MediaQuery.of(context).size.width,
+      height: 300,
       child: ClipRRect(
         child: imageUrl.isNotEmpty
             ? Image.network(
@@ -110,7 +110,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
 
   Widget _buildTopIcons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 17.0, vertical: 30.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -120,6 +120,9 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             children: [
               _buildIconButton(
                   Icons.share, () {}), // Placeholder for share action
+              SizedBox(
+                width: 20.0,
+              ),
               _buildIconButton(Icons.favorite_outline,
                   () {}), // Placeholder for favorite action
             ],
@@ -134,12 +137,18 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       onPressed: onPressed,
       icon: Icon(icon),
       iconSize: 30,
-      color: Colors.black,
+      color: const Color(0xff5B50A0),
+      style: const ButtonStyle(
+        backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
+      ),
     );
   }
 
   Widget _buildDetailsSection(
-      String name, String description, String hospitalType) {
+    String name,
+    String description,
+    String hospitalType,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
@@ -151,6 +160,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildFacilitiesBox(),
           const SizedBox(height: 16),
           _buildAboutUsSection(description),
+          _buildContactusSection(description),
+          _buildScheduleSection(description),
         ],
       ),
     );
@@ -169,7 +180,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   Widget _buildSubtitle(String subtitle) {
     return Text(
       subtitle,
-      style: const TextStyle(fontSize: 18, color: Colors.grey),
+      style: const TextStyle(fontSize: 16, color: Colors.green),
     );
   }
 
@@ -184,7 +195,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildInfoColumn('Facilities', '10'),
-          const VerticalDivider(thickness: 5, color: Colors.black),
+          const VerticalDivider(thickness: 5, color: Color(0xff5B50A0)),
           _buildInfoColumn('Accredited Insurance', '5'),
           const VerticalDivider(),
           _buildInfoColumn('Doctors', '20'),
@@ -199,7 +210,10 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       children: [
         Text(value, style: const TextStyle(fontSize: 16)),
         Text(title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff5B50A0))),
       ],
     );
   }
@@ -208,10 +222,65 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Divider(color: Color(0xff5B50A0)),
+        const SizedBox(
+          height: 20,
+        ),
         const Text('About Us',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Text(description, style: const TextStyle(fontSize: 16)),
+            style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff5B50A0))),
+        const SizedBox(height: 20),
+        Text(description, style: const TextStyle(fontSize: 18)),
+        const SizedBox(
+          height: 8,
+        ),
+        const Divider(color: Color(0xff5B50A0)),
+      ],
+    );
+  }
+
+  Widget _buildScheduleSection(String schedule) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 20),
+        Text(
+          'Opening Hours',
+          style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
+        ),
+        SizedBox(height: 20),
+        Text("Mon = Fri: 8:00am - 6:00pm",
+            style: TextStyle(fontSize: 18, color: Color(0xff5B50A0))),
+        SizedBox(
+          height: 8,
+        ),
+        Divider(color: Color(0xff5B50A0)),
+      ],
+    );
+  }
+
+  Widget _buildContactusSection(String contacts) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 20),
+        Text('Contact Us',
+            style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff5B50A0))),
+        SizedBox(height: 20),
+        Text("09131112421",
+            style: TextStyle(fontSize: 18, color: Color(0xff5B50A0))),
+        SizedBox(
+          height: 8,
+        ),
+        Divider(color: Color(0xff5B50A0)),
       ],
     );
   }
@@ -223,15 +292,15 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   Widget _MapBuilder() {
     return GoogleMap(
       onMapCreated: _onMapCreated,
-      initialCameraPosition: CameraPosition(
+      initialCameraPosition: const CameraPosition(
         target: _center, // Coordinates for the physical address
         zoom: 15.0, // Adjust the zoom level
       ),
       markers: {
-        Marker(
+        const Marker(
           markerId: MarkerId('Health-Institution'),
           position: _center,
-          infoWindow: const InfoWindow(title: 'Health Institution'),
+          infoWindow: InfoWindow(title: 'Health Institution'),
         ),
       },
     );
