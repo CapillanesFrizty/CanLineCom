@@ -305,4 +305,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       },
     );
   }
+
+  // Comment
 }
