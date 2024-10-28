@@ -1,4 +1,4 @@
-import 'package:canerline_app/widgets/Card/CardDesign3List.dart';
+import 'package:canerline_app/Presentation/widgets/Card/CardDesign3List.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

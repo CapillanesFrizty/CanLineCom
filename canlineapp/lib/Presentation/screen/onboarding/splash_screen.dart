@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:canerline_app/widgets/onboarding/getstarted_button.dart'; // Update the import path as needed
+import 'package:canerline_app/Presentation/widgets/onboarding/getstarted_button.dart'; // Update the import path as needed
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

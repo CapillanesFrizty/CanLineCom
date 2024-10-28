@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../Layouts/BarrelFileLayouts.dart';
+import '../../../Layouts/BarrelFileLayouts.dart';
 
 class MoreinfoBlogsscreen extends StatefulWidget {
   final String id;

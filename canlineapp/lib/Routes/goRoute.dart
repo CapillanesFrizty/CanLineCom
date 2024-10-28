@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../screen/BarrelFileScreen.dart';
+import '../Presentation/screen/BarrelFileScreen.dart';
 import '../Layouts/BarrelFileLayouts.dart';
 // import '../widgets/BarrelFileWidget..dart';
 
@@ -106,8 +106,11 @@ final GoRouter linkrouter = GoRouter(
             ),
         routes: [
           GoRoute(
-              path: './clinicInfo',
-              builder: (context, state) => MoreinfoClinicsscreen()),
+              name: 'cid',
+              path: ':cid',
+              builder: (context, state) => MoreinfoClinicsscreen(
+                    id: state.pathParameters['cid']!,
+                  )),
         ]),
   ],
 );
