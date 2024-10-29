@@ -20,8 +20,13 @@ class ScaffoldLayoutWidget extends StatefulWidget {
 }
 
 class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
-  int _currentIndex = 2; // Start with the Home tab selected
-  final List<String> _routes = [
+  int _currentIndex = 2;
+
+  static const Color _primaryColor = Color(0xFF5B50A0);
+  static const double _iconSize = 28.0;
+  static const double _toolbarHeight = 80.0;
+
+  static const List<String> _routes = [
     '/search',
     '/favorites',
     '/',
@@ -29,36 +34,41 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
     '/profile',
   ];
 
+  static const List<({IconData outlined, IconData filled})> _icons = [
+    (outlined: Icons.search_outlined, filled: Icons.search),
+    (outlined: Icons.favorite_outline, filled: Icons.favorite),
+    (outlined: Icons.home_max_outlined, filled: Icons.home_rounded),
+    (outlined: Icons.notifications_outlined, filled: Icons.notifications),
+    (outlined: Icons.person_outline, filled: Icons.person),
+  ];
+
   void _onTabSelected(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-    GoRouter.of(context).go(_routes[index]);
+    setState(() => _currentIndex = index);
+    context.go(_routes[index]);
   }
 
-  BottomNavigationBarItem _buildNavItem(IconData icon, IconData activeIcon,
-      {bool isCenter = false}) {
+  BottomNavigationBarItem _buildNavItem(int index, {bool isCenter = false}) {
+    Widget buildIcon(IconData icon) {
+      if (isCenter) {
+        return Container(
+          padding: const EdgeInsets.all(8.0),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: _primaryColor),
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Icon(icon),
+      );
+    }
+
     return BottomNavigationBarItem(
-      icon: isCenter
-          ? Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: Color(0xFF5B50A0)), // Home icon color
-            )
-          : Icon(icon),
-      activeIcon: isCenter
-          ? Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(activeIcon, color: Color(0xFF5B50A0)),
-            )
-          : Icon(activeIcon),
+      icon: buildIcon(_icons[index].outlined),
+      activeIcon: buildIcon(_icons[index].filled),
       label: '',
     );
   }
@@ -67,11 +77,23 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: widget.elevation ?? 0,
+        backgroundColor: Colors.white,
+        toolbarHeight: _toolbarHeight,
+        actions: widget.actionsWidget,
+        leadingWidth: 65,
+        leading: widget.leadingWidget != null
+            ? Padding(
+                padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                child: widget.leadingWidget!,
+              )
+            : null,
+      ),
       body: widget.bodyWidget,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Color(0xff5B50A0).withOpacity(
-            0.6), // Make the BottomNavigationBar background transparent
+        backgroundColor: _primaryColor.withOpacity(0.55),
         elevation: 0,
         currentIndex: _currentIndex,
         onTap: _onTabSelected,
@@ -79,15 +101,14 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
         showUnselectedLabels: false,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white,
-        iconSize: 28,
-        items: [
-          _buildNavItem(Icons.search_outlined, Icons.search),
-          _buildNavItem(Icons.favorite_outline, Icons.favorite),
-          _buildNavItem(Icons.home_max_outlined, Icons.home_rounded,
-              isCenter: true), // Center item with circle background
-          _buildNavItem(Icons.notifications_outlined, Icons.notifications),
-          _buildNavItem(Icons.person_outline, Icons.person),
-        ],
+        iconSize: _iconSize,
+        items: List.generate(
+          _icons.length,
+          (index) => _buildNavItem(
+            index,
+            isCenter: index == 2,
+          ),
+        ),
       ),
     );
   }

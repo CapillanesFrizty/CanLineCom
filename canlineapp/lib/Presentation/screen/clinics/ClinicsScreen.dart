@@ -12,65 +12,44 @@ class ClinicScreen extends StatefulWidget {
 }
 
 class _ClinicScreenState extends State<ClinicScreen> {
+  static const Color _primaryColor = Color(0xFF5B50A0);
+  static const Color _secondaryColor = Color(0xFFF3EBFF);
+
   final _clinicFuture =
       Supabase.instance.client.from('Clinic-External').select();
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTitle(),
-          const SizedBox(height: 10),
-          _buildSearchField(),
-          const SizedBox(height: 20),
-          _buildClinicGrid(),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTitle(),
+            _buildSearchField(),
+            _buildClinicGrid(),
+          ],
+        ),
       ),
     );
   }
 
   // Build the title widget
   Widget _buildTitle() {
+    final titleStyle = GoogleFonts.poppins(
+      fontSize: 30.0,
+      fontWeight: FontWeight.w500,
+      color: _primaryColor,
+    );
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 50.0),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 40.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back, color: Color(0xFF5B50A0)),
-            onPressed: () {
-              context.go('/'); // Navigates to the home route instead of popping
-            },
-          ),
-          SizedBox(
-              width: 10.0), // Adds some space between the icon and the title
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Clinics',
-                style: GoogleFonts.poppins(
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 30.0,
-                    color: Color(0xFF5B50A0),
-                  ),
-                ),
-              ),
-              Text(
-                '(External)',
-                style: GoogleFonts.poppins(
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 30.0,
-                    color: Color(0xFF5B50A0),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          Text('Clinics', style: titleStyle),
+          Text('(External)', style: titleStyle),
         ],
       ),
     );
@@ -79,29 +58,36 @@ class _ClinicScreenState extends State<ClinicScreen> {
   // Build the search field
   Widget _buildSearchField() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: TextField(
-        autofocus: false,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: const Color(0xffF3EBFF),
-          contentPadding: EdgeInsets.zero,
-          prefixIcon: Icon(Icons.search, color: Color(0xff5B50A0)),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
+      padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 50.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: const Offset(0, 4),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: TextField(
+          autofocus: false,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: _secondaryColor,
+            contentPadding: EdgeInsets.zero,
+            prefixIcon: const Icon(Icons.search, color: _primaryColor),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide(color: _secondaryColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+            ),
+            hintText: "Search",
+            hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-            borderSide: BorderSide(
-                color: Color(0xffF3EBFF), width: 1.0), // Border when enabled
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-            borderSide: BorderSide(
-                color: Color(0xff5B50A0), width: 1.5), // Border when focused
-          ),
-          hintText: "Search",
-          hintStyle: TextStyle(color: Color(0xff5B50A0), fontSize: 14.0),
         ),
       ),
     );
@@ -126,24 +112,22 @@ class _ClinicScreenState extends State<ClinicScreen> {
           return const Center(child: Text('No clinics available'));
         }
 
-        return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: SizedBox(
-              height: 500,
-              child: GridView.builder(
-                itemCount: clinics.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 1 / 1.2,
-                ),
-                itemBuilder: (context, index) {
-                  final clinicData = clinics[index];
-                  return _buildClinicCard(clinicData);
-                },
-              ),
-            ));
+        return SizedBox(
+          height: 500,
+          child: GridView.builder(
+            itemCount: clinics.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1 / 1.2,
+            ),
+            itemBuilder: (context, index) {
+              final clinicData = clinics[index];
+              return _buildClinicCard(clinicData);
+            },
+          ),
+        );
       },
     );
   }
