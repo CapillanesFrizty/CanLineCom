@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MoreInfoInstitutionScreen extends StatefulWidget {
   final String id;
+
   const MoreInfoInstitutionScreen({super.key, required this.id});
 
   @override
@@ -15,9 +15,14 @@ class MoreInfoInstitutionScreen extends StatefulWidget {
 
 class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   late Future<Map<String, dynamic>> _future;
-
   static const LatLng _center = LatLng(7.099091, 125.616108);
   late GoogleMapController mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _fetchInstitutionDetails();
+  }
 
   Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
     final response = await Supabase.instance.client
@@ -26,21 +31,13 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         .eq('Health-Institution-ID', widget.id)
         .single();
 
-    // Generate image URL
     final fileName = "${response['Health-Institution-Name']}.png";
     final imageUrl = Supabase.instance.client.storage
         .from('Assets')
         .getPublicUrl("Health-Institution/$fileName");
 
     response['Health-Institution-Image-Url'] = imageUrl;
-
     return response;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _future = _fetchInstitutionDetails();
   }
 
   @override
@@ -58,20 +55,13 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             return ListView(
               children: [
                 _buildImageSection(data['Health-Institution-Image-Url']),
-
-                const SizedBox(height: 20),
                 _buildDetailsSection(
-                  data['Health-Institution-Name'] ?? 'Unknown Name',
-                  data['Health-Institution-Desc'] ?? 'No description available',
-                  data['Health-Institution-Type'] ?? 'Unknown Type',
+                  name: data['Health-Institution-Name'] ?? 'Unknown Name',
+                  description: data['Health-Institution-Desc'] ??
+                      'No description available',
+                  type: data['Health-Institution-Type'] ?? 'Unknown Type',
                 ),
-                // !! Uncomment the code below to display the map
-                // TODO: Add the map to the screen
-                // Expanded(
-                //   child:
-                //       // The Map needs a API Key to work
-                //       Container(width: 100, height: 100, child: _MapBuilder()),
-                // ),
+                // TODO: Add map widget if required
               ],
             );
           } else {
@@ -92,25 +82,19 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
   Widget _buildBackgroundImage(String imageUrl) {
-    return Container(
-      // height: MediaQuery.of(context).size.width,
+    return SizedBox(
       height: 300,
       child: ClipRRect(
         child: imageUrl.isNotEmpty
-            ? Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-              )
-            : const Center(
-                child: Text('Image not available'),
-              ),
+            ? Image.network(imageUrl, fit: BoxFit.cover)
+            : const Center(child: Text('Image not available')),
       ),
     );
   }
 
   Widget _buildTopIcons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 17.0, vertical: 30.0),
+      padding: const EdgeInsets.symmetric(horizontal: 17.0, vertical: 15.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -118,13 +102,9 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
               Icons.arrow_back, () => context.go('/Health-Insititution')),
           Row(
             children: [
-              _buildIconButton(
-                  Icons.share, () {}), // Placeholder for share action
-              SizedBox(
-                width: 20.0,
-              ),
-              _buildIconButton(Icons.favorite_outline,
-                  () {}), // Placeholder for favorite action
+              _buildIconButton(Icons.share, () {}),
+              const SizedBox(width: 10.0),
+              _buildIconButton(Icons.favorite_outline, () {}),
             ],
           ),
         ],
@@ -136,7 +116,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return IconButton(
       onPressed: onPressed,
       icon: Icon(icon),
-      iconSize: 30,
+      iconSize: 20,
       color: const Color(0xff5B50A0),
       style: const ButtonStyle(
         backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
@@ -145,23 +125,29 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
   Widget _buildDetailsSection(
-    String name,
-    String description,
-    String hospitalType,
-  ) {
+      {required String name,
+      required String description,
+      required String type}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 16),
           _buildTitle(name),
-          _buildSubtitle(hospitalType),
+          const SizedBox(height: 16),
+          _buildSubtitle(type),
           const SizedBox(height: 16),
           _buildFacilitiesBox(),
           const SizedBox(height: 16),
           _buildAboutUsSection(description),
-          _buildContactusSection(description),
-          _buildScheduleSection(description),
+          const SizedBox(height: 16),
+          _buildContactUsSection(),
+          const SizedBox(height: 16),
+          _buildScheduleSection(),
+          const SizedBox(height: 16),
+          _buildMapSection(),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -209,11 +195,13 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(value, style: const TextStyle(fontSize: 16)),
-        Text(title,
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff5B50A0))),
+        Text(
+          title,
+          style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
+        ),
       ],
     );
   }
@@ -223,25 +211,23 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(color: Color(0xff5B50A0)),
-        const SizedBox(
-          height: 20,
+        const SizedBox(height: 20),
+        const Text(
+          'About Us',
+          style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
         ),
-        const Text('About Us',
-            style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff5B50A0))),
         const SizedBox(height: 20),
         Text(description, style: const TextStyle(fontSize: 18)),
-        const SizedBox(
-          height: 8,
-        ),
+        const SizedBox(height: 8),
         const Divider(color: Color(0xff5B50A0)),
       ],
     );
   }
 
-  Widget _buildScheduleSection(String schedule) {
+  Widget _buildScheduleSection() {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,33 +240,46 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
               color: Color(0xff5B50A0)),
         ),
         SizedBox(height: 20),
-        Text("Mon = Fri: 8:00am - 6:00pm",
+        Text('Mon - Fri: 8:00am - 6:00pm',
             style: TextStyle(fontSize: 18, color: Color(0xff5B50A0))),
-        SizedBox(
-          height: 8,
-        ),
+        SizedBox(height: 8),
         Divider(color: Color(0xff5B50A0)),
       ],
     );
   }
 
-  Widget _buildContactusSection(String contacts) {
+  Widget _buildContactUsSection() {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 20),
-        Text('Contact Us',
-            style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff5B50A0))),
-        SizedBox(height: 20),
-        Text("09131112421",
-            style: TextStyle(fontSize: 18, color: Color(0xff5B50A0))),
-        SizedBox(
-          height: 8,
+        Text(
+          'Contact Us',
+          style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
         ),
+        Text('09131112421',
+            style: TextStyle(fontSize: 18, color: Color(0xff5B50A0))),
         Divider(color: Color(0xff5B50A0)),
+      ],
+    );
+  }
+
+  Widget _buildMapSection() {
+    return const Column(
+      children: [
+        SizedBox(height: 20),
+        Center(
+          child: Text(
+            'Where are we?',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -289,12 +288,12 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     mapController = controller;
   }
 
-  Widget _MapBuilder() {
+  Widget _mapBuilder() {
     return GoogleMap(
       onMapCreated: _onMapCreated,
       initialCameraPosition: const CameraPosition(
-        target: _center, // Coordinates for the physical address
-        zoom: 15.0, // Adjust the zoom level
+        target: _center,
+        zoom: 15.0,
       ),
       markers: {
         const Marker(
@@ -305,6 +304,4 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       },
     );
   }
-
-  // Comment
 }

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 class CardDesign1 extends StatelessWidget {
-  static const double _width = 146; // Fixed width for the card
-  static const double _imageHeight = 122; // Height for the image
-  static const double _cardHeight = 177; // Total height for the card
   final VoidCallback? goto;
 
   final String title;
@@ -23,46 +20,23 @@ class CardDesign1 extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: InkWell(
         onTap: goto,
-        child: Container(
-          width: _width,
-          height: _cardHeight,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.transparent,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (image.isNotEmpty)
-                Image.network(image) // Use NetworkImage with the URL
-              else
-                Container(
-                  height: 100, // Placeholder for missing image
-                  color: Colors.grey,
-                  child: Icon(Icons.image_not_supported),
-                ),
-              const SizedBox(height: 10),
-              _cardTitleAndSecondaryText(
-                title,
-                subtitle,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (image.isNotEmpty)
+              Image.network(image) // Use NetworkImage with the URL
+            else
+              Container(
+                height: 100, // Placeholder for missing image
+                color: Colors.grey,
+                child: Icon(Icons.image_not_supported),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Method to build the card Media (Image)
-  Widget _cardImage(String image) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: SizedBox(
-        width: _width,
-        height: _imageHeight,
-        child: Image.network(
-          image,
-          fit: BoxFit.cover,
+            const SizedBox(height: 20),
+            _cardTitleAndSecondaryText(
+              title,
+              subtitle,
+            ),
+          ],
         ),
       ),
     );
@@ -78,7 +52,7 @@ class CardDesign1 extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Color(0xff5B50A0),
           ),
         ),
         SizedBox(height: 5),
@@ -88,6 +62,8 @@ class CardDesign1 extends StatelessWidget {
             fontSize: 10,
             fontWeight: FontWeight.normal,
             color: Colors.grey,
+            //todo! need a color assignation between government and private hospital
+            //todo! green for government red for private
           ),
         ),
       ],

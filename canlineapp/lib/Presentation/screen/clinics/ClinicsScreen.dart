@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:canerline_app/Presentation/widgets/Card/CardDesign1.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ClinicScreen extends StatefulWidget {
   const ClinicScreen({super.key});
@@ -16,58 +17,92 @@ class _ClinicScreenState extends State<ClinicScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTitle(),
-              const SizedBox(height: 10),
-              _buildSearchField(),
-              const SizedBox(height: 20),
-              _buildClinicGrid(),
-            ],
-          ),
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTitle(),
+          const SizedBox(height: 10),
+          _buildSearchField(),
+          const SizedBox(height: 20),
+          _buildClinicGrid(),
+        ],
       ),
     );
   }
 
   // Build the title widget
   Widget _buildTitle() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 30.0),
-      child: Text(
-        "Clinics",
-        style: TextStyle(
-          fontSize: 30.0,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF5B50A0),
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 50.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back, color: Color(0xFF5B50A0)),
+            onPressed: () {
+              context.go('/'); // Navigates to the home route instead of popping
+            },
+          ),
+          SizedBox(
+              width: 10.0), // Adds some space between the icon and the title
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Clinics',
+                style: GoogleFonts.poppins(
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 30.0,
+                    color: Color(0xFF5B50A0),
+                  ),
+                ),
+              ),
+              Text(
+                '(External)',
+                style: GoogleFonts.poppins(
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 30.0,
+                    color: Color(0xFF5B50A0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   // Build the search field
   Widget _buildSearchField() {
-    return TextField(
-      autofocus: false,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        contentPadding: EdgeInsets.zero,
-        prefixIcon: Icon(
-          Icons.search,
-          color: Colors.grey.shade500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      child: TextField(
+        autofocus: false,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xffF3EBFF),
+          contentPadding: EdgeInsets.zero,
+          prefixIcon: Icon(Icons.search, color: Color(0xff5B50A0)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.0),
+            borderSide: BorderSide(
+                color: Color(0xffF3EBFF), width: 1.0), // Border when enabled
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.0),
+            borderSide: BorderSide(
+                color: Color(0xff5B50A0), width: 1.5), // Border when focused
+          ),
+          hintText: "Search",
+          hintStyle: TextStyle(color: Color(0xff5B50A0), fontSize: 14.0),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50.0),
-          borderSide: BorderSide.none,
-        ),
-        hintText: "Search",
-        hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14.0),
       ),
     );
   }
@@ -91,22 +126,24 @@ class _ClinicScreenState extends State<ClinicScreen> {
           return const Center(child: Text('No clinics available'));
         }
 
-        return SizedBox(
-          height: 450,
-          child: GridView.builder(
-            itemCount: clinics.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1 / 1.2,
-            ),
-            itemBuilder: (context, index) {
-              final clinicData = clinics[index];
-              return _buildClinicCard(clinicData);
-            },
-          ),
-        );
+        return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: SizedBox(
+              height: 500,
+              child: GridView.builder(
+                itemCount: clinics.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 1 / 1.2,
+                ),
+                itemBuilder: (context, index) {
+                  final clinicData = clinics[index];
+                  return _buildClinicCard(clinicData);
+                },
+              ),
+            ));
       },
     );
   }
