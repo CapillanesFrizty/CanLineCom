@@ -85,7 +85,7 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
   }
 
   Widget _buildBackgroundImage(String imageUrl) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.width,
       child: ClipRRect(
         child: imageUrl.isNotEmpty

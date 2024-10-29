@@ -36,16 +36,29 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
     GoRouter.of(context).go(_routes[index]);
   }
 
-  BottomNavigationBarItem _buildNavItem(IconData icon, IconData activeIcon) {
+  BottomNavigationBarItem _buildNavItem(IconData icon, IconData activeIcon,
+      {bool isCenter = false}) {
     return BottomNavigationBarItem(
-      icon: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Icon(icon),
-      ),
-      activeIcon: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Icon(activeIcon),
-      ),
+      icon: isCenter
+          ? Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Color(0xFF5B50A0)), // Home icon color
+            )
+          : Icon(icon),
+      activeIcon: isCenter
+          ? Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(activeIcon, color: Color(0xFF5B50A0)),
+            )
+          : Icon(activeIcon),
       label: '',
     );
   }
@@ -54,15 +67,11 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: widget.elevation ?? 0,
-        backgroundColor: Colors.white,
-        actions: widget.actionsWidget,
-        leading: widget.leadingWidget,
-      ),
+      body: widget.bodyWidget,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xff5B50A0).withOpacity(0.6),
+        backgroundColor: Color(0xff5B50A0).withOpacity(
+            0.6), // Make the BottomNavigationBar background transparent
         elevation: 0,
         currentIndex: _currentIndex,
         onTap: _onTabSelected,
@@ -74,12 +83,12 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
         items: [
           _buildNavItem(Icons.search_outlined, Icons.search),
           _buildNavItem(Icons.favorite_outline, Icons.favorite),
-          _buildNavItem(Icons.home_outlined, Icons.home),
+          _buildNavItem(Icons.home_max_outlined, Icons.home_rounded,
+              isCenter: true), // Center item with circle background
           _buildNavItem(Icons.notifications_outlined, Icons.notifications),
           _buildNavItem(Icons.person_outline, Icons.person),
         ],
       ),
-      body: widget.bodyWidget,
     );
   }
 }

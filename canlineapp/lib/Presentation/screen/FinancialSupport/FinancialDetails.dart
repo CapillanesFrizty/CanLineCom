@@ -88,7 +88,7 @@ class _FinancialdetailsState extends State<Financialdetails> {
   }
 
   Widget _buildBackgroundImage(String imageUrl) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.width,
       child: ClipRRect(
         child: imageUrl.isNotEmpty

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../widgets/Card/Carddesign2Carousellist.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FinancialSupportScreen extends StatefulWidget {
   const FinancialSupportScreen({super.key});
@@ -25,31 +26,62 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildTitle(),
-        _buildSearchField(),
-        _buildInstitutionSection(
-            "Government Institution", _getGovFinancialInstitution),
-        _buildInstitutionSection(
-            "Private Institution", _getPrivateFinancialInstitution),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTitle(),
+          _buildSearchField(),
+          _buildInstitutionSection(
+              "Government Institution", _getGovFinancialInstitution),
+          _buildInstitutionSection(
+              "Private Institution", _getPrivateFinancialInstitution),
+        ],
+      ),
     );
   }
 
   /// Builds the screen title.
   Widget _buildTitle() {
-    return const Padding(
-      padding: EdgeInsets.all(30.0),
-      child: Text(
-        "Financial Support",
-        style: TextStyle(
-          fontFamily: "Gilroy-Medium",
-          fontWeight: FontWeight.w500,
-          fontSize: 30.0,
-          color: Color(0xFF5B50A0),
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 50.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back, color: Color(0xFF5B50A0)),
+            onPressed: () {
+              context.go('/'); // Navigates to the home route instead of popping
+            },
+          ),
+          SizedBox(
+              width: 10.0), // Adds some space between the icon and the title
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Financial',
+                style: GoogleFonts.poppins(
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 30.0,
+                    color: Color(0xFF5B50A0),
+                  ),
+                ),
+              ),
+              Text(
+                'Assistance',
+                style: GoogleFonts.poppins(
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 30.0,
+                    color: Color(0xFF5B50A0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -57,20 +89,29 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   /// Builds the search field for filtering institutions.
   Widget _buildSearchField() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: TextField(
         autofocus: false,
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color.fromRGBO(245, 245, 245, 1),
+          fillColor: const Color(0xffF3EBFF),
           contentPadding: EdgeInsets.zero,
-          prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
+          prefixIcon: Icon(Icons.search, color: Color(0xff5B50A0)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50.0),
-            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.0),
+            borderSide: BorderSide(
+                color: Color(0xffF3EBFF), width: 1.0), // Border when enabled
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.0),
+            borderSide: BorderSide(
+                color: Color(0xff5B50A0), width: 1.5), // Border when focused
           ),
           hintText: "Search",
-          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14.0),
+          hintStyle: TextStyle(color: Color(0xff5B50A0), fontSize: 14.0),
         ),
       ),
     );
@@ -83,11 +124,14 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 40.0),
+          child: Text(title,
+              style: GoogleFonts.poppins(
+                textStyle: const TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xff5B50A0)),
+              )),
         ),
         FutureBuilder(
           future: future,
@@ -109,7 +153,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: SizedBox(
-                height: 250, // Set a fixed height for horizontal scrolling
+                height: 220, // Set a fixed height for horizontal scrolling
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: institutions.length,
