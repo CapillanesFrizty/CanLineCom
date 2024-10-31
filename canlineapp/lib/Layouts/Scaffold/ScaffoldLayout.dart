@@ -28,7 +28,7 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
 
   static const List<String> _routes = [
     '/search',
-    '/favorites',
+    '/events',
     '/',
     '/notifications',
     '/profile',
