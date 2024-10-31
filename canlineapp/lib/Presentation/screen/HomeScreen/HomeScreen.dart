@@ -13,127 +13,140 @@ class HomeScreen extends StatelessWidget {
       children: [
         _buildGreetingText(),
         _buildSearchField(),
-        _buildGridView(context),
+        _buildGridView(),
       ],
     );
   }
 
   Widget _buildGreetingText() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(5, 100, 30, 30),
+      padding: const EdgeInsets.only(bottom: 40),
       child: Text(
         "Hello\nHanna Forger!",
         style: GoogleFonts.poppins(
-          textStyle: const TextStyle(
-            fontSize: 30.0,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF5B50A0),
-          ),
+          fontSize: 30.0,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF5B50A0),
         ),
       ),
     );
   }
 
   Widget _buildSearchField() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15.0),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 40),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            offset: const Offset(0, 4),
+            blurRadius: 4,
+          ),
+        ],
+      ),
       child: TextField(
         autofocus: false,
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xffF3EBFF),
           contentPadding: EdgeInsets.zero,
-          prefixIcon: Icon(Icons.search, color: Color(0xff5B50A0)),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-          ),
+          prefixIcon: const Icon(Icons.search, color: Color(0xff5B50A0)),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-            borderSide: BorderSide(
-                color: Color(0xffF3EBFF), width: 1.0), // Border when enabled
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: Color(0xffF3EBFF)),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-            borderSide: BorderSide(
-                color: Color(0xff5B50A0), width: 1.5), // Border when focused
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: Color(0xff5B50A0), width: 1.5),
           ),
           hintText: "Search",
-          hintStyle: TextStyle(color: Color(0xff5B50A0), fontSize: 14.0),
+          hintStyle: const TextStyle(color: Color(0xff5B50A0), fontSize: 14.0),
         ),
       ),
     );
   }
 
-  Widget _buildGridView(BuildContext context) {
+  Widget _buildGridView() {
     return GridView.count(
       crossAxisCount: 2,
-      crossAxisSpacing: 15,
-      mainAxisSpacing: 15,
+      crossAxisSpacing: 20,
+      mainAxisSpacing: 20,
       childAspectRatio: 1 / 1.2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      children: _buildGridItems(context),
+      children: _gridItems,
     );
   }
 
-  List<Widget> _buildGridItems(BuildContext context) {
-    return [
-      _buildGridItem(
-        label: "Health\nInstitution",
-        iconAsset: 'lib/assets/icons/Hospital.svg',
-        textColor: 0xffff5267,
-        bgColor: 0xffffd7db,
-        iconColor: 0xffff5267,
-        onTap: () => context.go('/Health-Insititution'),
-      ),
-      _buildGridItem(
-        label: "Financial\nSupport",
-        iconAsset: 'lib/assets/icons/Financial.svg',
-        textColor: 0xff3cc34f,
-        bgColor: 0xffcbffd2,
-        iconColor: 0xff3cc34f,
-        onTap: () {
-          context.go('/Financial-Institution');
-        },
-      ),
-      _buildGridItem(
-        label: "Blogs/News",
-        iconAsset: 'lib/assets/icons/Blogs.svg',
-        textColor: 0xffffa133,
-        bgColor: 0xffffead1,
-        iconColor: 0xffffa133,
-        onTap: () => context.go('/Blog'),
-      ),
-      _buildGridItem(
-        label: "Clinics\n(External)",
-        iconAsset: 'lib/assets/icons/Clinics.svg',
-        textColor: 0xff3f52ff,
-        bgColor: 0xffd9ddff,
-        iconColor: 0xff3f52ff,
-        onTap: () => context.go('/clinic'),
-      ),
-    ];
-  }
+  // Define grid items as a constant list
+  static final List<Widget> _gridItems = [
+    _GridItem(
+      label: "Health\nInstitution",
+      iconAsset: 'lib/assets/icons/Hospital.svg',
+      textColor: 0xffff5267,
+      bgColor: 0xffffd7db,
+      iconColor: 0xffff5267,
+      route: '/Health-Insititution',
+    ),
+    _GridItem(
+      label: "Financial\nSupport",
+      iconAsset: 'lib/assets/icons/Financial.svg',
+      textColor: 0xff3cc34f,
+      bgColor: 0xffcbffd2,
+      iconColor: 0xff3cc34f,
+      route: '/Financial-Institution',
+    ),
+    _GridItem(
+      label: "Blogs/News",
+      iconAsset: 'lib/assets/icons/Blogs.svg',
+      textColor: 0xffffa133,
+      bgColor: 0xffffead1,
+      iconColor: 0xffffa133,
+      route: '/Blog',
+    ),
+    _GridItem(
+      label: "Clinics\n(External)",
+      iconAsset: 'lib/assets/icons/Clinics.svg',
+      textColor: 0xff3f52ff,
+      bgColor: 0xffd9ddff,
+      iconColor: 0xff3f52ff,
+      route: '/clinic',
+    ),
+  ];
+}
 
-  Widget _buildGridItem({
-    required String label,
-    required String iconAsset,
-    required int textColor,
-    required int bgColor,
-    required int iconColor,
-    required VoidCallback onTap,
-  }) {
+// Separate widget for grid items
+class _GridItem extends StatelessWidget {
+  final String label;
+  final String iconAsset;
+  final int textColor;
+  final int bgColor;
+  final int iconColor;
+  final String route;
+
+  const _GridItem({
+    required this.label,
+    required this.iconAsset,
+    required this.textColor,
+    required this.bgColor,
+    required this.iconColor,
+    required this.route,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: () => context.go(route),
       child: Container(
         decoration: BoxDecoration(
           color: Color(bgColor),
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.25), // 25% opacity
-              blurRadius: 4, // Softness of the shadow
-              offset: Offset(0, 4), // Position of the shadow (y=4)
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -142,7 +155,6 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Displaying the icon (using SvgPicture for SVG assets)
               SvgPicture.asset(
                 iconAsset,
                 color: Color(iconColor),

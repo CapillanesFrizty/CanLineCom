@@ -13,7 +13,6 @@ class CardDesign3List extends StatelessWidget {
   final String category;
 
   static const double _borderRadius = 15.0;
-  static const double _padding = 10.0;
 
   @override
   Widget build(BuildContext context) {
@@ -22,19 +21,16 @@ class CardDesign3List extends StatelessWidget {
 
   // Method to build each card
   Widget _buildCard() {
-    return Padding(
-      padding: const EdgeInsets.all(_padding), // Space around each card
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_borderRadius),
-        ),
-        elevation: 4.0,
-        child: Row(
-          children: [
-            _buildImage(ImgURL), // Image on the left side
-            Expanded(child: _buildCardDetails(title)), // Text on the right side
-          ],
-        ),
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+      ),
+      elevation: 4.0,
+      child: Row(
+        children: [
+          _buildImage(ImgURL), // Image on the left side
+          Expanded(child: _buildCardDetails(title)), // Text on the right side
+        ],
       ),
     );
   }
@@ -56,19 +52,16 @@ class CardDesign3List extends StatelessWidget {
 
   // Method to build the entire card details
   Widget _buildCardDetails(String title) {
-    return Padding(
-      padding: const EdgeInsets.all(_padding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        // Align text to the left
-        children: [
-          _buildExpertOpinionRow(category),
-          const SizedBox(height: 8.0), // Spacing between elements
-          _buildTitle(title),
-          const SizedBox(height: 8.0),
-          _buildDate(date_published),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      // Align text to the left
+      children: [
+        _buildExpertOpinionRow(category),
+        const SizedBox(height: 8.0), // Spacing between elements
+        _buildTitle(title),
+        const SizedBox(height: 8.0),
+        _buildDate(date_published),
+      ],
     );
   }
 

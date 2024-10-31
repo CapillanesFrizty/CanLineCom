@@ -13,97 +13,77 @@ class HealthInstitutionScreen extends StatefulWidget {
 }
 
 class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
+  static const Color _primaryColor = Color(0xFF5B50A0);
+  static const Color _secondaryColor = Color(0xFFF3EBFF);
+
   final _future = Supabase.instance.client.from('Health-Institution').select();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTitle(),
-          _buildSearchField(),
-          _buildFilterButtons(),
-          _buildHealthInstitutionsGrid(),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTitle(),
+            _buildSearchField(),
+            _buildFilterButtons(),
+            _buildHealthInstitutionsGrid(),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTitle() {
+    final titleStyle = GoogleFonts.poppins(
+      fontSize: 30.0,
+      fontWeight: FontWeight.w500,
+      color: _primaryColor,
+    );
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 50.0),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 40.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back, color: Color(0xFF5B50A0)),
-            onPressed: () {
-              context.go('/'); // Navigates to the home route instead of popping
-            },
-          ),
-          SizedBox(
-              width: 10.0), // Adds some space between the icon and the title
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Health',
-                style: GoogleFonts.poppins(
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 30.0,
-                    color: Color(0xFF5B50A0),
-                  ),
-                ),
-              ),
-              Text(
-                'Institutions',
-                style: GoogleFonts.poppins(
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 30.0,
-                    color: Color(0xFF5B50A0),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          Text('Health', style: titleStyle),
+          Text('Institutions', style: titleStyle),
         ],
       ),
     );
   }
 
   Widget _buildSearchField() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            offset: const Offset(0, 4),
+            blurRadius: 4,
+          ),
+        ],
+      ),
       child: TextField(
         autofocus: false,
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color(0xffF3EBFF),
+          fillColor: _secondaryColor,
           contentPadding: EdgeInsets.zero,
-          prefixIcon: Icon(Icons.search, color: Color(0xff5B50A0)),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-          ),
+          prefixIcon: const Icon(Icons.search, color: _primaryColor),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-            borderSide: BorderSide(
-                color: Color(0xffF3EBFF), width: 1.0), // Border when enabled
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(color: _secondaryColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50.0),
-            borderSide: BorderSide(
-                color: Color(0xff5B50A0), width: 1.5), // Border when focused
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: _primaryColor, width: 1.5),
           ),
           hintText: "Search",
-          hintStyle: TextStyle(color: Color(0xff5B50A0), fontSize: 14.0),
+          hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
         ),
       ),
     );
@@ -111,26 +91,19 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
 
   Widget _buildFilterButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
-        children: [
-          _buildFilterButton('Government Hospital'),
-          const SizedBox(width: 5),
-          _buildFilterButton('Private Hospital'),
+        children: const [
+          _FilterButton(text: 'Government Hospital'),
+          SizedBox(width: 5),
+          _FilterButton(text: 'Private Hospital'),
         ],
       ),
     );
   }
 
-  Widget _buildFilterButton(String text) {
-    return TextButton(
-      onPressed: () {},
-      child: Text(text),
-    );
-  }
-
   Widget _buildHealthInstitutionsGrid() {
-    return FutureBuilder(
+    return FutureBuilder<List<Map<String, dynamic>>>(
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -141,63 +114,73 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           return const Center(child: Text('Error fetching data'));
         }
 
-        final List<Map<String, dynamic>> healthInst = snapshot.data ?? [];
+        final healthInst = snapshot.data ?? [];
 
         if (healthInst.isEmpty) {
           return const Center(child: Text('No data available'));
         }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: SizedBox(
-            height: 500,
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 1 / 1.2,
-              ),
-              itemCount: healthInst.length,
-              itemBuilder: (context, index) {
-                final healthInstData = healthInst[index];
-                return _buildHealthInstitutionCard(healthInstData, context);
-              },
+        return SizedBox(
+          height: 500,
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1 / 1.2,
+            ),
+            itemCount: healthInst.length,
+            itemBuilder: (context, index) => _HealthInstitutionCard(
+              healthInstData: healthInst[index],
             ),
           ),
         );
       },
     );
   }
+}
 
-  Future<String> _getImageUrl(Map<String, dynamic> healthInstData) async {
+class _FilterButton extends StatelessWidget {
+  final String text;
+
+  const _FilterButton({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () {},
+      child: Text(text),
+    );
+  }
+}
+
+class _HealthInstitutionCard extends StatelessWidget {
+  final Map<String, dynamic> healthInstData;
+
+  const _HealthInstitutionCard({required this.healthInstData});
+
+  Future<String> _getImageUrl() async {
     final fileName = "${healthInstData['Health-Institution-Name']}.png";
-    final response = Supabase.instance.client.storage
+    return Supabase.instance.client.storage
         .from('Assets')
         .getPublicUrl("Health-Institution/$fileName");
-    debugPrint("ERROR: $response and the filename is: $fileName");
-
-    return response;
   }
 
-  Widget _buildHealthInstitutionCard(
-      Map<String, dynamic> healthInstData, BuildContext context) {
-    return FutureBuilder(
-      future: _getImageUrl(healthInstData),
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _getImageUrl(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final imageUrl = snapshot.data ?? '';
-
         return CardDesign1(
           goto: () {
             final id = healthInstData['Health-Institution-ID'];
-            debugPrint('ID: $id');
             context.go('/Health-Insititution/$id');
           },
-          image: imageUrl.isEmpty ? '' : imageUrl,
+          image: snapshot.data ?? '',
           title: healthInstData['Health-Institution-Name'] ?? 'Unknown Name',
           subtitle: healthInstData['Health-Institution-Type'] ?? '',
         );
