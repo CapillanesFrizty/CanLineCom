@@ -112,5 +112,14 @@ final GoRouter linkrouter = GoRouter(
                     id: state.pathParameters['cid']!,
                   )),
         ]),
+    //! Health Institution Facilities Route
+    GoRoute(
+      path: '/HealthInstitutionFacilities',
+      builder: (context, state) {
+        // Retrieve the type from extra parameter (Facilities, Accredited Insurance, Doctors)
+        final type = state.extra as String? ?? '';
+        return HealthInstitutionFacilities(type: type);
+      },
+    ),
   ],
 );

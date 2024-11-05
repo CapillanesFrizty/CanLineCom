@@ -22,3 +22,6 @@ export 'Fav/fav.dart';
 // ! Login Screen
 export 'authentication flow/login_screen.dart';
 export 'authentication flow/intro_login.dart';
+
+// ! Health Institution Facilities
+export 'HealthInstitution/HealthinstitutionFacilities.dart';
