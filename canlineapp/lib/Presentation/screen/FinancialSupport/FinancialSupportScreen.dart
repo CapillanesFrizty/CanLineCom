@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../widgets/Card/Carddesign2Carousellist.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../widgets/Card/Carddesign2Carousellist.dart';
 
 class FinancialSupportScreen extends StatefulWidget {
   const FinancialSupportScreen({super.key});
@@ -12,12 +12,13 @@ class FinancialSupportScreen extends StatefulWidget {
 }
 
 class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
-  // Constants for better maintainability
+  // Constants
   static const _primaryColor = Color(0xFF5B50A0);
   static const _secondaryColor = Color(0xFFF3EBFF);
   static const _tableName = 'Financial-Institution';
+  static const double _cardHeight = 200.0;
 
-  // Cached styles for better performance
+  // Styles
   final _titleStyle = GoogleFonts.poppins(
     textStyle: const TextStyle(
       fontWeight: FontWeight.w500,
@@ -34,18 +35,18 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     ),
   );
 
-  // Search controller
+  // Controllers
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(() {
-      setState(() {
-        _searchQuery = _searchController.text;
-      });
-    });
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    setState(() => _searchQuery = _searchController.text);
   }
 
   @override
@@ -54,23 +55,30 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     super.dispose();
   }
 
+  // Data Fetching
   Future<List<Map<String, dynamic>>> _fetchInstitutions(String type) async {
     final response = await Supabase.instance.client
         .from(_tableName)
         .select()
         .eq('Financial-Institution-Type', type);
 
-    final List<Map<String, dynamic>> institutions =
-        List<Map<String, dynamic>>.from(response);
+    final institutions = List<Map<String, dynamic>>.from(response);
 
     if (_searchQuery.isEmpty) return institutions;
 
-    return institutions
-        .where((institution) => institution['Financial-Institution-Name']
-            .toString()
-            .toLowerCase()
-            .contains(_searchQuery.toLowerCase()))
-        .toList();
+    return institutions.where((institution) {
+      return institution['Financial-Institution-Name']
+          .toString()
+          .toLowerCase()
+          .contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
+  Future<String> _getImageUrl(Map<String, dynamic> institution) async {
+    final fileName = "${institution['Financial-Institution-Name']}.png";
+    return Supabase.instance.client.storage
+        .from('Assets')
+        .getPublicUrl("Financial-Institution/$fileName");
   }
 
   @override
@@ -90,6 +98,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     );
   }
 
+  // UI Components
   Widget _buildTitle() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 40.0),
@@ -117,24 +126,27 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
       ),
       child: TextField(
         controller: _searchController,
-        autofocus: false,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: _secondaryColor,
-          contentPadding: EdgeInsets.zero,
-          prefixIcon: const Icon(Icons.search, color: _primaryColor),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: BorderSide(color: _secondaryColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: const BorderSide(color: _primaryColor, width: 1.5),
-          ),
-          hintText: "Search",
-          hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
-        ),
+        decoration: _buildSearchDecoration(),
       ),
+    );
+  }
+
+  InputDecoration _buildSearchDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: _secondaryColor,
+      contentPadding: EdgeInsets.zero,
+      prefixIcon: const Icon(Icons.search, color: _primaryColor),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        borderSide: BorderSide(color: _secondaryColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+      ),
+      hintText: "Search",
+      hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
     );
   }
 
@@ -146,34 +158,36 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
           padding: const EdgeInsets.symmetric(vertical: 40.0),
           child: Text(title, style: _sectionTitleStyle),
         ),
-        FutureBuilder<List<Map<String, dynamic>>>(
-          future: _fetchInstitutions(type),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-
-            final institutions = snapshot.data ?? [];
-            if (institutions.isEmpty) {
-              return const Center(child: Text('No institutions found'));
-            }
-
-            return SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: institutions.length,
-                itemBuilder: (context, index) =>
-                    _buildInstitutionCard(institutions[index]),
-              ),
-            );
-          },
+        SizedBox(
+          height: _cardHeight,
+          child: FutureBuilder<List<Map<String, dynamic>>>(
+            future: _fetchInstitutions(type),
+            builder: _buildInstitutionList,
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInstitutionList(BuildContext context,
+      AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (snapshot.hasError) {
+      return Center(child: Text('Error: ${snapshot.error}'));
+    }
+
+    final institutions = snapshot.data ?? [];
+    if (institutions.isEmpty) {
+      return const Center(child: Text('No institutions found'));
+    }
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: institutions.length,
+      itemBuilder: (context, index) =>
+          _buildInstitutionCard(institutions[index]),
     );
   }
 
@@ -190,12 +204,5 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
         );
       },
     );
-  }
-
-  Future<String> _getImageUrl(Map<String, dynamic> institution) async {
-    final fileName = "${institution['Financial-Institution-Name']}.png";
-    return Supabase.instance.client.storage
-        .from('Assets')
-        .getPublicUrl("Financial-Institution/$fileName");
   }
 }

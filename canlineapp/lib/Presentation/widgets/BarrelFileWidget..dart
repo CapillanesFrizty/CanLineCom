@@ -14,3 +14,6 @@ export 'auth/signup_form.dart';
 //! Onboarding Widgets
 export 'onboarding/getstarted_button.dart';
 export 'onboarding/onboarding_step.dart';
+
+//! Notification
+export './notification/notificationcard.dart';

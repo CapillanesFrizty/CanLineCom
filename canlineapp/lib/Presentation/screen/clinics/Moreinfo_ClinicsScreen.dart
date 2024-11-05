@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MoreinfoClinicsscreen extends StatefulWidget {
   final String id;
@@ -12,8 +13,14 @@ class MoreinfoClinicsscreen extends StatefulWidget {
 
 class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
   late Future<Map<String, dynamic>> _clinicDetailsFuture;
-  // static const LatLng _defaultLocation = LatLng(7.099091, 125.616108);
-  // late GoogleMapController _mapController;
+  static const LatLng _center = LatLng(7.099091, 125.616108);
+  late GoogleMapController mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _clinicDetailsFuture = _fetchClinicDetails();
+  }
 
   Future<Map<String, dynamic>> _fetchClinicDetails() async {
     final response = await Supabase.instance.client
@@ -22,21 +29,13 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
         .eq('Clinic-ID', widget.id)
         .single();
 
-    // Generate image URL
     final fileName = "${response['Clinic-Name']}.png";
     final imageUrl = Supabase.instance.client.storage
         .from('Assets')
         .getPublicUrl("Clinic-External/$fileName");
 
     response['Clinic-Image-Url'] = imageUrl;
-
     return response;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _clinicDetailsFuture = _fetchClinicDetails();
   }
 
   @override
@@ -54,16 +53,13 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
             return ListView(
               children: [
                 _buildImageSection(data['Clinic-Image-Url']),
-                const SizedBox(height: 20),
                 _buildDetailsSection(
-                  data['Clinic-Name'] ?? 'Unknown Name',
-                  data['Clinic-Description'] ?? 'No description available',
-                  "Opening Hours: ${data['Clinic-OpenHR'] ?? 'Unknown Type'}",
+                  name: data['Clinic-Name'] ?? 'Unknown Name',
+                  description:
+                      data['Clinic-Description'] ?? 'No description available',
+                  type: data['Clinic-Type'] ?? 'Unknown Type',
+                  address: data['Clinic-Address'] ?? 'Unknown Address',
                 ),
-                const SizedBox(height: 50),
-                // Map integration placeholder
-                // Uncomment to enable the map with API key
-                // Container(height: 200, child: _buildMap()),
               ],
             );
           } else {
@@ -85,13 +81,12 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
 
   Widget _buildBackgroundImage(String imageUrl) {
     return SizedBox(
-      height: MediaQuery.of(context).size.width,
+      height: 250,
       child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
         child: imageUrl.isNotEmpty
-            ? Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-              )
+            ? Image.network(imageUrl, fit: BoxFit.cover)
             : const Center(child: Text('Image not available')),
       ),
     );
@@ -99,7 +94,7 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
 
   Widget _buildTopIcons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -107,7 +102,8 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
           Row(
             children: [
               _buildIconButton(Icons.share, () {}),
-              _buildIconButton(Icons.favorite_outline, () {}),
+              const SizedBox(width: 10.0),
+              _buildIconButton(Icons.favorite_border, () {}),
             ],
           ),
         ],
@@ -119,41 +115,62 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
     return IconButton(
       onPressed: onPressed,
       icon: Icon(icon),
-      iconSize: 30,
-      color: Colors.black,
+      iconSize: 20,
+      color: const Color(0xff5B50A0),
+      style: const ButtonStyle(
+        backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
+      ),
     );
   }
 
-  Widget _buildDetailsSection(
-      String name, String description, String clinicType) {
+  Widget _buildDetailsSection({
+    required String name,
+    required String description,
+    required String type,
+    required String address,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTitle(name),
-          _buildSubtitle(clinicType),
           const SizedBox(height: 16),
+          _buildTitle(name),
+          const SizedBox(height: 16),
+          _buildSubtitle(type),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.grey, thickness: 1),
           _buildAboutUsSection(description),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.grey, thickness: 1),
+          _buildScheduleSection(),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.grey, thickness: 1),
+          _buildFacilitiesSection(),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.grey, thickness: 1),
+          _buildAddressSection(address),
+          const SizedBox(height: 16),
+          _buildMapSection(),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.grey, thickness: 1),
         ],
       ),
     );
   }
 
   Widget _buildTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
+    return Text(
+      title,
+      style: const TextStyle(
+          fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xff5B50A0)),
     );
   }
 
   Widget _buildSubtitle(String subtitle) {
     return Text(
       subtitle,
-      style: const TextStyle(fontSize: 18, color: Colors.grey),
+      style: const TextStyle(fontSize: 16, color: Colors.green),
     );
   }
 
@@ -161,32 +178,152 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('About Us',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text(
+          'About Us',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
+        ),
         const SizedBox(height: 8),
         Text(description, style: const TextStyle(fontSize: 16)),
       ],
     );
   }
 
-  // void _onMapCreated(GoogleMapController controller) {
-  //   _mapController = controller;
-  // }
+  Widget _buildScheduleSection() {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Opening Hours',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'Monday - Saturday 9:00am - 6:00pm',
+          style: TextStyle(fontSize: 16, color: Colors.black87),
+        ),
+      ],
+    );
+  }
 
-  // Widget _buildMap() {
-  //   return GoogleMap(
-  //     onMapCreated: _onMapCreated,
-  //     initialCameraPosition: CameraPosition(
-  //       target: _defaultLocation,
-  //       zoom: 15.0,
-  //     ),
-  //     markers: {
-  //       Marker(
-  //         markerId: MarkerId('Clinic'),
-  //         position: _defaultLocation,
-  //         infoWindow: const InfoWindow(title: 'Clinic Location'),
-  //       ),
-  //     },
-  //   );
-  // }
+  Widget _buildFacilitiesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Available Facilities',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Dedicated to providing specialized care for cancer patients. With advanced treatments, compassionate support, and a team of expert oncologists, we are here to guide you every step of the way on your journey to healing.',
+          style: TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            border: Border.all(color: Color(0xff5B50A0)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.medical_services_outlined,
+                  size: 40, color: Color(0xff5B50A0)),
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Consultant Oncologists',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff5B50A0),
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Patient Consultant',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddressSection(String address) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Where are we?',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0)),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          address,
+          style: const TextStyle(fontSize: 16, color: Colors.black87),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMapSection() {
+    return const Column(
+      children: [
+        SizedBox(height: 20),
+        Center(
+          child: Text(
+            'Where are we?',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  Widget _mapBuilder() {
+    return GoogleMap(
+      onMapCreated: _onMapCreated,
+      initialCameraPosition: const CameraPosition(
+        target: _center,
+        zoom: 15.0,
+      ),
+      markers: {
+        const Marker(
+          markerId: MarkerId('Clinic'),
+          position: _center,
+          infoWindow: InfoWindow(title: 'Clinic Location'),
+        ),
+      },
+    );
+  }
 }
