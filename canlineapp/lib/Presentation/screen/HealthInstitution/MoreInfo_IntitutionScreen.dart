@@ -180,13 +180,43 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildInfoColumn('Facilities', '10'),
+          GestureDetector(
+            onTap: () =>
+                context.go('/HealthInstitutionFacilities', extra: 'Facilities'),
+            child: _buildClickableInfoColumn('Facilities', '10'),
+          ),
           const VerticalDivider(thickness: 5, color: Color(0xff5B50A0)),
-          _buildInfoColumn('Accredited Insurance', '5'),
+          GestureDetector(
+            onTap: () => context.go('/HealthInstitutionFacilities',
+                extra: 'Accredited Insurance'),
+            child: _buildClickableInfoColumn('Accredited Insurance', '5'),
+          ),
           const VerticalDivider(),
-          _buildInfoColumn('Doctors', '20'),
+          GestureDetector(
+            onTap: () =>
+                context.go('/HealthInstitutionFacilities', extra: 'Doctors'),
+            child: _buildClickableInfoColumn('Doctors', '20'),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildClickableInfoColumn(String title, String value) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(value, style: const TextStyle(fontSize: 16)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff5B50A0),
+            decoration: TextDecoration.underline, // Underlines the text
+          ),
+        ),
+      ],
     );
   }
 
