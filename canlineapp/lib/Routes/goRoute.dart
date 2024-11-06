@@ -42,8 +42,43 @@ final GoRouter linkrouter = GoRouter(
         GoRoute(
           name: 'id',
           path: ':id',
-          builder: (context, state) =>
-              MoreInfoInstitutionScreen(id: state.pathParameters['id']!),
+          builder: (context, state) => ScaffoldLayoutWidget(
+            leadingWidget: TextButton(
+              onPressed: () {
+                context.go('/Health-Insititution');
+              },
+              child: Icon(Icons.arrow_back),
+            ),
+            bodyWidget:
+                MoreInfoInstitutionScreen(id: state.pathParameters['id']!),
+          ),
+        ),
+        // ! Health Institution Facilities Route
+        GoRoute(
+          path: '/Health-Insititution/facilities',
+          builder: (context, state) {
+            final type = state.extra as String? ?? '';
+            return ScaffoldLayoutWidget(
+              leadingWidget: TextButton(
+                onPressed: () {
+                  context.go('/Health-Insititution');
+                },
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Color(0xFF5B50A0),
+                ),
+              ),
+              titleWidget: const Text(
+                'Available Services',
+                style: TextStyle(
+                  color: Color(0xFF5B50A0),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              bodyWidget: HealthInstitutionFacilities(type: type),
+            );
+          },
         ),
       ],
     ),
@@ -112,14 +147,5 @@ final GoRouter linkrouter = GoRouter(
                     id: state.pathParameters['cid']!,
                   )),
         ]),
-    //! Health Institution Facilities Route
-    GoRoute(
-      path: '/HealthInstitutionFacilities',
-      builder: (context, state) {
-        // Retrieve the type from extra parameter (Facilities, Accredited Insurance, Doctors)
-        final type = state.extra as String? ?? '';
-        return HealthInstitutionFacilities(type: type);
-      },
-    ),
   ],
 );

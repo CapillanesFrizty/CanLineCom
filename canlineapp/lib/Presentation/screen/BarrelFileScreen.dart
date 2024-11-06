@@ -24,4 +24,4 @@ export 'authentication flow/login_screen.dart';
 export 'authentication flow/intro_login.dart';
 
 // ! Health Institution Facilities
-export 'HealthInstitution/HealthinstitutionFacilities.dart';
+export 'HealthInstitution/HealthInstitutionServices/HealthinstitutionFacilities.dart';

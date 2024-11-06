@@ -5,6 +5,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget bodyWidget;
   final List<Widget>? actionsWidget;
   final Widget? leadingWidget;
+  final Widget? titleWidget;
   final double? elevation;
 
   const ScaffoldLayoutWidget({
@@ -12,6 +13,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
     required this.bodyWidget,
     this.actionsWidget,
     this.leadingWidget,
+    this.titleWidget,
     this.elevation,
   });
 
@@ -81,6 +83,7 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
         elevation: widget.elevation ?? 0,
         backgroundColor: Colors.white,
         toolbarHeight: _toolbarHeight,
+        title: widget.titleWidget,
         actions: widget.actionsWidget,
         leadingWidth: 65,
         leading: widget.leadingWidget != null
