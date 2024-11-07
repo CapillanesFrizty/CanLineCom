@@ -55,13 +55,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             return ListView(
               children: [
                 _buildImageSection(data['Health-Institution-Image-Url']),
-                _buildDetailsSection(
-                  name: data['Health-Institution-Name'] ?? 'Unknown Name',
-                  description: data['Health-Institution-Desc'] ??
-                      'No description available',
-                  type: data['Health-Institution-Type'] ?? 'Unknown Type',
-                ),
-                // TODO: Add map widget if required
+                _buildDetailsSection(data),
               ],
             );
           } else {
@@ -113,34 +107,35 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
   Widget _buildIconButton(IconData icon, VoidCallback onPressed) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(icon),
-      iconSize: 20,
-      color: const Color(0xff5B50A0),
-      style: const ButtonStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
+    return Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        iconSize: 20,
+        color: const Color(0xff5B50A0),
       ),
     );
   }
 
-  Widget _buildDetailsSection(
-      {required String name,
-      required String description,
-      required String type}) {
+  Widget _buildDetailsSection(Map<String, dynamic> data) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          _buildTitle(name),
+          _buildTitle(data['Health-Institution-Name'] ?? 'Unknown Name'),
           const SizedBox(height: 16),
-          _buildSubtitle(type),
+          _buildSubtitle(data['Health-Institution-Type'] ?? 'Unknown Type'),
           const SizedBox(height: 16),
           _buildFacilitiesBox(),
           const SizedBox(height: 16),
-          _buildAboutUsSection(description),
+          _buildAboutUsSection(
+              data['Health-Institution-Desc'] ?? 'No description available'),
           const SizedBox(height: 16),
           _buildContactUsSection(),
           const SizedBox(height: 16),
@@ -180,25 +175,21 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: () =>
-                context.go('/HealthInstitutionFacilities', extra: 'Facilities'),
-            child: _buildClickableInfoColumn('Facilities', '10'),
-          ),
+          _buildFacilityItem('Facilities', '10', 'Facilities'),
           const VerticalDivider(thickness: 5, color: Color(0xff5B50A0)),
-          GestureDetector(
-            onTap: () => context.go('/HealthInstitutionFacilities',
-                extra: 'Accredited Insurance'),
-            child: _buildClickableInfoColumn('Accredited Insurance', '5'),
-          ),
+          _buildFacilityItem(
+              'Accredited Insurance', '5', 'Accredited Insurance'),
           const VerticalDivider(),
-          GestureDetector(
-            onTap: () =>
-                context.go('/HealthInstitutionFacilities', extra: 'Doctors'),
-            child: _buildClickableInfoColumn('Doctors', '20'),
-          ),
+          _buildFacilityItem('Doctors', '20', 'Doctors'),
         ],
       ),
+    );
+  }
+
+  Widget _buildFacilityItem(String title, String value, String extra) {
+    return GestureDetector(
+      onTap: () => context.go('/HealthInstitutionFacilities', extra: extra),
+      child: _buildClickableInfoColumn(title, value),
     );
   }
 
@@ -213,24 +204,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Color(0xff5B50A0),
-            decoration: TextDecoration.underline, // Underlines the text
+            decoration: TextDecoration.underline,
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoColumn(String title, String value) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(value, style: const TextStyle(fontSize: 16)),
-        Text(
-          title,
-          style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff5B50A0)),
         ),
       ],
     );
@@ -297,16 +272,46 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
   Widget _buildMapSection() {
-    return const Column(
+    return Column(
       children: [
-        SizedBox(height: 20),
-        Center(
+        const SizedBox(height: 20),
+        const Center(
           child: Text(
             'Where are we?',
             style: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
               color: Color(0xff5B50A0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Valgosons Building, Bolton Extension, Poblacion District, Davao City, 8000 Davao del Sur, Philippines.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 200,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                offset: const Offset(0, 4),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              'https://via.placeholder.com/400x200', // Placeholder image URL
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(child: Text('Image not available'));
+              },
             ),
           ),
         ),

@@ -3,6 +3,16 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+// Centralized color definitions
+class AppColors {
+  static const Color primary = Color(0xff5B50A0);
+  static const Color secondary = Colors.green;
+  static const Color divider = Colors.grey;
+  static const Color textPrimary = Colors.black87;
+  static const Color textSecondary = Colors.black54;
+  static const Color background = Colors.white;
+}
+
 class MoreinfoClinicsscreen extends StatefulWidget {
   final String id;
   const MoreinfoClinicsscreen({super.key, required this.id});
@@ -116,9 +126,9 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
       onPressed: onPressed,
       icon: Icon(icon),
       iconSize: 20,
-      color: const Color(0xff5B50A0),
+      color: AppColors.primary,
       style: const ButtonStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
+        backgroundColor: MaterialStatePropertyAll<Color>(AppColors.background),
       ),
     );
   }
@@ -139,21 +149,22 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
           const SizedBox(height: 16),
           _buildSubtitle(type),
           const SizedBox(height: 16),
-          const Divider(color: Colors.grey, thickness: 1),
+          const Divider(color: AppColors.divider, thickness: 1),
           _buildAboutUsSection(description),
           const SizedBox(height: 16),
-          const Divider(color: Colors.grey, thickness: 1),
+          const Divider(color: AppColors.divider, thickness: 1),
           _buildScheduleSection(),
           const SizedBox(height: 16),
-          const Divider(color: Colors.grey, thickness: 1),
+          const Divider(color: AppColors.divider, thickness: 1),
           _buildFacilitiesSection(),
           const SizedBox(height: 16),
-          const Divider(color: Colors.grey, thickness: 1),
-          _buildAddressSection(address),
+          const Divider(color: AppColors.divider, thickness: 1),
+          _buildLocationSection(),
           const SizedBox(height: 16),
-          _buildMapSection(),
+          const Divider(color: AppColors.divider, thickness: 1),
+          _buildAccreditedInsurancesSection(),
           const SizedBox(height: 16),
-          const Divider(color: Colors.grey, thickness: 1),
+          const Divider(color: AppColors.divider, thickness: 1),
         ],
       ),
     );
@@ -163,14 +174,14 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
     return Text(
       title,
       style: const TextStyle(
-          fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xff5B50A0)),
+          fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.primary),
     );
   }
 
   Widget _buildSubtitle(String subtitle) {
     return Text(
       subtitle,
-      style: const TextStyle(fontSize: 16, color: Colors.green),
+      style: const TextStyle(fontSize: 16, color: AppColors.secondary),
     );
   }
 
@@ -183,7 +194,7 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
           style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xff5B50A0)),
+              color: AppColors.primary),
         ),
         const SizedBox(height: 8),
         Text(description, style: const TextStyle(fontSize: 16)),
@@ -200,12 +211,12 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
           style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xff5B50A0)),
+              color: AppColors.primary),
         ),
         SizedBox(height: 10),
         Text(
           'Monday - Saturday 9:00am - 6:00pm',
-          style: TextStyle(fontSize: 16, color: Colors.black87),
+          style: TextStyle(fontSize: 16, color: AppColors.textPrimary),
         ),
       ],
     );
@@ -220,7 +231,7 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
           style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xff5B50A0)),
+              color: AppColors.primary),
         ),
         const SizedBox(height: 8),
         const Text(
@@ -228,102 +239,133 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
           style: TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            border: Border.all(color: Color(0xff5B50A0)),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Row(
+        _buildFacilityCard(),
+      ],
+    );
+  }
+
+  Widget _buildFacilityCard() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.primary),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.medical_services_outlined,
+              size: 40, color: AppColors.primary),
+          SizedBox(width: 12),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.medical_services_outlined,
-                  size: 40, color: Color(0xff5B50A0)),
-              SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Consultant Oncologists',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xff5B50A0),
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Patient Consultant',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
+              Text(
+                'Consultant Oncologists',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Patient Consultant',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Where are we?',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        const Text(
+          'Barangay Bolton Extension, Poblacion District, Davao City, Davao del Sur',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 200,
+          color: Colors.grey[300], // Placeholder for map
+          child: const Center(child: Text('Map Placeholder')),
         ),
       ],
     );
   }
 
-  Widget _buildAddressSection(String address) {
+  Widget _buildAccreditedInsurancesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Where are we?',
+          'Accredited Insurances',
           style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xff5B50A0)),
+              color: AppColors.primary),
         ),
         const SizedBox(height: 8),
-        Text(
-          address,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+        const Text(
+          'Where we collaborate with leading accredited insurance providers to ensure seamless access to quality cancer care. Your well-being is our priority, and we’re here to support you every step of the way.',
+          style: TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 16),
+        _buildInsuranceCard(
+          'PhilHealth',
+          'Philippine Health Insurance Corporation Services',
+          'https://via.placeholder.com/50', // Replace with actual logo URL
         ),
       ],
     );
   }
 
-  Widget _buildMapSection() {
-    return const Column(
-      children: [
-        SizedBox(height: 20),
-        Center(
-          child: Text(
-            'Where are we?',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff5B50A0),
+  Widget _buildInsuranceCard(String name, String description, String logoUrl) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.primary),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Image.network(logoUrl, width: 50, height: 50),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-
-  Widget _mapBuilder() {
-    return GoogleMap(
-      onMapCreated: _onMapCreated,
-      initialCameraPosition: const CameraPosition(
-        target: _center,
-        zoom: 15.0,
+        ],
       ),
-      markers: {
-        const Marker(
-          markerId: MarkerId('Clinic'),
-          position: _center,
-          infoWindow: InfoWindow(title: 'Clinic Location'),
-        ),
-      },
     );
   }
 }

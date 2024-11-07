@@ -144,6 +144,12 @@ class _FinancialdetailsState extends State<Financialdetails> {
           _buildSubtitle(hospitalType),
           const SizedBox(height: 16),
           _buildAboutUsSection(description),
+          const SizedBox(height: 16),
+          _buildOpeningHoursSection(),
+          const SizedBox(height: 16),
+          _buildLocationSection(),
+          const SizedBox(height: 16),
+          _buildBenefitsSection(),
         ],
       ),
     );
@@ -174,6 +180,77 @@ class _FinancialdetailsState extends State<Financialdetails> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Text(description, style: const TextStyle(fontSize: 16)),
+      ],
+    );
+  }
+
+  Widget _buildOpeningHoursSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Opening Hours',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        const Text('Mon - Fri: 8:00 AM - 5:00 PM',
+            style: TextStyle(fontSize: 16, color: Colors.grey)),
+        const Text('Sat: 8:00 AM - 12:00 AM',
+            style: TextStyle(fontSize: 16, color: Colors.grey)),
+      ],
+    );
+  }
+
+  Widget _buildLocationSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Where are we?',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        const Text(
+          'Barangay Bolton Extension, Poblacion District, Davao City, Davao del Sur',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 200,
+          color: Colors.grey[300], // Placeholder for map
+          child: const Center(child: Text('Map Placeholder')),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBenefitsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Benefits',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildBenefitCard(
+                Icons.local_hospital, 'Outpatient Benefits', Colors.green),
+            _buildBenefitCard(Icons.bed, 'Z Benefits', Colors.orange),
+            _buildBenefitCard(
+                Icons.child_care, 'Inpatient Benefits', Colors.red),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBenefitCard(IconData icon, String title, Color color) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 30,
+          backgroundColor: color,
+          child: Icon(icon, color: Colors.white, size: 30),
+        ),
+        const SizedBox(height: 8),
+        Text(title, style: const TextStyle(fontSize: 14)),
       ],
     );
   }
