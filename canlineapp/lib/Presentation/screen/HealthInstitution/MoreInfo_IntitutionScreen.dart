@@ -15,7 +15,6 @@ class MoreInfoInstitutionScreen extends StatefulWidget {
 
 class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   late Future<Map<String, dynamic>> _future;
-  static const LatLng _center = LatLng(7.099091, 125.616108);
   late GoogleMapController mapController;
 
   @override
@@ -175,20 +174,27 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildFacilityItem('Facilities', '10', 'Facilities'),
+          _buildFacilityItem(
+              title: 'Facilities', value: '10', type: 'Facilities'),
           const VerticalDivider(thickness: 5, color: Color(0xff5B50A0)),
           _buildFacilityItem(
-              'Accredited Insurance', '5', 'Accredited Insurance'),
+              title: 'Accredited Insurance',
+              value: '5',
+              type: 'Accredited-Insurance'),
           const VerticalDivider(),
-          _buildFacilityItem('Doctors', '20', 'Doctors'),
+          _buildFacilityItem(title: 'Doctors', value: '20', type: 'Doctors'),
         ],
       ),
     );
   }
 
-  Widget _buildFacilityItem(String title, String value, String extra) {
+  Widget _buildFacilityItem({
+    required String title,
+    required String type,
+    required String value,
+  }) {
     return GestureDetector(
-      onTap: () => context.go('/HealthInstitutionFacilities', extra: extra),
+      onTap: () => context.go('/Health-Insititution/${widget.id}/$type'),
       child: _buildClickableInfoColumn(title, value),
     );
   }
@@ -327,13 +333,13 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return GoogleMap(
       onMapCreated: _onMapCreated,
       initialCameraPosition: const CameraPosition(
-        target: _center,
+        target: LatLng(7.099091, 125.616108),
         zoom: 15.0,
       ),
       markers: {
         const Marker(
           markerId: MarkerId('Health-Institution'),
-          position: _center,
+          position: LatLng(7.099091, 125.616108),
           infoWindow: InfoWindow(title: 'Health Institution'),
         ),
       },

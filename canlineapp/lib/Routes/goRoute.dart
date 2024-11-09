@@ -1,3 +1,5 @@
+import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionAccreditedInsurances.dart';
+import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionOncologists.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
@@ -42,43 +44,68 @@ final GoRouter linkrouter = GoRouter(
         GoRoute(
           name: 'id',
           path: ':id',
-          builder: (context, state) => ScaffoldLayoutWidget(
-            leadingWidget: TextButton(
-              onPressed: () {
-                context.go('/Health-Insititution');
+          builder: (context, state) =>
+              MoreInfoInstitutionScreen(id: state.pathParameters['id']!),
+          routes: [
+            // ! Health Institution Facilities Route
+            GoRoute(
+              path: 'facilities',
+              builder: (context, state) {
+                return ScaffoldLayoutWidget(
+                  leadingWidget: TextButton(
+                    onPressed: () {
+                      context.go(
+                          '/Health-Insititution/${state.pathParameters['id']}');
+                    },
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  bodyWidget: HealthInstitutionFacilities(
+                      id: state.pathParameters['id']!),
+                );
               },
-              child: Icon(Icons.arrow_back),
             ),
-            bodyWidget:
-                MoreInfoInstitutionScreen(id: state.pathParameters['id']!),
-          ),
-        ),
-        // ! Health Institution Facilities Route
-        GoRoute(
-          path: '/Health-Insititution/facilities',
-          builder: (context, state) {
-            final type = state.extra as String? ?? '';
-            return ScaffoldLayoutWidget(
-              leadingWidget: TextButton(
-                onPressed: () {
-                  context.go('/Health-Insititution');
-                },
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: Color(0xFF5B50A0),
-                ),
-              ),
-              titleWidget: const Text(
-                'Available Services',
-                style: TextStyle(
-                  color: Color(0xFF5B50A0),
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              bodyWidget: HealthInstitutionFacilities(type: type),
-            );
-          },
+            GoRoute(
+              path: 'Accredited-Insurance',
+              builder: (context, state) {
+                return ScaffoldLayoutWidget(
+                  leadingWidget: TextButton(
+                    onPressed: () {
+                      context.go(
+                          '/Health-Insititution/${state.pathParameters['id']}');
+                    },
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  bodyWidget: HealthInstitutionAccreditedInsurances(
+                      id: state.pathParameters['id']!),
+                );
+              },
+            ),
+            GoRoute(
+              path: 'Doctors',
+              builder: (context, state) {
+                return ScaffoldLayoutWidget(
+                  leadingWidget: TextButton(
+                    onPressed: () {
+                      context.go(
+                          '/Health-Insititution/${state.pathParameters['id']}');
+                    },
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  bodyWidget: HealthInstitutionOncologists(
+                      id: state.pathParameters['id']!),
+                );
+              },
+            ),
+          ],
         ),
       ],
     ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HealthInstitutionFacilities extends StatefulWidget {
-  final String type;
+  final String id;
 
-  const HealthInstitutionFacilities({super.key, required this.type});
+  const HealthInstitutionFacilities({super.key, required this.id});
 
   @override
   State<HealthInstitutionFacilities> createState() =>
@@ -13,55 +13,100 @@ class HealthInstitutionFacilities extends StatefulWidget {
 
 class _HealthInstitutionFacilitiesState
     extends State<HealthInstitutionFacilities> {
+  late Future<List<dynamic>> _futureFacilities;
   static const Color _primaryColor = Color(0xFF5B50A0);
   static const Color _secondaryColor = Color(0xFFF3EBFF);
 
   @override
+  void initState() {
+    super.initState();
+    _futureFacilities = _fetchInstitutionFacilities();
+  }
+
+  Future<List<dynamic>> _fetchInstitutionFacilities() async {
+    final response = await Supabase.instance.client
+        .from('Health-Institution-Service')
+        .select(
+            'Health-Institution-Service-ID, Health-Institution-Service-Name, Health-Institution-Service-Desc')
+        .eq('Health-Institution-ID', widget.id);
+
+    debugPrint('Facilities: $response');
+    return response;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF5B50A0)),
-          onPressed: () => context.go('/Health-Insititution'),
-        ),
-      ),
-      body: Container(
-        color: Colors.white,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 35.0),
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 24),
-            _buildMainServiceCard(),
-            const SizedBox(height: 16),
-            _buildConsultationCard(),
-          ],
-        ),
-      ),
+    return FutureBuilder<List<dynamic>>(
+      future: _futureFacilities,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No facilities available.'));
+        }
+
+        final facilities = snapshot.data!;
+
+        return Scaffold(
+          body: Container(
+            color: Colors.white,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 35.0),
+              itemCount: facilities.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Column(
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                    ],
+                  );
+                }
+
+                final facility = facilities[index - 1];
+                return Column(
+                  children: [
+                    _buildServiceCard(
+                      Icons.health_and_safety,
+                      facility['Health-Institution-Service-Name'],
+                      facility['Health-Institution-Service-Desc'],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: const [
         Center(
           child: Text(
-            '${widget.type} Services',
-            style: const TextStyle(
+            'Services',
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: _primaryColor,
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Center(
           child: Text(
-            '${widget.type} ${_HeaderData.description}',
-            style: const TextStyle(
+            'Sample Data',
+            style: TextStyle(
               fontSize: 12,
               color: _primaryColor,
             ),
@@ -69,22 +114,6 @@ class _HealthInstitutionFacilitiesState
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildMainServiceCard() {
-    return _buildServiceCard(
-      Icons.health_and_safety,
-      _ServiceData.getTitle(widget.type),
-      _ServiceData.getSubtitle(widget.type),
-    );
-  }
-
-  Widget _buildConsultationCard() {
-    return _buildServiceCard(
-      Icons.person,
-      _ServiceData.getAdditionalTitle(widget.type),
-      'Patient Consultant',
     );
   }
 
@@ -133,37 +162,4 @@ class _HealthInstitutionFacilitiesState
       ),
     );
   }
-}
-
-class _ServiceData {
-  static String getTitle(String type) {
-    return {
-          'Facilities': 'Facility Service',
-          'Accredited Insurance': 'Accredited Insurance Service',
-        }[type] ??
-        'Doctor Consultation';
-  }
-
-  static String getSubtitle(String type) {
-    return {
-          'Facilities': 'Details about facilities',
-          'Accredited Insurance': 'Details about insurance',
-        }[type] ??
-        'Details about doctors';
-  }
-
-  static String getAdditionalTitle(String type) {
-    return {
-          'Facilities': 'Additional Facility',
-          'Accredited Insurance': 'Insurance Partner',
-        }[type] ??
-        'Specialist Doctor';
-  }
-}
-
-class _HeaderData {
-  static const String description =
-      'Dedicated to providing specialized care for cancer patients. '
-      'With advanced treatments, compassionate support, and a team of expert oncologists, '
-      'we are here to guide you every step of the way on your journey to healing.';
 }

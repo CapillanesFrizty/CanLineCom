@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HealthInstitutionOncologists extends StatefulWidget {
-  final String type;
+  final String id;
 
-  const HealthInstitutionOncologists({super.key, required this.type});
+  const HealthInstitutionOncologists({super.key, required this.id});
 
   @override
   State<HealthInstitutionOncologists> createState() =>
@@ -13,55 +13,100 @@ class HealthInstitutionOncologists extends StatefulWidget {
 
 class _HealthInstitutionOncologistsState
     extends State<HealthInstitutionOncologists> {
+  late Future<List<dynamic>> _futureDoctors;
   static const Color _primaryColor = Color(0xFF5B50A0);
   static const Color _secondaryColor = Color(0xFFF3EBFF);
 
   @override
+  void initState() {
+    super.initState();
+    _futureDoctors = _fetchDoctors();
+  }
+
+  Future<List<dynamic>> _fetchDoctors() async {
+    final response = await Supabase.instance.client
+        .from('Doctor')
+        .select()
+        .eq('Affailated_at', widget.id);
+
+    debugPrint('Doctors: $response');
+    return response;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _primaryColor),
-          onPressed: () => context.go('/Health-Insititution'),
-        ),
-      ),
-      body: Container(
-        color: Colors.white,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 35.0),
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 24),
-            _buildMainServiceCard(),
-            const SizedBox(height: 16),
-            _buildConsultationCard(),
-          ],
-        ),
-      ),
+    return FutureBuilder(
+      future: _futureDoctors,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No Doctors available.'));
+        }
+
+        final doctors = snapshot.data!;
+
+        return Scaffold(
+          body: Container(
+            color: Colors.white,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 35.0),
+              itemCount: doctors.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Column(
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                    ],
+                  );
+                }
+
+                final Doctors = doctors[index - 1];
+                return Column(
+                  children: [
+                    _buildConsultationCard(
+                        Icons.health_and_safety,
+                        Doctors['Doctor-Firstname'] +
+                            ' ' +
+                            Doctors['Doctor-Lastname'],
+                        Doctors['Specialization']),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: const [
         Center(
           child: Text(
-            '${widget.type} Services',
-            style: const TextStyle(
+            'Doctors and Oncologists',
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: _primaryColor,
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Center(
           child: Text(
-            '${widget.type} ${_HeaderData.description}',
-            style: const TextStyle(
+            'Sample Description',
+            style: TextStyle(
               fontSize: 12,
               color: _primaryColor,
             ),
@@ -72,23 +117,7 @@ class _HealthInstitutionOncologistsState
     );
   }
 
-  Widget _buildMainServiceCard() {
-    return _buildServiceCard(
-      Icons.health_and_safety,
-      _ServiceData.getTitle(widget.type),
-      _ServiceData.getSubtitle(widget.type),
-    );
-  }
-
-  Widget _buildConsultationCard() {
-    return _buildServiceCard(
-      Icons.person,
-      _ServiceData.getAdditionalTitle(widget.type),
-      'Patient Consultant',
-    );
-  }
-
-  Widget _buildServiceCard(IconData icon, String title, String subtitle) {
+  Widget _buildConsultationCard(IconData icon, String title, String subtitle) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -133,37 +162,4 @@ class _HealthInstitutionOncologistsState
       ),
     );
   }
-}
-
-class _ServiceData {
-  static String getTitle(String type) {
-    return {
-          'Facilities': 'Facility Service',
-          'Accredited Insurance': 'Accredited Insurance Service',
-        }[type] ??
-        'Doctor Consultation';
-  }
-
-  static String getSubtitle(String type) {
-    return {
-          'Facilities': 'Details about facilities',
-          'Accredited Insurance': 'Details about insurance',
-        }[type] ??
-        'Details about doctors';
-  }
-
-  static String getAdditionalTitle(String type) {
-    return {
-          'Facilities': 'Additional Facility',
-          'Accredited Insurance': 'Insurance Partner',
-        }[type] ??
-        'Specialist Doctor';
-  }
-}
-
-class _HeaderData {
-  static const String description =
-      'Dedicated to providing specialized care for cancer patients. '
-      'With advanced treatments, compassionate support, and a team of expert oncologists, '
-      'we are here to guide you every step of the way on your journey to healing.';
 }

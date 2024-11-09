@@ -12,6 +12,7 @@ class Financialdetails extends StatefulWidget {
 
 class _FinancialdetailsState extends State<Financialdetails> {
   late Future<Map<String, dynamic>> _future;
+  late Future<PostgrestList> _futureInstitutionBenefits;
 
   Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
     final response = await Supabase.instance.client
@@ -31,10 +32,21 @@ class _FinancialdetailsState extends State<Financialdetails> {
     return response;
   }
 
+  Future<PostgrestList> _fetchInstitutionBenefits() async {
+    final response = await Supabase.instance.client
+        .from('Financial-Institution-Benefit')
+        .select()
+        .eq('Financial-Institution-ID', widget.id);
+
+    debugPrint('Benefits: $response');
+    return response;
+  }
+
   @override
   void initState() {
     super.initState();
     _future = _fetchInstitutionDetails();
+    _futureInstitutionBenefits = _fetchInstitutionBenefits();
   }
 
   @override
@@ -187,13 +199,13 @@ class _FinancialdetailsState extends State<Financialdetails> {
   Widget _buildOpeningHoursSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Opening Hours',
+      children: const [
+        Text('Opening Hours',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        const Text('Mon - Fri: 8:00 AM - 5:00 PM',
+        SizedBox(height: 8),
+        Text('Mon - Fri: 8:00 AM - 5:00 PM',
             style: TextStyle(fontSize: 16, color: Colors.grey)),
-        const Text('Sat: 8:00 AM - 12:00 AM',
+        Text('Sat: 8:00 AM - 12:00 AM',
             style: TextStyle(fontSize: 16, color: Colors.grey)),
       ],
     );
@@ -221,23 +233,40 @@ class _FinancialdetailsState extends State<Financialdetails> {
   }
 
   Widget _buildBenefitsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Benefits',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return FutureBuilder(
+      future: _futureInstitutionBenefits,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No facilities available.'));
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildBenefitCard(
-                Icons.local_hospital, 'Outpatient Benefits', Colors.green),
-            _buildBenefitCard(Icons.bed, 'Z Benefits', Colors.orange),
-            _buildBenefitCard(
-                Icons.child_care, 'Inpatient Benefits', Colors.red),
+            const Text('Benefits',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildBenefitCard(
+                    Icons.local_hospital, 'Outpatient Benefits', Colors.green),
+                _buildBenefitCard(Icons.bed, 'Z Benefits', Colors.orange),
+                _buildBenefitCard(
+                    Icons.child_care, 'Inpatient Benefits', Colors.red),
+              ],
+            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
