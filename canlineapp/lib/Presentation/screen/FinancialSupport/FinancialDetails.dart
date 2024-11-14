@@ -12,7 +12,8 @@ class Financialdetails extends StatefulWidget {
 
 class _FinancialdetailsState extends State<Financialdetails> {
   late Future<Map<String, dynamic>> _future;
-  late Future<PostgrestList> _futureInstitutionBenefits;
+  late Future<List<Map<String, dynamic>>> _futureInstitutionBenefits;
+  late Future<Map<String, dynamic>> _futureMoreBenefits;
 
   Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
     final response = await Supabase.instance.client
@@ -32,13 +33,31 @@ class _FinancialdetailsState extends State<Financialdetails> {
     return response;
   }
 
-  Future<PostgrestList> _fetchInstitutionBenefits() async {
+  Future<List<Map<String, dynamic>>> _fetchInstitutionBenefits() async {
     final response = await Supabase.instance.client
         .from('Financial-Institution-Benefit')
         .select()
         .eq('Financial-Institution-ID', widget.id);
 
-    debugPrint('Benefits: $response');
+    return response;
+  }
+
+  Future<PostgrestList> _fetchBenefitsDetails(int Bid) async {
+    final response = await Supabase.instance.client
+        .from('Benefit-Details-Financial-Institution')
+        .select('Benefit_name,Benefit_desccription')
+        .eq('Financial_Benefit', Bid);
+    return response.toList();
+  }
+
+  Future<PostgrestList> _fetchRequirements() async {
+    final response = await Supabase.instance.client
+        .from('Financial-Institution-Requirement')
+        .select()
+        .eq('Fiancial-Institution-ID', widget.id);
+
+    debugPrint('RESPONSE: $response');
+
     return response;
   }
 
@@ -47,6 +66,7 @@ class _FinancialdetailsState extends State<Financialdetails> {
     super.initState();
     _future = _fetchInstitutionDetails();
     _futureInstitutionBenefits = _fetchInstitutionBenefits();
+    _fetchRequirements();
   }
 
   @override
@@ -155,13 +175,15 @@ class _FinancialdetailsState extends State<Financialdetails> {
           _buildTitle(name),
           _buildSubtitle(hospitalType),
           const SizedBox(height: 16),
-          _buildAboutUsSection(description),
-          const SizedBox(height: 16),
           _buildOpeningHoursSection(),
+          const SizedBox(height: 16),
+          _buildAboutUsSection(description),
           const SizedBox(height: 16),
           _buildLocationSection(),
           const SizedBox(height: 16),
           _buildBenefitsSection(),
+          const SizedBox(height: 16),
+          _buildRequirementsSection()
         ],
       ),
     );
@@ -197,9 +219,9 @@ class _FinancialdetailsState extends State<Financialdetails> {
   }
 
   Widget _buildOpeningHoursSection() {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text('Opening Hours',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         SizedBox(height: 8),
@@ -248,39 +270,101 @@ class _FinancialdetailsState extends State<Financialdetails> {
           return const Center(child: Text('No facilities available.'));
         }
 
+        final Benefitsdata = snapshot.data!;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Benefits',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            // ! LIST OF EXPANSION PANEL
+            ExpansionPanelList(
               children: [
-                _buildBenefitCard(
-                    Icons.local_hospital, 'Outpatient Benefits', Colors.green),
-                _buildBenefitCard(Icons.bed, 'Z Benefits', Colors.orange),
-                _buildBenefitCard(
-                    Icons.child_care, 'Inpatient Benefits', Colors.red),
+                // ! A instance of Accordion/Expansion
+                ExpansionPanel(
+                  headerBuilder: (context, isExpanded) {
+                    return ListTile(
+                      leading: const CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.medical_services,
+                            color: Colors.white, size: 35),
+                      ),
+                      title: Text(
+                        Benefitsdata[0]['Financial-Institution-Benefits-Name']
+                            as String,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    );
+                  },
+                  body: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text(Benefitsdata[0]
+                            ['Financial-Institution-Benefits-Desc']),
+                        SizedBox(height: 24),
+                        FutureBuilder<List>(
+                            future: _fetchBenefitsDetails(Benefitsdata[0]
+                                ['Financial-Institution-Benefits-ID'] as int),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return const Center(
+                                    child: Text('No more details available.'));
+                              }
+
+                              final BenefitsDetailsdata = snapshot.data!;
+
+                              debugPrint(
+                                  'Benefits Details: $BenefitsDetailsdata');
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: BenefitsDetailsdata.map(
+                                  (e) => Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        e['Benefit_name'] ?? 'No name',
+                                        style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(e['Benefit_desccription'] ??
+                                          'No name'),
+                                      SizedBox(height: 16),
+                                    ],
+                                  ),
+                                ).toList(),
+                              );
+                            }),
+                      ],
+                    ),
+                  ),
+                  isExpanded: true,
+                ),
               ],
-            ),
+            )
           ],
         );
       },
     );
   }
 
-  Widget _buildBenefitCard(IconData icon, String title, Color color) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundColor: color,
-          child: Icon(icon, color: Colors.white, size: 30),
-        ),
-        const SizedBox(height: 8),
-        Text(title, style: const TextStyle(fontSize: 14)),
-      ],
+  Widget _buildRequirementsSection() {
+    return FutureBuilder(
+      future: _fetchRequirements(),
+      builder: (context, snapshot) {
+        return Text(snapshot.data.toString());
+      },
     );
   }
 

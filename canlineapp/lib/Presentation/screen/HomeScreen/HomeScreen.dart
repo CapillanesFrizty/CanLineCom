@@ -10,21 +10,23 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      shrinkWrap: true,
       children: [
-        _buildGreetingText(),
-        _buildSearchField(),
-        _buildGridView(),
+        _buildGreetingText(context),
+        Container(
+          child: _buildGridView(),
+        )
       ],
     );
   }
 
-  Widget _buildGreetingText() {
+  Widget _buildGreetingText(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 40),
       child: Text(
-        "Hello\nHanna Forger!",
+        "Hello John Capillanes!",
         style: GoogleFonts.poppins(
-          fontSize: 30.0,
+          fontSize: MediaQuery.sizeOf(context).height * 0.06,
           fontWeight: FontWeight.w500,
           color: const Color(0xFF5B50A0),
         ),

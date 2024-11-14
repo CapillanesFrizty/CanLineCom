@@ -1,5 +1,5 @@
-import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionAccreditedInsurances.dart';
-import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionOncologists.dart';
+// import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionAccreditedInsurances.dart';
+// import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionOncologists.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
@@ -156,23 +156,35 @@ final GoRouter linkrouter = GoRouter(
     ),
     // ! Clinics Route
     GoRoute(
-        path: '/clinic',
-        builder: (context, state) => ScaffoldLayoutWidget(
-              bodyWidget: ClinicScreen(),
-              leadingWidget: TextButton(
-                onPressed: () {
-                  context.go('/');
-                },
-                child: Icon(Icons.arrow_back),
-              ),
-            ),
-        routes: [
-          GoRoute(
-              name: 'cid',
-              path: ':cid',
-              builder: (context, state) => MoreinfoClinicsscreen(
-                    id: state.pathParameters['cid']!,
-                  )),
-        ]),
+      path: '/clinic',
+      builder: (context, state) => ScaffoldLayoutWidget(
+        bodyWidget: ClinicScreen(),
+        leadingWidget: TextButton(
+          onPressed: () {
+            context.go('/');
+          },
+          child: Icon(Icons.arrow_back),
+        ),
+      ),
+      routes: [
+        GoRoute(
+            name: 'cid',
+            path: ':cid',
+            builder: (context, state) => MoreinfoClinicsscreen(
+                  id: state.pathParameters['cid']!,
+                )),
+      ],
+    ),
+
+    GoRoute(path: '/profile', builder: (context, state) => ProfileScreen()),
+
+    GoRoute(
+      path: '/journal',
+      builder: (context, state) => JournalScreen(),
+    ),
+    GoRoute(
+      path: '/events',
+      builder: (context, state) => EventsScreen(),
+    ),
   ],
 );

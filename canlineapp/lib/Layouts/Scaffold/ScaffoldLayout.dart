@@ -22,25 +22,23 @@ class ScaffoldLayoutWidget extends StatefulWidget {
 }
 
 class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
-  int _currentIndex = 2;
+  int _currentIndex = 0;
 
   static const Color _primaryColor = Color(0xFF5B50A0);
   static const double _iconSize = 28.0;
   static const double _toolbarHeight = 80.0;
 
   static const List<String> _routes = [
-    '/search',
-    '/events',
     '/',
-    '/notifications',
+    '/journal',
+    '/events',
     '/profile',
   ];
 
   static const List<({IconData outlined, IconData filled})> _icons = [
-    (outlined: Icons.search_outlined, filled: Icons.search),
-    (outlined: Icons.favorite_outline, filled: Icons.favorite),
     (outlined: Icons.home_max_outlined, filled: Icons.home_rounded),
-    (outlined: Icons.notifications_outlined, filled: Icons.notifications),
+    (outlined: Icons.menu_book, filled: Icons.menu_book_sharp),
+    (outlined: Icons.event, filled: Icons.event),
     (outlined: Icons.person_outline, filled: Icons.person),
   ];
 
@@ -109,7 +107,7 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
           _icons.length,
           (index) => _buildNavItem(
             index,
-            isCenter: index == 2,
+            isCenter: index == 0,
           ),
         ),
       ),
