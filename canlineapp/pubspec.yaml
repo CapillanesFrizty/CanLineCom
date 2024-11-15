@@ -1,10 +1,10 @@
 name: canerline_app
 description: "app for canerline"
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: '>=3.4.4 <4.0.0'
+  sdk: ">=3.4.4 <4.0.0"
 
 dependencies:
   flutter:
@@ -14,7 +14,7 @@ dependencies:
   supabase_flutter: ^2.7.0
   google_fonts: ^6.0.0
   google_maps_flutter: ^2.9.0
-
+  lucide_icons: ^0.257.0
 
 dev_dependencies:
   flutter_test:
@@ -33,6 +33,13 @@ flutter:
     - lib/assets/icons/Blogs.svg
     - lib/assets/icons/Bell.svg
     - lib\assets\images\jpeg\spmc.jpg
-  
+    - lib/assets/images/Journal/Angel.png
+    - lib/assets/images/Journal/Angry.png
+    - lib/assets/images/Journal/Awsome.png
+    - lib/assets/images/Journal/Calm.png
+    - lib/assets/images/Journal/Disappointed.png
+    - lib/assets/images/Journal/Happy.png
+    - lib/assets/images/Journal/Inlove.png
+    - lib/assets/images/Journal/Sad.png
 
   uses-material-design: true

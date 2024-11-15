@@ -6,7 +6,7 @@ export 'Profile/profile.dart';
 
 // ! Journal Screen
 export 'Journal/journal.dart';
-
+export 'Journal/JournalCreateNote.dart';
 // ! Events Screen
 export 'Events/EventsScreen.dart';
 
