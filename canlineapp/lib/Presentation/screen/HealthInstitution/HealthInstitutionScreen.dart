@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../widgets/BarrelFileWidget..dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../widgets/BarrelFileWidget..dart';
 
 class HealthInstitutionScreen extends StatefulWidget {
   const HealthInstitutionScreen({super.key});
@@ -20,15 +20,21 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        padding:
+            const EdgeInsets.only(bottom: 20.0), // Extra padding for safety
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTitle(),
+            const SizedBox(height: 20),
             _buildSearchField(),
             _buildFilterButtons(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Health Institutions'),
+            const SizedBox(height: 16),
             _buildHealthInstitutionsGrid(),
           ],
         ),
@@ -39,12 +45,12 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   Widget _buildTitle() {
     final titleStyle = GoogleFonts.poppins(
       fontSize: 30.0,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w600,
       color: _primaryColor,
     );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -56,34 +62,40 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   }
 
   Widget _buildSearchField() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: const Offset(0, 4),
-            blurRadius: 4,
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(35.0),
       child: TextField(
         autofocus: false,
         decoration: InputDecoration(
-          filled: true,
-          fillColor: _secondaryColor,
-          contentPadding: EdgeInsets.zero,
-          prefixIcon: const Icon(Icons.search, color: _primaryColor),
+          hintText: 'Search',
+          hintStyle: GoogleFonts.poppins(color: _primaryColor),
+          prefixIcon: Icon(Icons.search, color: _primaryColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: BorderSide(color: _secondaryColor),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
           ),
-          hintText: "Search",
-          hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 45.0),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(
+          color: _primaryColor,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -91,65 +103,71 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
 
   Widget _buildFilterButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Row(
         children: const [
-          _FilterButton(text: 'Government Hospital'),
-          SizedBox(width: 5),
-          _FilterButton(text: 'Private Hospital'),
+          _FilterButton(text: 'Government Hospital', color: _primaryColor),
+          SizedBox(width: 8),
+          _FilterButton(text: 'Private Hospital', color: _primaryColor),
         ],
       ),
     );
   }
 
   Widget _buildHealthInstitutionsGrid() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching data'));
-        }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
 
-        final healthInst = snapshot.data ?? [];
+          final healthInst = snapshot.data ?? [];
 
-        if (healthInst.isEmpty) {
-          return const Center(child: Text('No data available'));
-        }
+          if (healthInst.isEmpty) {
+            return const Center(child: Text('No data available'));
+          }
 
-        return SizedBox(
-          height: 500,
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1 / 1.2,
+          return SizedBox(
+            height: 500,
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1 / 1.2,
+              ),
+              itemCount: healthInst.length,
+              itemBuilder: (context, index) => _HealthInstitutionCard(
+                healthInstData: healthInst[index],
+              ),
             ),
-            itemCount: healthInst.length,
-            itemBuilder: (context, index) => _HealthInstitutionCard(
-              healthInstData: healthInst[index],
-            ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
 
 class _FilterButton extends StatelessWidget {
   final String text;
-
-  const _FilterButton({required this.text});
+  final Color color;
+  const _FilterButton({required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () {},
-      child: Text(text),
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(color: color),
+      ),
     );
   }
 }

@@ -15,7 +15,6 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   // Constants
   static const _primaryColor = Color(0xFF5B50A0);
   static const _secondaryColor = Color(0xFFF3EBFF);
-  static const _tableName = 'Financial-Institution';
   static const double _cardHeight = 200.0;
 
   // Styles
@@ -29,8 +28,8 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
 
   final _sectionTitleStyle = GoogleFonts.poppins(
     textStyle: const TextStyle(
-      fontSize: 20.0,
-      fontWeight: FontWeight.w600,
+      fontSize: 18.0, // Match font size to BlogsScreen
+      fontWeight: FontWeight.bold,
       color: _primaryColor,
     ),
   );
@@ -58,7 +57,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   // Data Fetching
   Future<List<Map<String, dynamic>>> _fetchInstitutions(String type) async {
     final response = await Supabase.instance.client
-        .from(_tableName)
+        .from('Financial-Institution')
         .select()
         .eq('Financial-Institution-Type', type);
 
@@ -83,94 +82,100 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: ListView(
-        children: [
-          _buildTitle(),
-          _buildSearchField(),
-          _buildInstitutionSection(
-              "Government Institution", "Government Institution"),
-          _buildInstitutionSection(
-              "Private Institution", "Private Institution"),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        padding:
+            const EdgeInsets.only(bottom: 20.0), // Extra padding for safety
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTitle(),
+            const SizedBox(height: 20),
+            _buildSearchField(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Government Assistance'),
+            const SizedBox(height: 16),
+            _buildInstitutionSection("Government Institution"),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Private Assistance'),
+            const SizedBox(height: 16),
+            _buildInstitutionSection("Private Institution"),
+          ],
+        ),
       ),
     );
   }
 
-  // UI Components
   Widget _buildTitle() {
+    final titleStyle = GoogleFonts.poppins(
+      fontSize: 30.0,
+      fontWeight: FontWeight.w500,
+      color: _primaryColor,
+    );
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Financial', style: _titleStyle),
-          Text('Assistance', style: _titleStyle),
+          Text('Financial', style: titleStyle),
+          Text('Support', style: titleStyle),
         ],
       ),
     );
   }
 
   Widget _buildSearchField() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: const Offset(0, 4),
-            blurRadius: 4,
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(35.0), // Matches BlogsScreen padding
       child: TextField(
         controller: _searchController,
-        decoration: _buildSearchDecoration(),
-      ),
-    );
-  }
-
-  InputDecoration _buildSearchDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: _secondaryColor,
-      contentPadding: EdgeInsets.zero,
-      prefixIcon: const Icon(Icons.search, color: _primaryColor),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: BorderSide(color: _secondaryColor),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(color: _primaryColor, width: 1.5),
-      ),
-      hintText: "Search",
-      hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
-    );
-  }
-
-  Widget _buildInstitutionSection(String title, String type) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40.0),
-          child: Text(title, style: _sectionTitleStyle),
-        ),
-        SizedBox(
-          height: _cardHeight,
-          child: FutureBuilder<List<Map<String, dynamic>>>(
-            future: _fetchInstitutions(type),
-            builder: _buildInstitutionList,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon: Icon(Icons.search, color: _primaryColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildInstitutionList(BuildContext context,
-      AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 35.0), // Matches BlogsScreen
+      child: Text(
+        title,
+        style: _sectionTitleStyle,
+      ),
+    );
+  }
+
+  Widget _buildInstitutionSection(String type) {
+    return SizedBox(
+      height: _cardHeight,
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _fetchInstitutions(type),
+        builder: _buildInstitutionList,
+      ),
+    );
+  }
+
+  Widget _buildInstitutionList(
+    BuildContext context,
+    AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+  ) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -185,9 +190,17 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(
+          horizontal: 35.0), // Centered effect like BlogsScreen
       itemCount: institutions.length,
-      itemBuilder: (context, index) =>
-          _buildInstitutionCard(institutions[index]),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.only(
+            right: index == institutions.length - 1 ? 0.0 : 16.0,
+          ),
+          child: _buildInstitutionCard(institutions[index]),
+        );
+      },
     );
   }
 

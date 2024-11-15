@@ -11,6 +11,8 @@ class MoreInfoInstitutionScreen extends StatefulWidget {
   @override
   State<MoreInfoInstitutionScreen> createState() =>
       _MoreInfoInstitutionScreenState();
+  static const Color _primaryColor = Color(0xFF5B50A0);
+  static const Color _secondaryColor = Color(0xFFF3EBFF);
 }
 
 class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {

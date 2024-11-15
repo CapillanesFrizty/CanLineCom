@@ -1,35 +1,39 @@
-import 'package:canerline_app/Presentation/widgets/Card/CardDesign3List.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:go_router/go_router.dart';
 
 class BlogsScreen extends StatefulWidget {
   const BlogsScreen({super.key});
 
   @override
   State<BlogsScreen> createState() => _BlogsScreenState();
+  static const Color _primaryColor = Color(0xFF5B50A0);
+  static const Color _secondaryColor = Color(0xFFF3EBFF);
 }
 
 class _BlogsScreenState extends State<BlogsScreen> {
-  static const Color _primaryColor = Color(0xFF5B50A0);
-  static const Color _secondaryColor = Colors.white;
-
-  final _future = Supabase.instance.client.from('Blogs').select();
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: ListView(
-        children: [
-          _buildTitle(),
-          _buildSearchField(),
-          _buildBlogTitle("New Blogs"),
-          // _buildPopularBlogsList(context),
-          _buildBlogTitle("Recent Blogs"),
-          _buildRecentBlogs(context, _future),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        padding:
+            const EdgeInsets.only(bottom: 20.0), // Extra padding for safety
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTitle(),
+            const SizedBox(height: 20),
+            _buildSearchBar(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Popular'),
+            const SizedBox(height: 16),
+            _buildPopularBlogs(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Recent'),
+            const SizedBox(height: 16),
+            _buildRecentBlogs(),
+          ],
+        ),
       ),
     );
   }
@@ -38,11 +42,11 @@ class _BlogsScreenState extends State<BlogsScreen> {
     final titleStyle = GoogleFonts.poppins(
       fontSize: 30.0,
       fontWeight: FontWeight.w500,
-      color: _primaryColor,
+      color: BlogsScreen._primaryColor,
     );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -52,208 +56,219 @@ class _BlogsScreenState extends State<BlogsScreen> {
     );
   }
 
-  Widget _buildSearchField() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: const Offset(0, 4),
-            blurRadius: 4,
-          ),
-        ],
-      ),
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.all(35.0),
       child: TextField(
-        autofocus: false,
         decoration: InputDecoration(
-          filled: true,
-          fillColor: _secondaryColor,
-          contentPadding: EdgeInsets.zero,
-          prefixIcon: const Icon(Icons.search, color: _primaryColor),
+          hintText: 'Search',
+          hintStyle: GoogleFonts.poppins(color: BlogsScreen._primaryColor),
+          prefixIcon: Icon(Icons.search, color: BlogsScreen._primaryColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: BlogsScreen._primaryColor),
+          ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: BorderSide(color: _secondaryColor),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: BlogsScreen._primaryColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: BlogsScreen._primaryColor),
           ),
-          hintText: "Search",
-          hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
         ),
       ),
     );
   }
 
-  Widget _buildBlogTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.poppins(
-        fontSize: 17.0,
-        fontWeight: FontWeight.w600,
-        color: const Color(0xFF5B50A0),
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(
+          color: BlogsScreen._primaryColor,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  //Todo! need new blogs data to able to design the Card
-  // Widget _buildPopularBlogsList(BuildContext context) {
-  //   return FutureBuilder(
-  //     future: Supabase.instance.client
-  //         .from('Blogs')
-  //         .select()
-  //         .order('views', ascending: false)
-  //         .limit(3),
-  //     builder: (context, snapshot) {
-  //       if (!snapshot.hasData) {
-  //         return const Center(child: CircularProgressIndicator());
-  //       }
-
-  //       final blogs = snapshot.data as List<Map<String, dynamic>>;
-  //       return Column(
-  //         children: blogs
-  //             .map((blogData) => FutureBuilder<String>(
-  //                   future: _getImageUrl(blogData['Blogs-Name']),
-  //                   builder: (context, snapshot) {
-  //                     if (snapshot.connectionState == ConnectionState.waiting) {
-  //                       return const Center(child: CircularProgressIndicator());
-  //                     }
-
-  //                     final imageUrl = snapshot.data ?? '';
-  //                     return GestureDetector(
-  //                       onTap: () => context.go('/Blog/${blogData['Blog-ID']}'),
-  //                       child: CardDesign3List(
-  //                         title: blogData['Blogs-Name'] ?? 'Unknown',
-  //                         category: blogData['Blogs-Category'] ?? 'Unknown',
-  //                         date_published:
-  //                             blogData['Blog-Published'] ?? 'Unknown',
-  //                         ImgURL: imageUrl,
-  //                       ),
-  //                     );
-  //                   },
-  //                 ))
-  //             .toList(),
-  //       );
-  //     },
-  //   );
-  // }
-//Todo! need to work on UI in Blogs Card
-  Widget _buildRecentBlogs(
-      BuildContext context, Future<List<Map<String, dynamic>>> blogsFuture) {
-    return FutureBuilder(
-      future: blogsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 200,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Container(
-            height: 200,
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 40, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Error fetching data',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.red,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final List<Map<String, dynamic>> blogs = snapshot.data ?? [];
-
-        if (blogs.isEmpty) {
-          return Container(
-            height: 200,
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.article_outlined,
-                    size: 40, color: _primaryColor),
-                const SizedBox(height: 16),
-                Text(
-                  'No blogs available',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: _primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: blogs.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final blogData = blogs[index];
-            return FutureBuilder<String>(
-              future: _getImageUrl(blogData['Blogs-Name']),
-              builder: (context, imageSnapshot) {
-                if (imageSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Center(
-                      child: SizedBox(
-                        height: 100,
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  );
-                }
-
-                return GestureDetector(
-                  onTap: () => context.go('/Blog/${blogData['Blog-ID']}'),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: CardDesign3List(
-                      category: blogData['Blogs-Category'] ?? 'Unknown',
-                      date_published: blogData['Blog-Published'] ?? 'Unknown',
-                      ImgURL: imageSnapshot.data ?? '',
-                      title: blogData['Blogs-Name'] ?? 'Unknown Name',
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
+  Widget _buildPopularBlogs() {
+    return SizedBox(
+      height: 200,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 35.0),
+        children: [
+          _buildPopularBlogCard(
+            date: 'Aug 7, 2024',
+            title: 'Balancing the right treatments for metastatic cancer',
+            author: 'Karl Wood',
+          ),
+          const SizedBox(width: 16),
+          _buildPopularBlogCard(
+            date: 'September 19, 2024',
+            title: 'Therapy customized through stem cell treatments',
+            author: 'Jane Doe',
+          ),
+        ],
+      ),
     );
   }
 
-  Future<String> _getImageUrl(String blogName) async {
-    final fileName = "$blogName.png";
-    final response = Supabase.instance.client.storage
-        .from('Assets')
-        .getPublicUrl("Blogs-News/$fileName");
-    return response;
+  Widget _buildRecentBlogs() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: ListView(
+        shrinkWrap: true, // Allows the ListView to take only the needed space
+        physics:
+            NeverScrollableScrollPhysics(), // Prevents scrolling inside the main scroll view
+        children: [
+          _buildRecentBlogCard(
+            category: 'Expert Opinions',
+            title: 'Is hormone replacement therapy safe? An expert\'s opinion',
+            date: 'September 17, 2024',
+          ),
+          _buildRecentBlogCard(
+            category: 'Expert Opinions',
+            title: 'Is hormone replacement therapy safe? An expert\'s opinion',
+            date: 'September 17, 2024',
+          ),
+          _buildRecentBlogCard(
+            category: 'Expert Opinions',
+            title: 'Is hormone replacement therapy safe? An expert\'s opinion',
+            date: 'September 17, 2024',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPopularBlogCard({
+    required String date,
+    required String title,
+    required String author,
+  }) {
+    return Container(
+      width: 250,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[300],
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Center(
+              child: Icon(Icons.image, color: Colors.white70, size: 50),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  date,
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Written by $author',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Icon(
+              Icons.favorite_border,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentBlogCard({
+    required String category,
+    required String title,
+    required String date,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[100],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.image, color: Colors.white70, size: 40),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category,
+                  style: GoogleFonts.poppins(
+                    color: BlogsScreen._primaryColor,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: BlogsScreen._primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  date,
+                  style: GoogleFonts.poppins(
+                    color: BlogsScreen._primaryColor,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.favorite_border, color: BlogsScreen._primaryColor),
+        ],
+      ),
+    );
   }
 }

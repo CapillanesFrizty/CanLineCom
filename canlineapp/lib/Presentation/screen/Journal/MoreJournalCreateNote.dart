@@ -54,7 +54,7 @@ class _MoreJournalCreateNoteState extends State<MoreJournalCreateNote> {
 
   Widget _buildDateTime() {
     return Column(
-      children: [
+      children: const [
         Text(
           'November',
           style: TextStyle(
@@ -63,7 +63,7 @@ class _MoreJournalCreateNoteState extends State<MoreJournalCreateNote> {
             color: MoreJournalCreateNote.primaryColor,
           ),
         ),
-        const SizedBox(height: 5),
+        SizedBox(height: 5),
         Text(
           '9:45pm',
           style: TextStyle(
