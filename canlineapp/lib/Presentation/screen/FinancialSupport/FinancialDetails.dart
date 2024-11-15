@@ -291,11 +291,8 @@ class _FinancialdetailsState extends State<Financialdetails> {
                         child: Icon(Icons.medical_services,
                             color: Colors.white, size: 35),
                       ),
-                      title: Text(
-                        Benefitsdata[0]['Financial-Institution-Benefits-Name']
-                            as String,
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                      title: Text('Benefits',
+                          style: const TextStyle(fontSize: 14)),
                     );
                   },
                   body: Padding(
@@ -363,7 +360,78 @@ class _FinancialdetailsState extends State<Financialdetails> {
     return FutureBuilder(
       future: _fetchRequirements(),
       builder: (context, snapshot) {
-        return Text(snapshot.data.toString());
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Requirements',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            SizedBox(height: 16),
+            ExpansionPanelList(
+              children: [
+                ExpansionPanel(
+                  headerBuilder: (context, isExpanded) {
+                    return ListTile(
+                      leading: const CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.medical_services,
+                            color: Colors.white, size: 35),
+                      ),
+                      title: Text('Requirements',
+                          style: const TextStyle(fontSize: 14)),
+                    );
+                  },
+                  body: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: FutureBuilder(
+                      future: _fetchRequirements(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Center(
+                              child: Text('No requirements available.'));
+                        }
+
+                        final Requirementsdata = snapshot.data!;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: Requirementsdata.map(
+                            (e) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  e['Financial-Institution-Requirements-Name'] ??
+                                      'No name',  
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                    e['Financial-Institution-Requirements-Desc'] ??
+                                        'No name'),
+                                SizedBox(height: 16),
+                              ],
+                            ),
+                          ).toList(),
+                        );
+                      },
+                    ),
+                  ),
+                  isExpanded: true,
+                ),
+              ],
+            )
+          ],
+        );
       },
     );
   }
