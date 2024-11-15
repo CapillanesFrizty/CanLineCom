@@ -61,14 +61,14 @@ class _JournalScreenState extends State<JournalScreen> {
       color: Colors.white, // Set the background color to white
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ListView(
-        children: [
-          const SizedBox(height: 16),
-          const _DateSection(
+        children: const [
+          SizedBox(height: 16),
+          _DateSection(
               date: 'NOV 13',
               day: 'Today',
               weekday: 'Wednesday',
               color: primaryColor),
-          const _JournalEntry(
+          _JournalEntry(
             emoji: '😊',
             title: "I've done my work today",
             time: '9:52 PM',
@@ -77,13 +77,13 @@ class _JournalScreenState extends State<JournalScreen> {
             primaryColor: primaryColor,
             secondaryColor: secondaryColor,
           ),
-          const SizedBox(height: 16),
-          const _DateSection(
+          SizedBox(height: 16),
+          _DateSection(
               date: 'NOV 14',
               day: 'Yesterday',
               weekday: 'Tuesday',
               color: primaryColor),
-          const _JournalEntry(
+          _JournalEntry(
             emoji: '😊',
             title: "I've done Jogging",
             time: '9:52 PM',
@@ -92,8 +92,8 @@ class _JournalScreenState extends State<JournalScreen> {
             primaryColor: primaryColor,
             secondaryColor: secondaryColor,
           ),
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: 16),
+          Text(
             'October',
             style: TextStyle(
               fontSize: 18,
@@ -101,13 +101,13 @@ class _JournalScreenState extends State<JournalScreen> {
               color: primaryColor,
             ),
           ),
-          const SizedBox(height: 16),
-          const _DateSection(
+          SizedBox(height: 16),
+          _DateSection(
               date: 'NOV 14',
               day: 'Yesterday',
               weekday: 'Tuesday',
               color: primaryColor),
-          const _JournalEntry(
+          _JournalEntry(
             emoji: '😊',
             title: "I've done Jogging",
             time: '9:52 PM',

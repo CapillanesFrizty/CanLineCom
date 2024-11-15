@@ -109,6 +109,7 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
+    //!Blogs Screen
     GoRoute(
       path: '/Blog',
       builder: (context, state) => ScaffoldLayoutWidget(

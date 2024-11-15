@@ -20,14 +20,20 @@ class _ClinicScreenState extends State<ClinicScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        padding:
+            const EdgeInsets.only(bottom: 20.0), // Extra padding for safety
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTitle(),
+            const SizedBox(height: 20),
             _buildSearchField(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Available Clinics'),
+            const SizedBox(height: 16),
             _buildClinicGrid(),
           ],
         ),
@@ -35,7 +41,6 @@ class _ClinicScreenState extends State<ClinicScreen> {
     );
   }
 
-  // Build the title widget
   Widget _buildTitle() {
     final titleStyle = GoogleFonts.poppins(
       fontSize: 30.0,
@@ -44,7 +49,7 @@ class _ClinicScreenState extends State<ClinicScreen> {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -55,84 +60,86 @@ class _ClinicScreenState extends State<ClinicScreen> {
     );
   }
 
-  // Build the search field
   Widget _buildSearchField() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 50.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 4,
-            ),
-          ],
-        ),
-        child: TextField(
-          autofocus: false,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: _secondaryColor,
-            contentPadding: EdgeInsets.zero,
-            prefixIcon: const Icon(Icons.search, color: _primaryColor),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              borderSide: BorderSide(color: _secondaryColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              borderSide: const BorderSide(color: _primaryColor, width: 1.5),
-            ),
-            hintText: "Search",
-            hintStyle: const TextStyle(color: _primaryColor, fontSize: 14.0),
+      padding: const EdgeInsets.all(35.0),
+      child: TextField(
+        autofocus: false,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.deepPurple),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.deepPurple),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.deepPurple),
           ),
         ),
       ),
     );
   }
 
-  // Build the grid of clinics using FutureBuilder
-  Widget _buildClinicGrid() {
-    return FutureBuilder(
-      future: _clinicFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching data'));
-        }
-
-        final List<Map<String, dynamic>> clinics = snapshot.data ?? [];
-
-        if (clinics.isEmpty) {
-          return const Center(child: Text('No clinics available'));
-        }
-
-        return SizedBox(
-          height: 500,
-          child: GridView.builder(
-            itemCount: clinics.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1 / 1.2,
-            ),
-            itemBuilder: (context, index) {
-              final clinicData = clinics[index];
-              return _buildClinicCard(clinicData);
-            },
-          ),
-        );
-      },
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: _primaryColor,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
-  // Build each clinic card with navigation and data handling
+  Widget _buildClinicGrid() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: FutureBuilder(
+        future: _clinicFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
+
+          final List<Map<String, dynamic>> clinics = snapshot.data ?? [];
+
+          if (clinics.isEmpty) {
+            return const Center(child: Text('No clinics available'));
+          }
+
+          return SizedBox(
+            height: 500,
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1 / 1.2,
+              ),
+              itemCount: clinics.length,
+              itemBuilder: (context, index) {
+                final clinicData = clinics[index];
+                return _buildClinicCard(clinicData);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildClinicCard(Map<String, dynamic> clinicData) {
     return FutureBuilder(
       future: _getImageUrl(clinicData),
@@ -152,14 +159,10 @@ class _ClinicScreenState extends State<ClinicScreen> {
     );
   }
 
-  // Get the image URL for a clinic
   Future<String> _getImageUrl(Map<String, dynamic> clinicData) async {
     final fileName = "${clinicData['Clinic-Name']}.png";
-    final response = Supabase.instance.client.storage
+    return Supabase.instance.client.storage
         .from('Assets')
         .getPublicUrl("Clinic-External/$fileName");
-    debugPrint("Fetched image URL: $response");
-
-    return response;
   }
 }
