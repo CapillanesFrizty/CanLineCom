@@ -6,22 +6,28 @@ import '../Layouts/BarrelFileLayouts.dart';
 final GoRouter linkrouter = GoRouter(
   routes: [
     //! Intro Login Route
-    GoRoute(path: '/', builder: (context, state) => IntroLogin(), routes: [
-      // //! Login Route
-      GoRoute(
-        path: 'Login',
-        builder: (context, state) => LoginScreen(),
-      ),
-      // //! Sign Up Route
-      GoRoute(path: 'Sign-Up', builder: (context, state) => SignUpScreen()),
-    ]),
-
+    // GoRoute(
+    //   path: '/',
+    //   builder: (context, state) => IntroLogin(),
+    // ),
+    // //! Login Route
+    GoRoute(
+      path: '/',
+      builder: (context, state) => LoginScreen(),
+    ),
+    //! Registration
+    GoRoute(
+      path: '/SignUpScreen',
+      builder: (context, state) => SignupScreen(),
+    ),
+    GoRoute(
+      path: '/MoreSignUpScreen',
+      builder: (context, state) => MoreSignupScreen(),
+    ),
     //! Home Route
     GoRoute(
-      name: 'userID',
-      path: '/homescreen/:userID',
-      builder: (context, state) => ScaffoldLayoutHomeScreen(
-        userid: state.pathParameters['userID'],
+      path: '/HomeScreen',
+      builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: HomeScreen(),
       ),
       routes: [
@@ -200,6 +206,21 @@ final GoRouter linkrouter = GoRouter(
           ),
         ),
       ],
+    ),
+
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) =>
+          ProfileScreen(userid: state.pathParameters['userID']!),
+    ),
+
+    GoRoute(
+      path: '/journal',
+      builder: (context, state) => JournalScreen(),
+    ),
+    GoRoute(
+      path: '/events',
+      builder: (context, state) => EventsScreen(),
     ),
   ],
 );

@@ -264,6 +264,7 @@ class _DateSection extends StatelessWidget {
     );
   }
 }
+
 class _JournalEntry extends StatelessWidget {
   final String emoji;
   final String title;
