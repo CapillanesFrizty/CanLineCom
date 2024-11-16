@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final String? userid;
+
+  const ProfileScreen({super.key, required this.userid});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -14,7 +16,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: _buildAppBar(),
+      // appBar: _buildAppBar(),
       body: _buildBody(),
     );
   }
@@ -56,6 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildMedicalRecordLabel(),
           const SizedBox(height: 16),
           _buildQRCodePlaceholder(),
+          SizedBox(height: 20),
+          Text('User ID: ${widget.userid}'),
         ],
       ),
     );

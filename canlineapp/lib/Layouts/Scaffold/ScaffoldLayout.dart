@@ -7,6 +7,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget? leadingWidget;
   final Widget? titleWidget;
   final double? elevation;
+  final String? userid;
 
   const ScaffoldLayoutWidget({
     super.key,
@@ -15,6 +16,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
     this.leadingWidget,
     this.titleWidget,
     this.elevation,
+    this.userid,
   });
 
   @override
@@ -26,14 +28,20 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
 
   static const Color _primaryColor = Color(0xFF5B50A0);
   static const double _iconSize = 28.0;
-  static const double _toolbarHeight = 80.0;
+  static const double _toolbarHeight = 40.0;
 
-  static const List<String> _routes = [
-    '/',
-    '/journal',
-    '/events',
-    '/profile',
-  ];
+  late final List<String> _routes;
+
+  @override
+  void initState() {
+    super.initState();
+    _routes = [
+      '/homescreen/${widget.userid}',
+      '/homescreen/${widget.userid}/journal',
+      '/homescreen/${widget.userid}/events',
+      '/homescreen/${widget.userid}/profile',
+    ];
+  }
 
   static const List<({IconData outlined, IconData filled, String label})>
       _icons = [

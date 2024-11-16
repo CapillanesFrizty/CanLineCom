@@ -9,10 +9,12 @@
 # packages, and plugins designed to encourage good coding practices.
 analyzer:
   errors:
+    avoid_unnecessary_containers: ignore
     deprecated_member_use: ignore
     file_names: ignore
     non_constant_identifier_names: ignore
     prefer_const_constructors: ignore
+    sized_box_for_whitespace: ignore
     unused_field: ignore
     
 include: package:flutter_lints/flutter.yaml

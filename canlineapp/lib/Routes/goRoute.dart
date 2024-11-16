@@ -1,12 +1,7 @@
-// import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionAccreditedInsurances.dart';
-// import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionOncologists.dart';
-import 'package:canerline_app/Presentation/screen/authentication%20flow/MoreSignupScreen/MoreSignupScreen.dart';
-import 'package:canerline_app/Presentation/screen/authentication%20flow/SignupScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
 import '../Layouts/BarrelFileLayouts.dart';
-// import '../widgets/BarrelFileWidget..dart';
 
 final GoRouter linkrouter = GoRouter(
   routes: [
@@ -20,12 +15,43 @@ final GoRouter linkrouter = GoRouter(
       path: '/',
       builder: (context, state) => LoginScreen(),
     ),
+    //! Registration
+    GoRoute(
+      path: '/SignUpScreen',
+      builder: (context, state) => SignupScreen(),
+    ),
+    GoRoute(
+      path: '/MoreSignUpScreen',
+      builder: (context, state) => MoreSignupScreen(),
+    ),
     //! Home Route
     GoRoute(
       path: '/HomeScreen',
       builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: HomeScreen(),
       ),
+      routes: [
+        // ! Profile Route
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => ScaffoldLayoutHomeScreen(
+            bodyWidget: ProfileScreen(userid: state.pathParameters['userID']),
+          ),
+        ),
+
+        // ! Journal Route
+        GoRoute(
+          path: '/journal',
+          builder: (context, state) => ScaffoldLayoutHomeScreen(
+            bodyWidget: JournalScreen(),
+          ),
+        ),
+        // ! Events Route
+        GoRoute(
+          path: '/events',
+          builder: (context, state) => EventsScreen(),
+        ),
+      ],
     ),
 
     //? Information Hub Routes
@@ -35,7 +61,7 @@ final GoRouter linkrouter = GoRouter(
       builder: (context, state) => ScaffoldLayoutWidget(
         leadingWidget: TextButton(
           onPressed: () {
-            context.go('/');
+            context.go('/homescreen/:userID');
           },
           child: Icon(Icons.arrow_back),
         ),
@@ -44,10 +70,10 @@ final GoRouter linkrouter = GoRouter(
       routes: [
         // ! More Info Intended for Health Institution Route
         GoRoute(
-          name: 'id',
-          path: ':id',
+          name: 'hid',
+          path: ':hid',
           builder: (context, state) =>
-              MoreInfoInstitutionScreen(id: state.pathParameters['id']!),
+              MoreInfoInstitutionScreen(id: state.pathParameters['hid']!),
           routes: [
             // ! Health Institution Facilities Route
             GoRoute(
@@ -57,7 +83,7 @@ final GoRouter linkrouter = GoRouter(
                   leadingWidget: TextButton(
                     onPressed: () {
                       context.go(
-                          '/Health-Insititution/${state.pathParameters['id']}');
+                          '/Health-Insititution/${state.pathParameters['hid']}');
                     },
                     child: const Icon(
                       Icons.arrow_back,
@@ -65,7 +91,7 @@ final GoRouter linkrouter = GoRouter(
                     ),
                   ),
                   bodyWidget: HealthInstitutionFacilities(
-                      id: state.pathParameters['id']!),
+                      id: state.pathParameters['hid']!),
                 );
               },
             ),
@@ -76,7 +102,7 @@ final GoRouter linkrouter = GoRouter(
                   leadingWidget: TextButton(
                     onPressed: () {
                       context.go(
-                          '/Health-Insititution/${state.pathParameters['id']}');
+                          '/Health-Insititution/${state.pathParameters['hid']}');
                     },
                     child: const Icon(
                       Icons.arrow_back,
@@ -84,7 +110,7 @@ final GoRouter linkrouter = GoRouter(
                     ),
                   ),
                   bodyWidget: HealthInstitutionAccreditedInsurances(
-                      id: state.pathParameters['id']!),
+                      id: state.pathParameters['hid']!),
                 );
               },
             ),
@@ -95,7 +121,7 @@ final GoRouter linkrouter = GoRouter(
                   leadingWidget: TextButton(
                     onPressed: () {
                       context.go(
-                          '/Health-Insititution/${state.pathParameters['id']}');
+                          '/Health-Insititution/${state.pathParameters['hid']}');
                     },
                     child: const Icon(
                       Icons.arrow_back,
@@ -103,7 +129,7 @@ final GoRouter linkrouter = GoRouter(
                     ),
                   ),
                   bodyWidget: HealthInstitutionOncologists(
-                      id: state.pathParameters['id']!),
+                      id: state.pathParameters['hid']!),
                 );
               },
             ),
@@ -111,13 +137,14 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
-    //!Blogs Screen
+
+    // ! Blogs Route
     GoRoute(
       path: '/Blog',
       builder: (context, state) => ScaffoldLayoutWidget(
         leadingWidget: TextButton(
           onPressed: () {
-            context.go('/');
+            context.go('/homescreen/:userID');
           },
           child: Icon(Icons.arrow_back),
         ),
@@ -142,7 +169,7 @@ final GoRouter linkrouter = GoRouter(
         bodyWidget: FinancialSupportScreen(),
         leadingWidget: TextButton(
           onPressed: () {
-            context.go('/');
+            context.go('/homescreen/:userID');
           },
           child: Icon(Icons.arrow_back),
         ),
@@ -157,6 +184,7 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
+
     // ! Clinics Route
     GoRoute(
       path: '/clinic',
@@ -164,22 +192,27 @@ final GoRouter linkrouter = GoRouter(
         bodyWidget: ClinicScreen(),
         leadingWidget: TextButton(
           onPressed: () {
-            context.go('/');
+            context.go('/homescreen/:userID');
           },
           child: Icon(Icons.arrow_back),
         ),
       ),
       routes: [
         GoRoute(
-            name: 'cid',
-            path: ':cid',
-            builder: (context, state) => MoreinfoClinicsscreen(
-                  id: state.pathParameters['cid']!,
-                )),
+          name: 'cid',
+          path: ':cid',
+          builder: (context, state) => MoreinfoClinicsscreen(
+            id: state.pathParameters['cid']!,
+          ),
+        ),
       ],
     ),
 
-    GoRoute(path: '/profile', builder: (context, state) => ProfileScreen()),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) =>
+          ProfileScreen(userid: state.pathParameters['userID']!),
+    ),
 
     GoRoute(
       path: '/journal',
@@ -189,14 +222,5 @@ final GoRouter linkrouter = GoRouter(
       path: '/events',
       builder: (context, state) => EventsScreen(),
     ),
-    //! Registration
-    GoRoute(
-      path: '/SignUpScreen',
-      builder: (context, state) => SignupScreen(),
-    ),
-    GoRoute(
-      path: '/MoreSignUpScreen',
-      builder: (context, state) => MoreSignupScreen(),
-    )
   ],
 );

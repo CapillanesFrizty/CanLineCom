@@ -2,7 +2,7 @@
 export 'HomeScreen/HomeScreen.dart';
 
 // ! Profile Screen
-export 'Profile/profile.dart';
+export 'profile/profile.dart';
 
 // ! Journal Screen
 export 'Journal/journal.dart';
@@ -32,6 +32,6 @@ export 'clinics/Moreinfo_ClinicsScreen.dart';
 // ! Login Screen
 export 'authentication flow/LoginScreen.dart';
 
-
 //! Signup Screen
-
+export 'authentication flow/SignupScreen.dart';
+export 'authentication flow/MoreSignupScreen/MoreSignupScreen.dart';
