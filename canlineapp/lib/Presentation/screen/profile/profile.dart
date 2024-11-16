@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -32,9 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               top: 20.0), // Add margin to vertically center
           child: IconButton(
             icon: Icon(Icons.arrow_back, color: ProfileScreen.primaryColor),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => context.go('/HomeScreen'),
           ),
         ),
         elevation: 0,

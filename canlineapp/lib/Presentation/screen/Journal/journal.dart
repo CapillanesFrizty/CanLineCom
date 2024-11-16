@@ -44,9 +44,7 @@ class _JournalScreenState extends State<JournalScreen> {
               top: 20.0), // Add margin to vertically center
           child: IconButton(
             icon: const Icon(Icons.arrow_back, color: primaryColor),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => context.go('/HomeScreen'),
           ),
         ),
         elevation: 0,

@@ -1,5 +1,7 @@
 // import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionAccreditedInsurances.dart';
 // import 'package:canerline_app/Presentation/screen/HealthInstitution/HealthInstitutionServices/HealthInstitutionOncologists.dart';
+import 'package:canerline_app/Presentation/screen/authentication%20flow/MoreSignupScreen/MoreSignupScreen.dart';
+import 'package:canerline_app/Presentation/screen/authentication%20flow/SignupScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
@@ -14,13 +16,13 @@ final GoRouter linkrouter = GoRouter(
     //   builder: (context, state) => IntroLogin(),
     // ),
     // //! Login Route
-    // GoRoute(
-    //   path: '/Login-Screen',
-    //   builder: (context, state) => LoginScreen(),
-    // ),
-    //! Home Route
     GoRoute(
       path: '/',
+      builder: (context, state) => LoginScreen(),
+    ),
+    //! Home Route
+    GoRoute(
+      path: '/HomeScreen',
       builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: HomeScreen(),
       ),
@@ -187,5 +189,14 @@ final GoRouter linkrouter = GoRouter(
       path: '/events',
       builder: (context, state) => EventsScreen(),
     ),
+    //! Registration
+    GoRoute(
+      path: '/SignUpScreen',
+      builder: (context, state) => SignupScreen(),
+    ),
+    GoRoute(
+      path: '/MoreSignUpScreen',
+      builder: (context, state) => MoreSignupScreen(),
+    )
   ],
 );
