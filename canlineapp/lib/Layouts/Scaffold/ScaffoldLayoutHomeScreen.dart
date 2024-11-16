@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class ScaffoldLayoutWidget extends StatefulWidget {
+class ScaffoldLayoutHomeScreen extends StatefulWidget {
   final Widget bodyWidget;
   final List<Widget>? actionsWidget;
   final Widget? leadingWidget;
@@ -9,7 +9,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   final double? elevation;
   final String? userid;
 
-  const ScaffoldLayoutWidget({
+  const ScaffoldLayoutHomeScreen({
     super.key,
     required this.bodyWidget,
     this.actionsWidget,
@@ -20,10 +20,11 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   });
 
   @override
-  State<ScaffoldLayoutWidget> createState() => _ScaffoldLayoutWidgetState();
+  State<ScaffoldLayoutHomeScreen> createState() =>
+      _ScaffoldLayoutHomeScreenState();
 }
 
-class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
+class _ScaffoldLayoutHomeScreenState extends State<ScaffoldLayoutHomeScreen> {
   int _currentIndex = 0;
 
   static const Color _primaryColor = Color(0xFF5B50A0);
@@ -85,20 +86,6 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: widget.elevation ?? 0,
-        backgroundColor: Colors.white,
-        toolbarHeight: _toolbarHeight,
-        title: widget.titleWidget,
-        actions: widget.actionsWidget,
-        leadingWidth: 65,
-        leading: widget.leadingWidget != null
-            ? Padding(
-                padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                child: widget.leadingWidget!,
-              )
-            : null,
-      ),
       body: widget.bodyWidget,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +12,13 @@ void main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51a2NoZHVud2p6bWt0ZnRncXZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMzI1MTksImV4cCI6MjA0MzYwODUxOX0.0Yps_Ah424w6EnT8ZiYN2uysLCo7bMY7joTz__L6HYM',
   );
 
-  runApp(const App());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const App());
+  });
 }
 
 final supabase = Supabase.instance.client;

@@ -4,12 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final String? userid;
+  const HomeScreen({super.key, this.userid});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 70.0),
+      physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       children: [
         _buildGreetingText(context),
@@ -22,9 +24,9 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildGreetingText(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40),
+      padding: const EdgeInsets.only(top: 30, bottom: 20),
       child: Text(
-        "Hello John Capillanes!",
+        "Hello Arnold Gou!",
         style: GoogleFonts.poppins(
           fontSize: MediaQuery.sizeOf(context).height * 0.06,
           fontWeight: FontWeight.w500,
@@ -77,45 +79,47 @@ class HomeScreen extends StatelessWidget {
       childAspectRatio: 1 / 1.2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      children: _gridItems,
+      children: _gridItems(userid),
     );
   }
 
-  // Define grid items as a constant list
-  static final List<Widget> _gridItems = [
-    _GridItem(
-      label: "Health\nInstitution",
-      iconAsset: 'lib/assets/icons/Hospital.svg',
-      textColor: 0xffff5267,
-      bgColor: 0xffffd7db,
-      iconColor: 0xffff5267,
-      route: '/Health-Insititution',
-    ),
-    _GridItem(
-      label: "Financial\nSupport",
-      iconAsset: 'lib/assets/icons/Financial.svg',
-      textColor: 0xff3cc34f,
-      bgColor: 0xffcbffd2,
-      iconColor: 0xff3cc34f,
-      route: '/Financial-Institution',
-    ),
-    _GridItem(
-      label: "Blogs/News",
-      iconAsset: 'lib/assets/icons/Blogs.svg',
-      textColor: 0xffffa133,
-      bgColor: 0xffffead1,
-      iconColor: 0xffffa133,
-      route: '/Blog',
-    ),
-    _GridItem(
-      label: "Clinics\n(External)",
-      iconAsset: 'lib/assets/icons/Clinics.svg',
-      textColor: 0xff3f52ff,
-      bgColor: 0xffd9ddff,
-      iconColor: 0xff3f52ff,
-      route: '/clinic',
-    ),
-  ];
+  // Define grid items as a function
+  List<Widget> _gridItems(String? userid) {
+    return [
+      _GridItem(
+        label: "Health\nInstitution",
+        iconAsset: 'lib/assets/icons/Hospital.svg',
+        textColor: 0xffff5267,
+        bgColor: 0xffffd7db,
+        iconColor: 0xffff5267,
+        route: '/Health-Insititution',
+      ),
+      _GridItem(
+        label: "Financial\nSupport",
+        iconAsset: 'lib/assets/icons/Financial.svg',
+        textColor: 0xff3cc34f,
+        bgColor: 0xffcbffd2,
+        iconColor: 0xff3cc34f,
+        route: '/Financial-Institution',
+      ),
+      _GridItem(
+        label: "Blogs/News",
+        iconAsset: 'lib/assets/icons/Blogs.svg',
+        textColor: 0xffffa133,
+        bgColor: 0xffffead1,
+        iconColor: 0xffffa133,
+        route: '/Blog',
+      ),
+      _GridItem(
+        label: "Clinics\n(External)",
+        iconAsset: 'lib/assets/icons/Clinics.svg',
+        textColor: 0xff3f52ff,
+        bgColor: 0xffd9ddff,
+        iconColor: 0xff3f52ff,
+        route: '/clinic',
+      ),
+    ];
+  }
 }
 
 // Separate widget for grid items

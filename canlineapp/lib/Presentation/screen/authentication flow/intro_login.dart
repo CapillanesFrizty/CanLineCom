@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class IntroLogin extends StatelessWidget {
   const IntroLogin({super.key});
@@ -14,10 +15,10 @@ class IntroLogin extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset(
-                'assets/logo.png',
-                height: 100.0,
-              ),
+              // Image.asset(
+              //   'slib/assets/images/logo/introduction.png',
+              //   height: 100.0,
+              // ),
               const SizedBox(height: 40.0),
               const Text(
                 'CancerLine Companion',
@@ -30,9 +31,11 @@ class IntroLogin extends StatelessWidget {
               ),
               const SizedBox(height: 80.0),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.go('/Sign-Up');
+                },
                 style: ElevatedButton.styleFrom(
-                  foregroundColor:Colors.white,
+                  foregroundColor: Colors.white,
                   backgroundColor: Color(0xFF5B50A0),
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
@@ -43,7 +46,9 @@ class IntroLogin extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
               OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.go('/Login');
+                },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Color(0xFF5B50A0),
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -61,5 +66,3 @@ class IntroLogin extends StatelessWidget {
     );
   }
 }
-
-

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:go_router/go_router.dart';
 
 class JournalScreen extends StatefulWidget {
   const JournalScreen({super.key});
@@ -12,57 +11,155 @@ class JournalScreen extends StatefulWidget {
 class _JournalScreenState extends State<JournalScreen> {
   static const Color primaryColor = Color(0xFF5B50A0);
   static const Color secondaryColor = Color(0xFFFF0000);
+  int selectedEmotion = -1;
+  final List<bool> selectedReasons = List.generate(14, (_) => false);
+
+  // Text controllers for the form fields
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
+
+  // Function to handle the submission of data
+  void _submitJournalEntry() {
+    // Collect data from fields
+    final String title = titleController.text.trim();
+    final String content = contentController.text.trim();
+    final String emotion = selectedEmotion == -1
+        ? "None"
+        : [
+            "Awesome",
+            "Happy",
+            "Lovely",
+            "Blessed",
+            "Okay",
+            "Sad",
+            "Terrible",
+            "Angry"
+          ][selectedEmotion];
+
+    // Print the submitted data
+    print("Submitted Journal Entry:");
+    print("Emotion: $emotion");
+    print("Title: $title");
+    print("Content: $content");
+
+    // Optionally clear the fields after submission
+    titleController.clear();
+    contentController.clear();
+    setState(() {
+      selectedEmotion = -1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
       body: _buildBody(),
-      bottomNavigationBar: _buildBottomTab(),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(80.0), // Set the height here
-      child: AppBar(
-        title: Container(
-          margin: const EdgeInsets.only(
-              top: 20.0), // Add margin to vertically center
-          child: const Text(
-            'Journal',
-            style: TextStyle(
-              fontSize: 34,
-              fontWeight: FontWeight.bold,
-              color: primaryColor,
-            ),
-          ),
-        ),
-        centerTitle: false,
-        leading: Container(
-          margin: const EdgeInsets.only(
-              top: 20.0), // Add margin to vertically center
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: primaryColor),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: primaryColor,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+              isScrollControlled: true,
+              context: context,
+              builder: (context) {
+                return Container(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Add Journal Entry'),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'How are you feeling today?',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Container(
+                        height: 100,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          itemExtent: 100,
+                          children: [
+                            _emotionButton(0, 'Awesome',
+                                'lib/assets/images/Journal/Awsome.png'),
+                            _emotionButton(1, 'Happy',
+                                'lib/assets/images/Journal/Happy.png'),
+                            _emotionButton(2, 'Lovely',
+                                'lib/assets/images/Journal/Inlove.png'),
+                            _emotionButton(3, 'Blessed',
+                                'lib/assets/images/Journal/Angel.png'),
+                            _emotionButton(4, 'Okay',
+                                'lib/assets/images/Journal/Calm.png'),
+                            _emotionButton(
+                                5, 'Sad', 'lib/assets/images/Journal/Sad.png'),
+                            _emotionButton(6, 'Terrible',
+                                'lib/assets/images/Journal/Disappointed.png'),
+                            _emotionButton(7, 'Angry',
+                                'lib/assets/images/Journal/Angry.png'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Form(
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: titleController,
+                              decoration: const InputDecoration(
+                                  labelText: 'Title of your Journal',
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10)))),
+                            ),
+                            const SizedBox(height: 24),
+                            TextFormField(
+                              controller: contentController,
+                              decoration: const InputDecoration(
+                                labelText: 'Share you thoughts here...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(10),
+                                  ),
+                                ),
+                                alignLabelWithHint: true,
+                              ),
+                              maxLines: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Center(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                          ),
+                          onPressed: _submitJournalEntry,
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              });
+        },
+        backgroundColor: primaryColor,
+        child: const Icon(Icons.add),
       ),
     );
   }
 
   Widget _buildBody() {
     return Container(
-      color: Colors.white, // Set the background color to white
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: ListView(
         children: const [
-          SizedBox(height: 16),
           _DateSection(
               date: 'NOV 13',
               day: 'Today',
@@ -78,103 +175,40 @@ class _JournalScreenState extends State<JournalScreen> {
             secondaryColor: secondaryColor,
           ),
           SizedBox(height: 16),
-          _DateSection(
-              date: 'NOV 14',
-              day: 'Yesterday',
-              weekday: 'Tuesday',
-              color: primaryColor),
-          _JournalEntry(
-            emoji: '😊',
-            title: "I've done Jogging",
-            time: '9:52 PM',
-            content: "I'm doing 1 mile jogging with friends",
-            tag: 'Exercise',
-            primaryColor: primaryColor,
-            secondaryColor: secondaryColor,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'October',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: primaryColor,
-            ),
-          ),
-          SizedBox(height: 16),
-          _DateSection(
-              date: 'NOV 14',
-              day: 'Yesterday',
-              weekday: 'Tuesday',
-              color: primaryColor),
-          _JournalEntry(
-            emoji: '😊',
-            title: "I've done Jogging",
-            time: '9:52 PM',
-            content: "I'm doing 1 mile jogging with friends",
-            tag: 'Exercise',
-            primaryColor: primaryColor,
-            secondaryColor: secondaryColor,
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomTab() {
-    return Container(
-      color: Colors.white, // Set the background color of the bottom tab
-      padding: const EdgeInsets.symmetric(vertical: 10.0), // Adjust padding
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment
-            .center, // Center the "Create note" button horizontally
+  Widget _emotionButton(int index, String label, String imagePath) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedEmotion = index;
+          debugPrint('Selected emotion index: $index'); // Debugging statement
+        });
+      },
+      child: Column(
         children: [
-          Material(
-            color: Colors
-                .transparent, // Ensure no visible background color for the material
-            child: InkWell(
-              borderRadius: BorderRadius.circular(
-                  24), // Rounded border for the ink effect area
-              splashColor:
-                  primaryColor.withOpacity(0.3), // Splash color when tapped
-              highlightColor: Colors
-                  .transparent, // No highlight color (no background change)
-              onTap: () {
-                // Add note creation logic here
-                context.go('/journalCreateNote');
-              },
-              child: Container(
-                width: 150, // Set a specific width for the button
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                // No background color here to keep it transparent
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(
-                          8), // Adjust padding around the icon
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: primaryColor,
-                            width: 2), // Border color for the icon
-                      ),
-                      child: const Icon(Icons.add,
-                          color: primaryColor, size: 24), // Icon color and size
-                    ),
-                    const SizedBox(height: 4), // Space between icon and text
-                    const Text(
-                      'Create note',
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: selectedEmotion == index
+                ? primaryColor.withOpacity(0.4)
+                : primaryColor.withOpacity(0.1),
+            child: Image.asset(
+              imagePath,
+              width: 30,
+              height: 30,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: primaryColor,
+              fontWeight: selectedEmotion == index
+                  ? FontWeight.bold
+                  : FontWeight.normal,
             ),
           ),
         ],
@@ -230,7 +264,6 @@ class _DateSection extends StatelessWidget {
     );
   }
 }
-
 class _JournalEntry extends StatelessWidget {
   final String emoji;
   final String title;
