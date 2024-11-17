@@ -36,10 +36,10 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
   void initState() {
     super.initState();
     _routes = [
-      '/homescreen/${widget.userid}',
-      '/homescreen/${widget.userid}/journal',
-      '/homescreen/${widget.userid}/events',
-      '/homescreen/${widget.userid}/profile',
+      '/HomeScreen/${widget.userid}',
+      '/HomeScreen/${widget.userid}/journal',
+      '/HomeScreen/${widget.userid}/events',
+      '/HomeScreen/${widget.userid}/profile',
     ];
   }
 

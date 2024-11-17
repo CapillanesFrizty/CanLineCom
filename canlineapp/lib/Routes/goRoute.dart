@@ -17,23 +17,20 @@ final GoRouter linkrouter = GoRouter(
     ),
     //! Registration
     GoRoute(
-      path: '/SignUpScreen',
-      builder: (context, state) => SignupScreen(),
-    ),
-    GoRoute(
-      path: '/MoreSignUpScreen',
-      builder: (context, state) => MoreSignupScreen(),
+      path: '/RegisterScreen',
+      builder: (context, state) => Registerscreen(),
     ),
     //! Home Route
     GoRoute(
-      path: '/HomeScreen',
+      name: 'userID',
+      path: '/HomeScreen/:userID',
       builder: (context, state) => ScaffoldLayoutWidget(
         bodyWidget: HomeScreen(),
       ),
       routes: [
         // ! Profile Route
         GoRoute(
-          path: '/profile',
+          path: 'profile',
           builder: (context, state) => ScaffoldLayoutHomeScreen(
             bodyWidget: ProfileScreen(userid: state.pathParameters['userID']),
           ),
@@ -41,14 +38,15 @@ final GoRouter linkrouter = GoRouter(
 
         // ! Journal Route
         GoRoute(
-          path: '/journal',
+          path: 'journal',
           builder: (context, state) => ScaffoldLayoutHomeScreen(
             bodyWidget: JournalScreen(),
           ),
         ),
+
         // ! Events Route
         GoRoute(
-          path: '/events',
+          path: 'events',
           builder: (context, state) => EventsScreen(),
         ),
       ],

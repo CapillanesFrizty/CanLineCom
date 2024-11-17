@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class JournalScreen extends StatefulWidget {
   const JournalScreen({super.key});
@@ -15,14 +16,18 @@ class _JournalScreenState extends State<JournalScreen> {
   final List<bool> selectedReasons = List.generate(14, (_) => false);
 
   // Text controllers for the form fields
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController contentController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  bool isLoading = true;
+  final supabase = Supabase.instance.client;
+  User? _user;
+  List<dynamic> journalEntries = [];
 
   // Function to handle the submission of data
-  void _submitJournalEntry() {
+  Future<void> _submitJournalEntry() async {
     // Collect data from fields
-    final String title = titleController.text.trim();
-    final String content = contentController.text.trim();
+    final String title = _titleController.text.trim();
+    final String content = _contentController.text.trim();
     final String emotion = selectedEmotion == -1
         ? "None"
         : [
@@ -36,18 +41,80 @@ class _JournalScreenState extends State<JournalScreen> {
             "Angry"
           ][selectedEmotion];
 
+    final Map<String, dynamic> journalEntry = {
+      'title_of_the_journal': title,
+      'body_of_journal': content,
+      'emotion': emotion,
+      'created_by': _user!.id,
+    };
+
     // Print the submitted data
-    print("Submitted Journal Entry:");
-    print("Emotion: $emotion");
-    print("Title: $title");
-    print("Content: $content");
+    try {
+      // Insert data into the "Journal" table
+      final response = await supabase
+          .from('Journal')
+          .insert([journalEntry]) // Wrap data in a list
+          .select();
+
+      // Print the response
+      debugPrint('Journal Entry Submitted: $response');
+    } catch (e) {
+      // Handle unexpected exceptions
+      debugPrint('Unexpected error: $e');
+    }
 
     // Optionally clear the fields after submission
-    titleController.clear();
-    contentController.clear();
+    _titleController.clear();
+    _contentController.clear();
     setState(() {
       selectedEmotion = -1;
     });
+  }
+
+//  Function for fetching journal entries
+  Future<void> fetchUserJournalEntries() async {
+    // Fetch data from the "Journal" table with the User's ID
+    final u = await supabase.auth.getUser();
+
+    setState(() {
+      _user = u.user;
+    });
+
+    final response =
+        await supabase.from('Journal').select().eq('created_by', _user!.id);
+
+    debugPrint('Journal Entries: $response');
+
+    setState(() {
+      journalEntries = response as List<dynamic>;
+      isLoading = false;
+    });
+  }
+
+//  Function for deletion journal entries
+  Future<void> deleteJournalEntry(int id) async {
+    try {
+      // Delete data from the "Journal" table with the specified ID
+      final response =
+          await supabase.from('Journal').delete().eq('journal_id', id);
+
+      if (response != null) {
+        debugPrint('Journal Entry Deleted: $response');
+
+        // Update UI by removing the deleted entry
+        setState(() {
+          journalEntries.removeWhere((entry) => entry['id'] == id);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error deleting journal entry: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserJournalEntries();
   }
 
   @override
@@ -66,8 +133,7 @@ class _JournalScreenState extends State<JournalScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Add Journal Entry'),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
                       const Text(
                         'How are you feeling today?',
                         style: TextStyle(
@@ -106,7 +172,7 @@ class _JournalScreenState extends State<JournalScreen> {
                         child: Column(
                           children: [
                             TextFormField(
-                              controller: titleController,
+                              controller: _titleController,
                               decoration: const InputDecoration(
                                   labelText: 'Title of your Journal',
                                   border: OutlineInputBorder(
@@ -115,7 +181,7 @@ class _JournalScreenState extends State<JournalScreen> {
                             ),
                             const SizedBox(height: 24),
                             TextFormField(
-                              controller: contentController,
+                              controller: _contentController,
                               decoration: const InputDecoration(
                                 labelText: 'Share you thoughts here...',
                                 border: OutlineInputBorder(
@@ -155,29 +221,80 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 
   Widget _buildBody() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (journalEntries.isEmpty) {
+      return Center(
+        child: Text(
+          "No journal entries yet. Start writing!",
+          style: TextStyle(color: Colors.grey, fontSize: 16),
+        ),
+      );
+    }
+
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 26.0),
       child: ListView(
-        children: const [
-          _DateSection(
-              date: 'NOV 13',
-              day: 'Today',
-              weekday: 'Wednesday',
-              color: primaryColor),
-          _JournalEntry(
-            emoji: '😊',
-            title: "I've done my work today",
-            time: '9:52 PM',
-            content: "I'm doing my part",
-            tag: 'Work',
-            primaryColor: primaryColor,
-            secondaryColor: secondaryColor,
+        children: [
+          // Optional: Date section (example for one entry)
+          // _Header(
+          //   date: 'NOV 13',
+          //   day: 'Today',
+          //   weekday: 'Wednesday',
+          //   color: primaryColor,
+          // ),
+          SizedBox(height: 32),
+          Text(
+            "My Journal",
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
+            ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
+          // Render Journal Entries
+          ...journalEntries.map((entry) {
+            return _JournalEntry(
+              emoji: _getEmojiForEmotion(entry['emotion']),
+              title: entry['title_of_the_journal'],
+              time: entry['created_at'],
+              content: entry['body_of_journal'],
+              primaryColor: primaryColor,
+              secondaryColor: secondaryColor,
+              onDelete: () => deleteJournalEntry(entry['journal_id']),
+            );
+          }),
+          const SizedBox(height: 16),
         ],
       ),
     );
+  }
+
+  String _getEmojiForEmotion(String emotion) {
+    switch (emotion.toLowerCase()) {
+      case 'awesome':
+        return '🤩';
+      case 'happy':
+        return '😊';
+      case 'lovely':
+        return '😍';
+      case 'blessed':
+        return '😇';
+      case 'okay':
+        return '😌';
+      case 'sad':
+        return '😢';
+      case 'terrible':
+        return '😞';
+      case 'angry':
+        return '😡';
+      default:
+        return '🤔'; // Default emoji for undefined emotions
+    }
   }
 
   Widget _emotionButton(int index, String label, String imagePath) {
@@ -217,13 +334,13 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 }
 
-class _DateSection extends StatelessWidget {
+class _Header extends StatelessWidget {
   final String date;
   final String day;
   final String weekday;
   final Color color;
 
-  const _DateSection({
+  const _Header({
     required this.date,
     required this.day,
     required this.weekday,
@@ -270,18 +387,20 @@ class _JournalEntry extends StatelessWidget {
   final String title;
   final String time;
   final String content;
-  final String tag;
+  // final String tag;
   final Color primaryColor;
   final Color secondaryColor;
+  final VoidCallback onDelete; // Add this parameter
 
   const _JournalEntry({
     required this.emoji,
     required this.title,
     required this.time,
     required this.content,
-    required this.tag,
+    // required this.tag,
     required this.primaryColor,
     required this.secondaryColor,
+    required this.onDelete, // Make it required
   });
 
   @override
@@ -327,25 +446,23 @@ class _JournalEntry extends StatelessWidget {
           Text(content, style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 8),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: primaryColor.withOpacity(0.5)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  tag,
-                  style: TextStyle(color: primaryColor),
-                ),
-              ),
+              // Container(
+              //   padding:
+              //       const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+              //   decoration: BoxDecoration(
+              //     border: Border.all(color: primaryColor.withOpacity(0.5)),
+              //     borderRadius: BorderRadius.circular(8),
+              //   ),
+              //   child: Text(
+              //     tag,
+              //     style: TextStyle(color: primaryColor),
+              //   ),
+              // ),
               IconButton(
                 icon: Icon(LucideIcons.trash, color: secondaryColor),
-                onPressed: () {
-                  // Add delete logic here
-                },
+                onPressed: onDelete, // Call the delete callback
               ),
             ],
           ),
