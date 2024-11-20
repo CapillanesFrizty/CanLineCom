@@ -37,49 +37,30 @@ class _ScaffoldLayoutHomeScreenState extends State<ScaffoldLayoutHomeScreen> {
   void initState() {
     super.initState();
     _routes = [
-      '/homescreen/${widget.userid}',
-      '/homescreen/${widget.userid}/journal',
-      '/homescreen/${widget.userid}/events',
-      '/homescreen/${widget.userid}/profile',
+      '/HomeScreen/${widget.userid}',
+      '/HomeScreen/${widget.userid}/journal',
+      '/HomeScreen/${widget.userid}/events',
+      '/HomeScreen/${widget.userid}/profile',
     ];
   }
 
-  static const List<({IconData outlined, IconData filled})> _icons = [
-    (outlined: Icons.home_max_outlined, filled: Icons.home_rounded),
-    (outlined: Icons.menu_book, filled: Icons.menu_book_sharp),
-    (outlined: Icons.event, filled: Icons.event),
-    (outlined: Icons.person_outline, filled: Icons.person),
+  static const List<({IconData outlined, IconData filled, String label})>
+      _icons = [
+    (outlined: Icons.home_outlined, filled: Icons.home, label: "Home"),
+    (
+      outlined: Icons.menu_book_outlined,
+      filled: Icons.menu_book,
+      label: "Journal"
+    ),
+    (outlined: Icons.event_outlined, filled: Icons.event, label: "Event"),
+    (outlined: Icons.person_outline, filled: Icons.person, label: "Profile"),
   ];
 
   void _onTabSelected(int index) {
-    setState(() => _currentIndex = index);
+    setState(() {
+      _currentIndex = index;
+    });
     context.go(_routes[index]);
-  }
-
-  BottomNavigationBarItem _buildNavItem(int index, {bool isCenter = false}) {
-    Widget buildIcon(IconData icon) {
-      if (isCenter) {
-        return Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: _primaryColor),
-        );
-      }
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Icon(icon),
-      );
-    }
-
-    return BottomNavigationBarItem(
-      icon: buildIcon(_icons[index].outlined),
-      activeIcon: buildIcon(_icons[index].filled),
-      label: '',
-    );
   }
 
   @override
@@ -87,23 +68,39 @@ class _ScaffoldLayoutHomeScreenState extends State<ScaffoldLayoutHomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: widget.bodyWidget,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: _primaryColor.withOpacity(0.55),
-        elevation: 0,
-        currentIndex: _currentIndex,
-        onTap: _onTabSelected,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white,
-        iconSize: _iconSize,
-        items: List.generate(
-          _icons.length,
-          (index) => _buildNavItem(
-            index,
-            isCenter: index == 0,
-          ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: _primaryColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: _primaryColor,
+          elevation: 0,
+          currentIndex: _currentIndex,
+          onTap: _onTabSelected,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white70,
+          iconSize: _iconSize,
+          items: _icons
+              .map(
+                (iconData) => BottomNavigationBarItem(
+                  icon: Icon(iconData.outlined),
+                  activeIcon: Icon(iconData.filled),
+                  label: iconData.label,
+                ),
+              )
+              .toList(),
         ),
       ),
     );

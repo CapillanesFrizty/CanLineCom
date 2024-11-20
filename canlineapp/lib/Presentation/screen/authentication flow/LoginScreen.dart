@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,6 +12,34 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // Form key
+  final _formKey = GlobalKey<FormState>();
+
+  // Textfield Controllers
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+
+  // Initiate a Supabase Client
+  final supabase = Supabase.instance.client;
+
+  // Login function
+  Future<void> login() async {
+    try {
+      await supabase.auth.signInWithPassword(
+        password: _password.text.trim(),
+        email: _email.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      final user = await supabase.auth.getUser();
+
+      context.go('/HomeScreen/${user.user?.id}');
+    } on AuthException catch (e) {
+      debugPrint('Error: ${e.message}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,11 +56,60 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               _buildWelcomeText(),
               const SizedBox(height: 40.0),
-              _buildEmailTextField(),
-              const SizedBox(height: 20.0),
-              _buildPasswordTextField(),
+              Form(
+                child: Column(
+                  children: [
+                    // Email field
+                    TextField(
+                      controller: _email,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: GoogleFonts.poppins(
+                            color: LoginScreen._primaryColor),
+                        border: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: LoginScreen._primaryColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: LoginScreen._primaryColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: LoginScreen._primaryColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20.0),
+                    // Password field
+                    TextField(
+                      controller: _password,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: GoogleFonts.poppins(
+                            color: LoginScreen._primaryColor),
+                        border: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: LoginScreen._primaryColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: LoginScreen._primaryColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: LoginScreen._primaryColor),
+                        ),
+                        suffixIcon: Icon(Icons.visibility,
+                            color: LoginScreen._primaryColor),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 40.0),
-              _buildLoginButton(),
+              _buildLoginButton(login),
               const SizedBox(height: 20.0),
               _buildOrText(),
               const SizedBox(height: 20.0),
@@ -56,47 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildEmailTextField() {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: 'Email',
-        labelStyle: GoogleFonts.poppins(color: LoginScreen._primaryColor),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: LoginScreen._primaryColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: LoginScreen._primaryColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: LoginScreen._primaryColor),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPasswordTextField() {
-    return TextField(
-      obscureText: true,
-      decoration: InputDecoration(
-        labelText: 'Password',
-        labelStyle: GoogleFonts.poppins(color: LoginScreen._primaryColor),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: LoginScreen._primaryColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: LoginScreen._primaryColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: LoginScreen._primaryColor),
-        ),
-        suffixIcon: Icon(Icons.visibility, color: LoginScreen._primaryColor),
-      ),
-    );
-  }
-
-  Widget _buildLoginButton() {
+  Widget _buildLoginButton(Function login) {
     return ElevatedButton(
-      onPressed: () => context.go('/HomeScreen'),
+      onPressed: () {
+        login();
+      },
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: LoginScreen._primaryColor,
@@ -132,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildCreateAccountButton() {
     return OutlinedButton(
-      onPressed: () => context.go('/SignUpScreen'),
+      onPressed: () => context.go('/RegisterScreen'),
       style: OutlinedButton.styleFrom(
         foregroundColor: LoginScreen._primaryColor,
         padding: const EdgeInsets.symmetric(vertical: 16.0),

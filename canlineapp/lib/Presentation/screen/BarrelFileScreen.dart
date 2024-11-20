@@ -33,5 +33,4 @@ export 'clinics/Moreinfo_ClinicsScreen.dart';
 export 'authentication flow/LoginScreen.dart';
 
 //! Signup Screen
-export 'authentication flow/SignupScreen.dart';
-export 'authentication flow/MoreSignupScreen/MoreSignupScreen.dart';
+export 'authentication flow/RegisterScreen.dart';
