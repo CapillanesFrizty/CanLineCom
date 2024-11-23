@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BlogsScreen extends StatefulWidget {
   const BlogsScreen({super.key});
@@ -11,9 +13,30 @@ class BlogsScreen extends StatefulWidget {
 }
 
 class _BlogsScreenState extends State<BlogsScreen> {
+  final _getBlogs = Supabase.instance.client.from('Blogs').select();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 100,
+        title: Text(
+          'Blogs',
+          style: GoogleFonts.poppins(
+            fontSize: 30.0,
+            fontWeight: FontWeight.w600,
+            color: BlogsScreen._primaryColor,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: BlogsScreen._primaryColor),
+          onPressed: () {
+            context.go('/homescreen/:userID');
+          },
+        ),
+      ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding:
@@ -21,61 +44,15 @@ class _BlogsScreenState extends State<BlogsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTitle(),
             const SizedBox(height: 20),
-            _buildSearchBar(),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Popular'),
-            const SizedBox(height: 16),
-            _buildPopularBlogs(),
-            const SizedBox(height: 20),
+            // _buildSectionTitle('Popular'),
+            // const SizedBox(height: 16),
+            // _buildPopularBlogs(),
+            // const SizedBox(height: 20),
             _buildSectionTitle('Recent'),
             const SizedBox(height: 16),
             _buildRecentBlogs(),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitle() {
-    final titleStyle = GoogleFonts.poppins(
-      fontSize: 30.0,
-      fontWeight: FontWeight.w500,
-      color: BlogsScreen._primaryColor,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Blogs', style: titleStyle),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.all(35.0),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search',
-          hintStyle: GoogleFonts.poppins(color: BlogsScreen._primaryColor),
-          prefixIcon: Icon(Icons.search, color: BlogsScreen._primaryColor),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: BlogsScreen._primaryColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: BlogsScreen._primaryColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: BlogsScreen._primaryColor),
-          ),
         ),
       ),
     );
@@ -95,179 +72,119 @@ class _BlogsScreenState extends State<BlogsScreen> {
     );
   }
 
-  Widget _buildPopularBlogs() {
-    return SizedBox(
-      height: 200,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 35.0),
-        children: [
-          _buildPopularBlogCard(
-            date: 'Aug 7, 2024',
-            title: 'Balancing the right treatments for metastatic cancer',
-            author: 'Karl Wood',
-          ),
-          const SizedBox(width: 16),
-          _buildPopularBlogCard(
-            date: 'September 19, 2024',
-            title: 'Therapy customized through stem cell treatments',
-            author: 'Jane Doe',
-          ),
-        ],
-      ),
-    );
-  }
+  // ? Parked for now, will be implemented in the future
+  // Widget _buildPopularBlogs() {
+  //   return SizedBox(
+  //     height: 200,
+  //     child: ListView(
+  //       scrollDirection: Axis.horizontal,
+  //       padding: const EdgeInsets.symmetric(horizontal: 35.0),
+  //       children: [
+  //         _buildPopularBlogCard(
+  //           date: 'Aug 7, 2024',
+  //           title: 'Balancing the right treatments for metastatic cancer',
+  //           author: 'Karl Wood',
+  //         ),
+  //         const SizedBox(width: 16),
+  //         _buildPopularBlogCard(
+  //           date: 'September 19, 2024',
+  //           title: 'Therapy customized through stem cell treatments',
+  //           author: 'Jane Doe',
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  // Widget _buildPopularBlogCard({
 
   Widget _buildRecentBlogs() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: ListView(
-        shrinkWrap: true, // Allows the ListView to take only the needed space
-        physics:
-            NeverScrollableScrollPhysics(), // Prevents scrolling inside the main scroll view
-        children: [
-          _buildRecentBlogCard(
-            category: 'Expert Opinions',
-            title: 'Is hormone replacement therapy safe? An expert\'s opinion',
-            date: 'September 17, 2024',
-          ),
-          _buildRecentBlogCard(
-            category: 'Expert Opinions',
-            title: 'Is hormone replacement therapy safe? An expert\'s opinion',
-            date: 'September 17, 2024',
-          ),
-          _buildRecentBlogCard(
-            category: 'Expert Opinions',
-            title: 'Is hormone replacement therapy safe? An expert\'s opinion',
-            date: 'September 17, 2024',
-          ),
-        ],
+      child: FutureBuilder(
+        future: _getBlogs,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
+          final blogsdata = snapshot.data as List<Map<String, dynamic>>;
+          if (blogsdata.isEmpty) {
+            return const Center(child: Text('No data available'));
+          }
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: blogsdata.length,
+            itemBuilder: (context, index) {
+              return _buildRecentBlogCard(blogsdata[index]);
+            },
+          );
+        },
       ),
     );
   }
 
-  Widget _buildPopularBlogCard({
-    required String date,
-    required String title,
-    required String author,
-  }) {
-    return Container(
-      width: 250,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.grey[300],
-      ),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Center(
-              child: Icon(Icons.image, color: Colors.white70, size: 50),
+  Widget _buildRecentBlogCard(Map<String, dynamic> blogsdata) {
+    return GestureDetector(
+      onTap: () {
+        context.go('/Blog/${blogsdata['Blog-ID']}');
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.grey[100],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.image, color: Colors.white70, size: 40),
             ),
-          ),
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  date,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 12,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    blogsdata['Blogs-Category'],
+                    style: GoogleFonts.poppins(
+                      color: BlogsScreen._primaryColor,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 6),
+                  Text(
+                    blogsdata['Blogs-Name'],
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: BlogsScreen._primaryColor,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Written by $author',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 12,
+                  const SizedBox(height: 6),
+                  Text(
+                    blogsdata['Blog-Published'],
+                    style: GoogleFonts.poppins(
+                      color: BlogsScreen._primaryColor,
+                      fontSize: 10,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Icon(
-              Icons.favorite_border,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecentBlogCard({
-    required String category,
-    required String title,
-    required String date,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.grey[100],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.image, color: Colors.white70, size: 40),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  category,
-                  style: GoogleFonts.poppins(
-                    color: BlogsScreen._primaryColor,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: BlogsScreen._primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  date,
-                  style: GoogleFonts.poppins(
-                    color: BlogsScreen._primaryColor,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.favorite_border, color: BlogsScreen._primaryColor),
-        ],
+            // SizedBox(width: 15),
+            // Icon(Icons.favorite_border, color: BlogsScreen._primaryColor),
+          ],
+        ),
       ),
     );
   }

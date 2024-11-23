@@ -12,7 +12,7 @@ class JournalScreen extends StatefulWidget {
 class _JournalScreenState extends State<JournalScreen> {
   static const Color primaryColor = Color(0xFF5B50A0);
   static const Color secondaryColor = Color(0xFFFF0000);
-  int selectedEmotion = -1;
+  int selectedEmotion = 0;
   final List<bool> selectedReasons = List.generate(14, (_) => false);
 
   // Text controllers for the form fields
@@ -58,6 +58,7 @@ class _JournalScreenState extends State<JournalScreen> {
 
       // Print the response
       debugPrint('Journal Entry Submitted: $response');
+      fetchUserJournalEntries();
     } catch (e) {
       // Handle unexpected exceptions
       debugPrint('Unexpected error: $e');
@@ -67,7 +68,7 @@ class _JournalScreenState extends State<JournalScreen> {
     _titleController.clear();
     _contentController.clear();
     setState(() {
-      selectedEmotion = -1;
+      selectedEmotion = 0;
     });
   }
 
@@ -106,6 +107,7 @@ class _JournalScreenState extends State<JournalScreen> {
           journalEntries.removeWhere((entry) => entry['id'] == id);
         });
       }
+      fetchUserJournalEntries();
     } catch (e) {
       debugPrint('Error deleting journal entry: $e');
     }
@@ -298,38 +300,47 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 
   Widget _emotionButton(int index, String label, String imagePath) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedEmotion = index;
-          debugPrint('Selected emotion index: $index'); // Debugging statement
-        });
-      },
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: selectedEmotion == index
-                ? primaryColor.withOpacity(0.4)
-                : primaryColor.withOpacity(0.1),
+    return Column(
+      children: [
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.all(0),
+            shape: const CircleBorder(),
+            side: BorderSide(
+              color: (selectedEmotion == index)
+                  ? primaryColor.withOpacity(1)
+                  : primaryColor.withOpacity(0.5),
+              width: 0,
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              selectedEmotion = index;
+              debugPrint(
+                  'Selected emotion index: $index'); // Debugging statement
+            });
+          },
+          child: CircleAvatar(
+            backgroundColor: (selectedEmotion == index)
+                ? primaryColor.withOpacity(1)
+                : primaryColor.withOpacity(0.5),
             child: Image.asset(
               imagePath,
               width: 30,
               height: 30,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: primaryColor,
-              fontWeight: selectedEmotion == index
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-            ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: primaryColor,
+            fontWeight:
+                selectedEmotion == index ? FontWeight.bold : FontWeight.normal,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

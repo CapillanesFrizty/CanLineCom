@@ -70,7 +70,7 @@ class _JournalCreateNoteState extends State<JournalCreateNote> {
 
   Widget _buildEmotionGrid() {
     return GridView.count(
-      crossAxisCount: 4,
+      crossAxisCount: 7,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       shrinkWrap: true,
