@@ -31,9 +31,8 @@ class _JournalScreenState extends State<JournalScreen> {
     // Collect data from fields
     final String title = _titleController.text.trim();
     final String content = _contentController.text.trim();
-    final String emotion = selectedEmotion == -1
-        ? "None"
-        : [
+    final String emotion = selectedEmotion != -1
+        ? [
             "Awesome",
             "Happy",
             "Lovely",
@@ -42,7 +41,8 @@ class _JournalScreenState extends State<JournalScreen> {
             "Sad",
             "Terrible",
             "Angry"
-          ][selectedEmotion];
+          ][selectedEmotion]
+        : "None";
 
     final Map<String, dynamic> journalEntry = {
       'title_of_the_journal': title,
@@ -142,17 +142,23 @@ class _JournalScreenState extends State<JournalScreen> {
       isScrollControlled: true,
       context: context,
       builder: (context) {
-        int? localSelectedEmotion;
+        int localSelectedEmotion =
+            selectedEmotion; // Start with the current value
         return StatefulBuilder(
           builder: (context, setModalState) {
-            Future<void> changeIndex(int index) async {
+            // Function to update the selected index
+            void changeIndex(int index) {
               setModalState(() {
                 localSelectedEmotion = index;
-                debugPrint('Selected index: $index');
+                debugPrint('Selected index in modal: $index');
+              });
+              // Immediately reflect the change in the parent state
+              setState(() {
+                selectedEmotion = index;
               });
             }
 
-            // Button Radio Button
+            // Radio button builder
             Widget buildcustomRadio({
               required String imagePath,
               required String label,
@@ -162,14 +168,6 @@ class _JournalScreenState extends State<JournalScreen> {
                   onTap: () {
                     changeIndex(index);
                   },
-                  // style: OutlinedButton.styleFrom(
-                  //   shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.zero,
-                  //       side: BorderSide(
-                  //           color: Colors.transparent, strokeAlign: 0)),
-                  //   alignment: Alignment.center,
-                  //   minimumSize: const Size(50.0, 100.0), // Width and height
-                  // ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -200,8 +198,7 @@ class _JournalScreenState extends State<JournalScreen> {
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisSize:
-                    MainAxisSize.min, // Minimize the height of the column
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
@@ -211,7 +208,7 @@ class _JournalScreenState extends State<JournalScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20), // Add spacing
+                  const SizedBox(height: 20),
                   SizedBox(
                     height: 120,
                     child: ListView(
@@ -223,62 +220,72 @@ class _JournalScreenState extends State<JournalScreen> {
                           label: 'Awesome',
                           imagePath: 'lib/assets/images/Journal/Awsome.png',
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         buildcustomRadio(
-                            index: 1,
-                            label: 'Happy',
-                            imagePath: 'lib/assets/images/Journal/Happy.png'),
-                        SizedBox(width: 10),
+                          index: 1,
+                          label: 'Happy',
+                          imagePath: 'lib/assets/images/Journal/Happy.png',
+                        ),
+                        const SizedBox(width: 10),
                         buildcustomRadio(
-                            index: 2,
-                            label: 'Lovely',
-                            imagePath: 'lib/assets/images/Journal/Inlove.png'),
-                        SizedBox(width: 10),
+                          index: 2,
+                          label: 'Lovely',
+                          imagePath: 'lib/assets/images/Journal/Inlove.png',
+                        ),
+                        const SizedBox(width: 10),
                         buildcustomRadio(
-                            index: 3,
-                            label: 'Blessed',
-                            imagePath: 'lib/assets/images/Journal/Angel.png'),
-                        SizedBox(width: 10),
+                          index: 3,
+                          label: 'Blessed',
+                          imagePath: 'lib/assets/images/Journal/Angel.png',
+                        ),
+                        const SizedBox(width: 10),
                         buildcustomRadio(
-                            index: 4,
-                            label: 'Okay',
-                            imagePath: 'lib/assets/images/Journal/Calm.png'),
-                        SizedBox(width: 10),
+                          index: 4,
+                          label: 'Okay',
+                          imagePath: 'lib/assets/images/Journal/Calm.png',
+                        ),
+                        const SizedBox(width: 10),
                         buildcustomRadio(
-                            index: 5,
-                            label: 'Sad',
-                            imagePath: 'lib/assets/images/Journal/Sad.png'),
-                        SizedBox(width: 10),
+                          index: 5,
+                          label: 'Sad',
+                          imagePath: 'lib/assets/images/Journal/Sad.png',
+                        ),
+                        const SizedBox(width: 10),
                         buildcustomRadio(
-                            index: 6,
-                            label: 'Terrible',
-                            imagePath:
-                                'lib/assets/images/Journal/Disappointed.png'),
-                        SizedBox(width: 10),
+                          index: 6,
+                          label: 'Terrible',
+                          imagePath:
+                              'lib/assets/images/Journal/Disappointed.png',
+                        ),
+                        const SizedBox(width: 10),
                         buildcustomRadio(
-                            index: 7,
-                            label: 'Angry',
-                            imagePath: 'lib/assets/images/Journal/Angry.png'),
+                          index: 7,
+                          label: 'Angry',
+                          imagePath: 'lib/assets/images/Journal/Angry.png',
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20), // Add spacing
+                  const SizedBox(height: 20),
                   Form(
                     child: Column(
                       children: [
                         TextFormField(
                           controller: _titleController,
                           decoration: const InputDecoration(
-                              labelText: 'Title of your Journal',
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)))),
+                            labelText: 'Title of your Journal',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 24),
                         TextFormField(
                           controller: _contentController,
                           decoration: const InputDecoration(
-                            labelText: 'Share you thoughts here...',
+                            labelText: 'Share your thoughts here...',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.all(
                                 Radius.circular(10),
@@ -291,23 +298,17 @@ class _JournalScreenState extends State<JournalScreen> {
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 50), // Add spacing
+                  const SizedBox(height: 50),
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
-                        minimumSize: const Size(double.infinity,
-                            50), // Full width and custom height
-                        padding:
-                            EdgeInsets.zero, // Optional: Remove default padding
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: EdgeInsets.zero,
                       ),
                       onPressed: () {
-                        // Todo: Need to Work on this, if i
-                        setState(() {
-                          selectedEmotion = localSelectedEmotion!;
-                          _submitJournalEntry();
-                        });
+                        // Trigger journal entry submission
+                        _submitJournalEntry();
                       },
                       child: const Text(
                         'Save',
@@ -402,7 +403,6 @@ class _JournalScreenState extends State<JournalScreen> {
     }
   }
 }
-
 class _JournalEntry extends StatelessWidget {
   final String emoji;
   final String title;
