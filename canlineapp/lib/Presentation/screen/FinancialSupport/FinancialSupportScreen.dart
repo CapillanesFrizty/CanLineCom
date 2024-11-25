@@ -90,8 +90,6 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTitle(),
-            const SizedBox(height: 20),
             _buildSearchField(),
             const SizedBox(height: 20),
             _buildSectionTitle('Government Assistance'),
@@ -103,25 +101,6 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
             _buildInstitutionSection("Private Institution"),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTitle() {
-    final titleStyle = GoogleFonts.poppins(
-      fontSize: 30.0,
-      fontWeight: FontWeight.w500,
-      color: _primaryColor,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Financial', style: titleStyle),
-          Text('Support', style: titleStyle),
-        ],
       ),
     );
   }

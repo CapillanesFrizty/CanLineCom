@@ -26,7 +26,7 @@ export 'FinancialSupport/FinancialSupportScreen.dart';
 export 'FinancialSupport/FinancialDetails.dart';
 
 // ! Doctors Screen
-export 'doctors/Doctors.dart';
+export 'Oncologist/OncologistsScreen.dart';
 
 // ! Clinic
 export 'HealthInstitution/HealthInstitutionServices/Moreinfo_ClinicsScreen.dart';

@@ -351,15 +351,8 @@ class _JournalScreenState extends State<JournalScreen> {
           //   weekday: 'Wednesday',
           //   color: primaryColor,
           // ),
-          SizedBox(height: 32),
-          Text(
-            "My Journal",
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: primaryColor,
-            ),
-          ),
+          SizedBox(height: 20),
+
           const SizedBox(height: 16),
           // Render Journal Entries
           ...journalEntries.map((entry) {
@@ -403,6 +396,7 @@ class _JournalScreenState extends State<JournalScreen> {
     }
   }
 }
+
 class _JournalEntry extends StatelessWidget {
   final String emoji;
   final String title;

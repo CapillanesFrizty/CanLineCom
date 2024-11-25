@@ -15,6 +15,7 @@ dependencies:
   google_fonts: ^6.0.0
   google_maps_flutter: ^2.9.0
   lucide_icons: ^0.257.0
+  lucide_icons_flutter: ^1.2.4
 
 dev_dependencies:
   flutter_test:
@@ -29,7 +30,7 @@ flutter:
     - lib/assets/images/logo/HeartLogo.svg
     - lib/assets/icons/Hospital.svg
     - lib/assets/icons/Financial.svg
-    - lib/assets/icons/Clinics.svg
+    - lib/assets/icons/Oncologists.svg
     - lib/assets/icons/Blogs.svg
     - lib/assets/icons/Bell.svg
     - lib\assets\images\jpeg\spmc.jpg

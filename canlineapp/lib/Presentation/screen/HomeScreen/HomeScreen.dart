@@ -10,7 +10,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 70.0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 30.0,
+      ),
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       children: [
@@ -24,11 +26,11 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildGreetingText(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 30, bottom: 20),
+      padding: const EdgeInsets.only(top: 20, bottom: 40),
       child: Text(
-        "Hello Arnold Gou!",
+        "Greetings Warrior!",
         style: GoogleFonts.poppins(
-          fontSize: MediaQuery.sizeOf(context).height * 0.06,
+          fontSize: MediaQuery.sizeOf(context).height * 0.05,
           fontWeight: FontWeight.w500,
           color: const Color(0xFF5B50A0),
         ),
@@ -92,7 +94,7 @@ class HomeScreen extends StatelessWidget {
         textColor: 0xffff5267,
         bgColor: 0xffffd7db,
         iconColor: 0xffff5267,
-        route: '/Health-Insititution',
+        route: '/Health-Institution',
       ),
       _GridItem(
         label: "Financial\nSupport",
@@ -111,12 +113,12 @@ class HomeScreen extends StatelessWidget {
         route: '/Blog',
       ),
       _GridItem(
-        label: "Doctors",
-        iconAsset: 'lib/assets/icons/Clinics.svg',
-        textColor: 0xff3f52ff,
-        bgColor: 0xffd9ddff,
-        iconColor: 0xff3f52ff,
-        route: '/doctors',
+        label: "Oncologists",
+        iconAsset: 'lib/assets/icons/Oncologists.svg',
+        textColor: 0xff009999,
+        bgColor: 0xffD1FFFF,
+        iconColor: 0xff009999,
+        route: '/Oncologists',
       ),
     ];
   }
