@@ -108,7 +108,8 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildIconButton(Icons.arrow_back, () => context.go('/clinic')),
+          _buildIconButton(
+              Icons.arrow_back, () => context.go('/Health-Insititution')),
           Row(
             children: [
               _buildIconButton(Icons.share, () {}),
