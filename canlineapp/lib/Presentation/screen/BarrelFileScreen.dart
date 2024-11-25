@@ -6,7 +6,7 @@ export 'profile/profile.dart';
 
 // ! Journal Screen
 export 'Journal/journal.dart';
-export 'Journal/JournalCreateNote.dart';
+
 // ! Events Screen
 export 'Events/EventsScreen.dart';
 
@@ -25,9 +25,11 @@ export 'Blogs/MoreInfo_BlogsScreen.dart';
 export 'FinancialSupport/FinancialSupportScreen.dart';
 export 'FinancialSupport/FinancialDetails.dart';
 
-// ! Clinic Screen
-export 'clinics/ClinicsScreen.dart';
-export 'clinics/Moreinfo_ClinicsScreen.dart';
+// ! Doctors Screen
+export 'doctors/Doctors.dart';
+
+// ! Clinic
+export 'HealthInstitution/HealthInstitutionServices/Moreinfo_ClinicsScreen.dart';
 
 // ! Login Screen
 export 'authentication flow/LoginScreen.dart';

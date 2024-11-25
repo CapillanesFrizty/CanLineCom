@@ -111,12 +111,12 @@ class HomeScreen extends StatelessWidget {
         route: '/Blog',
       ),
       _GridItem(
-        label: "Clinics\n(External)",
+        label: "Doctors",
         iconAsset: 'lib/assets/icons/Clinics.svg',
         textColor: 0xff3f52ff,
         bgColor: 0xffd9ddff,
         iconColor: 0xff3f52ff,
-        route: '/clinic',
+        route: '/doctors',
       ),
     ];
   }

@@ -37,6 +37,32 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         .from('Assets')
         .getPublicUrl("Health-Institution/$fileName");
 
+    final number_of_facilities = await Supabase.instance.client
+        .from('Health-Institution-Service')
+        .select("*")
+        .eq('Health-Institution-ID', widget.id)
+        .count(CountOption.exact);
+
+    final number_of_doctors = await Supabase.instance.client
+        .from('Doctor')
+        .select("*")
+        .eq('Affailated_at', widget.id)
+        .count(CountOption.exact);
+
+    final number_of_acredited_insurances = await Supabase.instance.client
+        .from('Health-Institution-Accredited-Insurance')
+        .select("*")
+        .eq('Health-Instiution', widget.id)
+        .count(CountOption.exact);
+
+    final number_of_doctor = number_of_doctors.count as int?;
+    final number_of_Facilities = number_of_facilities.count as int?;
+    final number_of_acredited_insurance =
+        number_of_acredited_insurances.count as int?;
+
+    response['Facilities'] = number_of_Facilities;
+    response['Doctors'] = number_of_doctor;
+    response['Accredited-Insurance'] = number_of_acredited_insurance;
     response['Health-Institution-Image-Url'] = imageUrl;
     return response;
   }

@@ -15,6 +15,7 @@ analyzer:
     non_constant_identifier_names: ignore
     prefer_const_constructors: ignore
     sized_box_for_whitespace: ignore
+    unnecessary_null_comparison: ignore
     unused_field: ignore
     use_build_context_synchronously: ignore
     

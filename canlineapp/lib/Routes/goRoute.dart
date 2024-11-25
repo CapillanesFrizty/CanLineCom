@@ -56,16 +56,18 @@ final GoRouter linkrouter = GoRouter(
     // ! Health Institution Route
     GoRoute(
       path: '/Health-Insititution',
-      builder: (context, state) => ScaffoldLayoutWidget(
-        leadingWidget: TextButton(
-          onPressed: () {
-            context.go('/homescreen/:userID');
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-        bodyWidget: HealthInstitutionScreen(),
-      ),
+      builder: (context, state) => HealthInstitutionScreen(),
       routes: [
+        // ? TODO NEW ADDED ROUTE FOR CLINICS
+        // ! Clinics Route
+        GoRoute(
+          name: 'cid',
+          path: 'clinic/:cid',
+          builder: (context, state) => MoreinfoClinicsscreen(
+            id: state.pathParameters['cid']!,
+          ),
+        ),
+
         // ! More Info Intended for Health Institution Route
         GoRoute(
           name: 'hid',
@@ -139,15 +141,7 @@ final GoRouter linkrouter = GoRouter(
     // ! Blogs Route
     GoRoute(
       path: '/Blog',
-      builder: (context, state) => ScaffoldLayoutWidget(
-        leadingWidget: TextButton(
-          onPressed: () {
-            context.go('/homescreen/:userID');
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-        bodyWidget: BlogsScreen(),
-      ),
+      builder: (context, state) => BlogsScreen(),
       routes: [
         // ! More Info Intended for Blogs Route
         GoRoute(
@@ -183,27 +177,10 @@ final GoRouter linkrouter = GoRouter(
       ],
     ),
 
-    // ! Clinics Route
+    // ! Doctors Route
     GoRoute(
-      path: '/clinic',
-      builder: (context, state) => ScaffoldLayoutWidget(
-        bodyWidget: ClinicScreen(),
-        leadingWidget: TextButton(
-          onPressed: () {
-            context.go('/homescreen/:userID');
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-      ),
-      routes: [
-        GoRoute(
-          name: 'cid',
-          path: ':cid',
-          builder: (context, state) => MoreinfoClinicsscreen(
-            id: state.pathParameters['cid']!,
-          ),
-        ),
-      ],
+      path: "/doctors",
+      builder: (context, state) => DoctorsScreens(),
     ),
 
     GoRoute(
@@ -222,3 +199,8 @@ final GoRouter linkrouter = GoRouter(
     ),
   ],
 );
+
+
+
+// gmelsword2131@gmail.com
+// sampledatafritz123

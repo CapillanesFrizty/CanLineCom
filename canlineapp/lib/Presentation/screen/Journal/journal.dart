@@ -12,7 +12,10 @@ class JournalScreen extends StatefulWidget {
 class _JournalScreenState extends State<JournalScreen> {
   static const Color primaryColor = Color(0xFF5B50A0);
   static const Color secondaryColor = Color(0xFFFF0000);
+
+  // Todo: Returns none because -1 is the default value
   int selectedEmotion = -1;
+
   final List<bool> selectedReasons = List.generate(14, (_) => false);
 
   // Text controllers for the form fields
@@ -28,9 +31,8 @@ class _JournalScreenState extends State<JournalScreen> {
     // Collect data from fields
     final String title = _titleController.text.trim();
     final String content = _contentController.text.trim();
-    final String emotion = selectedEmotion == -1
-        ? "None"
-        : [
+    final String emotion = selectedEmotion != -1
+        ? [
             "Awesome",
             "Happy",
             "Lovely",
@@ -39,7 +41,8 @@ class _JournalScreenState extends State<JournalScreen> {
             "Sad",
             "Terrible",
             "Angry"
-          ][selectedEmotion];
+          ][selectedEmotion]
+        : "None";
 
     final Map<String, dynamic> journalEntry = {
       'title_of_the_journal': title,
@@ -58,6 +61,7 @@ class _JournalScreenState extends State<JournalScreen> {
 
       // Print the response
       debugPrint('Journal Entry Submitted: $response');
+      fetchUserJournalEntries();
     } catch (e) {
       // Handle unexpected exceptions
       debugPrint('Unexpected error: $e');
@@ -69,6 +73,7 @@ class _JournalScreenState extends State<JournalScreen> {
     setState(() {
       selectedEmotion = -1;
     });
+    Navigator.pop(context);
   }
 
 //  Function for fetching journal entries
@@ -106,6 +111,7 @@ class _JournalScreenState extends State<JournalScreen> {
           journalEntries.removeWhere((entry) => entry['id'] == id);
         });
       }
+      fetchUserJournalEntries();
     } catch (e) {
       debugPrint('Error deleting journal entry: $e');
     }
@@ -123,100 +129,199 @@ class _JournalScreenState extends State<JournalScreen> {
       body: _buildBody(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (context) {
-                return Container(
-                  padding: const EdgeInsets.all(16.0),
+          _buildBottomSheet();
+        },
+        backgroundColor: primaryColor,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Future _buildBottomSheet() {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (context) {
+        int localSelectedEmotion =
+            selectedEmotion; // Start with the current value
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            // Function to update the selected index
+            void changeIndex(int index) {
+              setModalState(() {
+                localSelectedEmotion = index;
+                debugPrint('Selected index in modal: $index');
+              });
+              // Immediately reflect the change in the parent state
+              setState(() {
+                selectedEmotion = index;
+              });
+            }
+
+            // Radio button builder
+            Widget buildcustomRadio({
+              required String imagePath,
+              required String label,
+              required int index,
+            }) =>
+                GestureDetector(
+                  onTap: () {
+                    changeIndex(index);
+                  },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 24),
-                      const Text(
-                        'How are you feeling today?',
+                      CircleAvatar(
+                        minRadius: 2.0,
+                        backgroundColor: (localSelectedEmotion == index)
+                            ? primaryColor.withOpacity(0.1)
+                            : primaryColor.withOpacity(0.5),
+                        child: Image.asset(
+                          imagePath,
+                          width: 80,
+                          height: 80,
+                        ),
+                      ),
+                      Text(
+                        label,
                         style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Container(
-                        height: 100,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          itemExtent: 100,
-                          children: [
-                            _emotionButton(0, 'Awesome',
-                                'lib/assets/images/Journal/Awsome.png'),
-                            _emotionButton(1, 'Happy',
-                                'lib/assets/images/Journal/Happy.png'),
-                            _emotionButton(2, 'Lovely',
-                                'lib/assets/images/Journal/Inlove.png'),
-                            _emotionButton(3, 'Blessed',
-                                'lib/assets/images/Journal/Angel.png'),
-                            _emotionButton(4, 'Okay',
-                                'lib/assets/images/Journal/Calm.png'),
-                            _emotionButton(
-                                5, 'Sad', 'lib/assets/images/Journal/Sad.png'),
-                            _emotionButton(6, 'Terrible',
-                                'lib/assets/images/Journal/Disappointed.png'),
-                            _emotionButton(7, 'Angry',
-                                'lib/assets/images/Journal/Angry.png'),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Form(
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _titleController,
-                              decoration: const InputDecoration(
-                                  labelText: 'Title of your Journal',
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10)))),
-                            ),
-                            const SizedBox(height: 24),
-                            TextFormField(
-                              controller: _contentController,
-                              decoration: const InputDecoration(
-                                labelText: 'Share you thoughts here...',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                ),
-                                alignLabelWithHint: true,
-                              ),
-                              maxLines: 10,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Center(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                          ),
-                          onPressed: _submitJournalEntry,
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          color: primaryColor,
+                          fontWeight: (localSelectedEmotion == index)
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
                   ),
                 );
-              });
-        },
-        backgroundColor: primaryColor,
-        child: const Icon(Icons.add),
-      ),
+
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'How are you feeling today?',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 120,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        buildcustomRadio(
+                          index: 0,
+                          label: 'Awesome',
+                          imagePath: 'lib/assets/images/Journal/Awsome.png',
+                        ),
+                        const SizedBox(width: 10),
+                        buildcustomRadio(
+                          index: 1,
+                          label: 'Happy',
+                          imagePath: 'lib/assets/images/Journal/Happy.png',
+                        ),
+                        const SizedBox(width: 10),
+                        buildcustomRadio(
+                          index: 2,
+                          label: 'Lovely',
+                          imagePath: 'lib/assets/images/Journal/Inlove.png',
+                        ),
+                        const SizedBox(width: 10),
+                        buildcustomRadio(
+                          index: 3,
+                          label: 'Blessed',
+                          imagePath: 'lib/assets/images/Journal/Angel.png',
+                        ),
+                        const SizedBox(width: 10),
+                        buildcustomRadio(
+                          index: 4,
+                          label: 'Okay',
+                          imagePath: 'lib/assets/images/Journal/Calm.png',
+                        ),
+                        const SizedBox(width: 10),
+                        buildcustomRadio(
+                          index: 5,
+                          label: 'Sad',
+                          imagePath: 'lib/assets/images/Journal/Sad.png',
+                        ),
+                        const SizedBox(width: 10),
+                        buildcustomRadio(
+                          index: 6,
+                          label: 'Terrible',
+                          imagePath:
+                              'lib/assets/images/Journal/Disappointed.png',
+                        ),
+                        const SizedBox(width: 10),
+                        buildcustomRadio(
+                          index: 7,
+                          label: 'Angry',
+                          imagePath: 'lib/assets/images/Journal/Angry.png',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Form(
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _titleController,
+                          decoration: const InputDecoration(
+                            labelText: 'Title of your Journal',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        TextFormField(
+                          controller: _contentController,
+                          decoration: const InputDecoration(
+                            labelText: 'Share your thoughts here...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                            alignLabelWithHint: true,
+                          ),
+                          maxLines: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 50),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: EdgeInsets.zero,
+                      ),
+                      onPressed: () {
+                        // Trigger journal entry submission
+                        _submitJournalEntry();
+                      },
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -274,6 +379,7 @@ class _JournalScreenState extends State<JournalScreen> {
     );
   }
 
+  // todo: update the Function to get emoji for emotion
   String _getEmojiForEmotion(String emotion) {
     switch (emotion.toLowerCase()) {
       case 'awesome':
@@ -296,92 +402,7 @@ class _JournalScreenState extends State<JournalScreen> {
         return '🤔'; // Default emoji for undefined emotions
     }
   }
-
-  Widget _emotionButton(int index, String label, String imagePath) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedEmotion = index;
-          debugPrint('Selected emotion index: $index'); // Debugging statement
-        });
-      },
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: selectedEmotion == index
-                ? primaryColor.withOpacity(0.4)
-                : primaryColor.withOpacity(0.1),
-            child: Image.asset(
-              imagePath,
-              width: 30,
-              height: 30,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: primaryColor,
-              fontWeight: selectedEmotion == index
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
-
-class _Header extends StatelessWidget {
-  final String date;
-  final String day;
-  final String weekday;
-  final Color color;
-
-  const _Header({
-    required this.date,
-    required this.day,
-    required this.weekday,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          date,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              day,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-            Text(
-              weekday,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
 class _JournalEntry extends StatelessWidget {
   final String emoji;
   final String title;

@@ -22,6 +22,9 @@ class _LoginScreenState extends State<LoginScreen> {
   // Initiate a Supabase Client
   final supabase = Supabase.instance.client;
 
+  // Obscure password variable
+  var _obscurePassword;
+
   // Login function
   Future<void> login() async {
     try {
@@ -38,6 +41,32 @@ class _LoginScreenState extends State<LoginScreen> {
     } on AuthException catch (e) {
       debugPrint('Error: ${e.message}');
     }
+  }
+
+  // Check session
+  Future<void> checkSession() async {
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (session != null) {
+      final userId = session.user.id;
+      debugPrint('Session: $session');
+      if (userId != null) {
+        context.go('/HomeScreen/$userId');
+      }
+    } else {
+      context.go('/');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _obscurePassword = true;
+
+    // Defer navigation to after the widget build is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkSession();
+    });
   }
 
   @override
@@ -84,26 +113,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Password field
                     TextField(
                       controller: _password,
-                      obscureText: true,
+                      obscureText: _obscurePassword!,
                       decoration: InputDecoration(
-                        labelText: 'Password',
-                        labelStyle: GoogleFonts.poppins(
-                            color: LoginScreen._primaryColor),
-                        border: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: LoginScreen._primaryColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: LoginScreen._primaryColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: LoginScreen._primaryColor),
-                        ),
-                        suffixIcon: Icon(Icons.visibility,
-                            color: LoginScreen._primaryColor),
-                      ),
+                          labelText: 'Password',
+                          labelStyle: GoogleFonts.poppins(
+                              color: LoginScreen._primaryColor),
+                          border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                              icon: Icon(_obscurePassword!
+                                  ? Icons.visibility
+                                  : Icons.visibility_off))),
                     ),
                   ],
                 ),
