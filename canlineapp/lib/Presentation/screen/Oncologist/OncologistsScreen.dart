@@ -3,16 +3,16 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class EventsScreen extends StatefulWidget {
-  const EventsScreen({super.key});
+class OncologistsScreens extends StatefulWidget {
+  const OncologistsScreens({super.key});
 
   @override
-  State<EventsScreen> createState() => _EventsScreenState();
+  State<OncologistsScreens> createState() => _OncologistsScreensState();
   static const Color _primaryColor = Color(0xFF5B50A0);
   static const Color _secondaryColor = Color(0xFFF3EBFF);
 }
 
-class _EventsScreenState extends State<EventsScreen> {
+class _OncologistsScreensState extends State<OncologistsScreens> {
   final _getBlogs = Supabase.instance.client.from('Blogs').select();
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -31,7 +31,7 @@ class _EventsScreenState extends State<EventsScreen> {
             _buildSearchBar(),
             const SizedBox(height: 30),
             _buildSectionTitle('Latest Events'),
-            const SizedBox(height: 30),
+            const SizedBox(height: 16),
             // _buildPopularBlogs(),
             // const SizedBox(height: 20),
             _buildSectionTitle('Other Events'),
@@ -49,7 +49,7 @@ class _EventsScreenState extends State<EventsScreen> {
       child: Text(
         title,
         style: GoogleFonts.poppins(
-          color: EventsScreen._primaryColor,
+          color: OncologistsScreens._primaryColor,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
@@ -70,25 +70,26 @@ class _EventsScreenState extends State<EventsScreen> {
         decoration: InputDecoration(
           hintText: 'Search',
           prefixIcon:
-              const Icon(Icons.search, color: EventsScreen._primaryColor),
-          suffixIcon:
-              const Icon(Icons.filter_list, color: EventsScreen._primaryColor),
+              const Icon(Icons.search, color: OncologistsScreens._primaryColor),
+          suffixIcon: const Icon(Icons.filter_list,
+              color: OncologistsScreens._primaryColor),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: EventsScreen._primaryColor),
+            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: EventsScreen._primaryColor),
+            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: EventsScreen._primaryColor),
+            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
           ),
         ),
       ),
     );
   }
+
   // ? Parked for now, will be implemented in the future
   // Widget _buildLatestEvents) {
   //   return SizedBox(
@@ -174,7 +175,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   Text(
                     blogsdata['Blogs-Category'],
                     style: GoogleFonts.poppins(
-                      color: EventsScreen._primaryColor,
+                      color: OncologistsScreens._primaryColor,
                       fontSize: 12,
                     ),
                   ),
@@ -184,14 +185,14 @@ class _EventsScreenState extends State<EventsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: EventsScreen._primaryColor,
+                      color: OncologistsScreens._primaryColor,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     blogsdata['Blog-Published'],
                     style: GoogleFonts.poppins(
-                      color: EventsScreen._primaryColor,
+                      color: OncologistsScreens._primaryColor,
                       fontSize: 10,
                     ),
                   ),

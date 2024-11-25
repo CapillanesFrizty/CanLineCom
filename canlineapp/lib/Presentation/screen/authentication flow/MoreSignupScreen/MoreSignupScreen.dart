@@ -114,7 +114,7 @@ class _MoreSignupScreenState extends State<MoreSignupScreen> {
                                   Navigator.pop(context);
                                 },
                               );
-                            }).toList(),
+                            }),
                           ],
                         );
                       },

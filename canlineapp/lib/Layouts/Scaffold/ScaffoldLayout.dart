@@ -7,7 +7,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget? leadingWidget;
   final Widget? titleWidget;
   final double? elevation;
-  final String? userid;
+  final String userid;
 
   const ScaffoldLayoutWidget({
     super.key,
@@ -16,7 +16,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
     this.leadingWidget,
     this.titleWidget,
     this.elevation,
-    this.userid,
+    required this.userid,
   });
 
   @override
@@ -24,23 +24,59 @@ class ScaffoldLayoutWidget extends StatefulWidget {
 }
 
 class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   static const Color _primaryColor = Color(0xFF5B50A0);
   static const double _iconSize = 28.0;
-  static const double _toolbarHeight = 40.0;
 
   late final List<String> _routes;
 
   @override
   void initState() {
     super.initState();
+
+    // Define routes based on userID
     _routes = [
-      '/HomeScreen/${widget.userid}',
-      '/HomeScreen/${widget.userid}/journal',
-      '/HomeScreen/${widget.userid}/events',
-      '/HomeScreen/${widget.userid}/profile',
+      '/HomeScreen/${widget.userid}', // Home
+      '/HomeScreen/${widget.userid}/journal', // Journal
+      '/HomeScreen/${widget.userid}/events', // Events
+      '/HomeScreen/${widget.userid}/profile', // Profile
     ];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateIndexFromRoute();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateIndexFromRoute();
+  }
+
+  void _updateIndexFromRoute() {
+    final currentRoute =
+        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
+
+    if (currentRoute != null) {
+      for (int i = 0; i < _routes.length; i++) {
+        // Match exact route or nested route structure
+        if (currentRoute == _routes[i] ||
+            currentRoute.startsWith('${_routes[i]}/')) {
+          if (_currentIndex != i) {
+            setState(() {
+              _currentIndex = i;
+            });
+          }
+          return; // Stop once a match is found
+        }
+      }
+
+      // If no match, reset index (for non-bottom-navigation routes)
+      setState(() {
+        _currentIndex = -1;
+      });
+    }
   }
 
   static const List<({IconData outlined, IconData filled, String label})>
@@ -51,13 +87,80 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
       filled: Icons.menu_book,
       label: "Journal"
     ),
-    (outlined: Icons.event_outlined, filled: Icons.event, label: "Event"),
+    (outlined: Icons.event_outlined, filled: Icons.event, label: "Events"),
     (outlined: Icons.person_outline, filled: Icons.person, label: "Profile"),
   ];
 
   void _onTabSelected(int index) {
-    setState(() => _currentIndex = index);
-    context.go(_routes[index]);
+    if (index >= 0 && index < _routes.length) {
+      if (_currentIndex != index) {
+        setState(() {
+          _currentIndex = index;
+        });
+        context.go(_routes[index]); // Navigate to the selected route
+      }
+    }
+  }
+
+  Widget buildCustomNavigationBar() {
+    return Container(
+      height: 80,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: _primaryColor.withOpacity(0.6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(
+          _icons.length,
+          (index) {
+            final isSelected = _currentIndex == index;
+            final iconData = _icons[index];
+
+            return GestureDetector(
+              onTap: () {
+                _onTabSelected(index);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    isSelected ? iconData.filled : iconData.outlined,
+                    color: isSelected ? Colors.white : Colors.white70,
+                    size: _iconSize,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    iconData.label,
+                    style: TextStyle(
+                      fontSize: isSelected ? 12 : 11,
+                      color: isSelected ? Colors.white : Colors.white70,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 2,
+                    width: isSelected ? 40 : 0,
+                    color: isSelected ? Colors.white : Colors.transparent,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -67,53 +170,18 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
       appBar: AppBar(
         elevation: widget.elevation ?? 0,
         backgroundColor: Colors.white,
-        toolbarHeight: _toolbarHeight,
         title: widget.titleWidget,
         actions: widget.actionsWidget,
         leadingWidth: 65,
         leading: widget.leadingWidget != null
             ? Padding(
-                padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                child: widget.leadingWidget!,
+                padding: const EdgeInsets.only(left: 10.0),
+                child: widget.leadingWidget,
               )
             : null,
       ),
       body: widget.bodyWidget,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: _primaryColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: _primaryColor,
-          elevation: 0,
-          currentIndex: _currentIndex,
-          onTap: _onTabSelected,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
-          iconSize: _iconSize,
-          items: _icons
-              .map(
-                (iconData) => BottomNavigationBarItem(
-                  icon: Icon(iconData.outlined),
-                  activeIcon: Icon(iconData.filled),
-                  label: iconData.label,
-                ),
-              )
-              .toList(),
-        ),
-      ),
+      bottomNavigationBar: buildCustomNavigationBar(),
     );
   }
 }

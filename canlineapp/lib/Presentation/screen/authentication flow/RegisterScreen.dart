@@ -111,14 +111,20 @@ class _RegisterscreenState extends State<Registerscreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text(
-            'Create an Account',
-            style: GoogleFonts.poppins(
-              fontSize: 25,
-              fontWeight: FontWeight.w500,
-              color: Registerscreen._primaryColor,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(80.0), // Set the height here
+          child: AppBar(
+            backgroundColor: Colors.white,
+            title: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Text(
+                'Create an Account',
+                style: GoogleFonts.poppins(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w500,
+                  color: Registerscreen._primaryColor,
+                ),
+              ),
             ),
           ),
         ),

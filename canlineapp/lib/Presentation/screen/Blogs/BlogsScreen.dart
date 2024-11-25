@@ -13,30 +13,13 @@ class BlogsScreen extends StatefulWidget {
 }
 
 class _BlogsScreenState extends State<BlogsScreen> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
   final _getBlogs = Supabase.instance.client.from('Blogs').select();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 100,
-        title: Text(
-          'Blogs',
-          style: GoogleFonts.poppins(
-            fontSize: 30.0,
-            fontWeight: FontWeight.w600,
-            color: BlogsScreen._primaryColor,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: BlogsScreen._primaryColor),
-          onPressed: () {
-            context.go('/homescreen/:userID');
-          },
-        ),
-      ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding:
@@ -44,15 +27,48 @@ class _BlogsScreenState extends State<BlogsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-            // _buildSectionTitle('Popular'),
+            const SizedBox(height: 30),
+            _buildSearchBar(),
+            const SizedBox(height: 30),
+            _buildSectionTitle('New'),
             // const SizedBox(height: 16),
             // _buildPopularBlogs(),
             // const SizedBox(height: 20),
-            _buildSectionTitle('Recent'),
+            _buildSectionTitle('Other news and blogs'),
             const SizedBox(height: 16),
             _buildRecentBlogs(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (query) {
+          setState(() {
+            _searchQuery = query;
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon: Icon(Icons.search, color: BlogsScreen._primaryColor),
+          suffixIcon: Icon(Icons.filter_list, color: BlogsScreen._primaryColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: BlogsScreen._primaryColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: BlogsScreen._primaryColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: BlogsScreen._primaryColor),
+          ),
         ),
       ),
     );

@@ -2,205 +2,225 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
 import '../Layouts/BarrelFileLayouts.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+const Color _primaryColor = Color(0xFF5B50A0);
 final GoRouter linkrouter = GoRouter(
   routes: [
-    //! Intro Login Route
-    // GoRoute(
-    //   path: '/',
-    //   builder: (context, state) => IntroLogin(),
-    // ),
-    // //! Login Route
+    // Login Screen
     GoRoute(
       path: '/',
       builder: (context, state) => LoginScreen(),
     ),
-    //! Registration
+    // Registration Screen
     GoRoute(
       path: '/RegisterScreen',
       builder: (context, state) => Registerscreen(),
     ),
-    //! Home Route
+    // Home Screen with AppBar Icons
     GoRoute(
       name: 'userID',
       path: '/HomeScreen/:userID',
-      builder: (context, state) => ScaffoldLayoutWidget(
-        bodyWidget: HomeScreen(),
-      ),
-      routes: [
-        // ! Profile Route
-        GoRoute(
-          path: 'profile',
-          builder: (context, state) => ScaffoldLayoutHomeScreen(
-            bodyWidget: ProfileScreen(userid: state.pathParameters['userID']),
-          ),
-        ),
-
-        // ! Journal Route
-        GoRoute(
-          path: 'journal',
-          builder: (context, state) => ScaffoldLayoutHomeScreen(
-            bodyWidget: JournalScreen(),
-          ),
-        ),
-
-        // ! Events Route
-        GoRoute(
-          path: 'events',
-          builder: (context, state) => EventsScreen(),
-        ),
-      ],
-    ),
-
-    //? Information Hub Routes
-    // ! Health Institution Route
-    GoRoute(
-      path: '/Health-Insititution',
-      builder: (context, state) => HealthInstitutionScreen(),
-      routes: [
-        // ? TODO NEW ADDED ROUTE FOR CLINICS
-        // ! Clinics Route
-        GoRoute(
-          name: 'cid',
-          path: 'clinic/:cid',
-          builder: (context, state) => MoreinfoClinicsscreen(
-            id: state.pathParameters['cid']!,
-          ),
-        ),
-
-        // ! More Info Intended for Health Institution Route
-        GoRoute(
-          name: 'hid',
-          path: ':hid',
-          builder: (context, state) =>
-              MoreInfoInstitutionScreen(id: state.pathParameters['hid']!),
-          routes: [
-            // ! Health Institution Facilities Route
-            GoRoute(
-              path: 'facilities',
-              builder: (context, state) {
-                return ScaffoldLayoutWidget(
-                  leadingWidget: TextButton(
-                    onPressed: () {
-                      context.go(
-                          '/Health-Insititution/${state.pathParameters['hid']}');
-                    },
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFF5B50A0),
-                    ),
-                  ),
-                  bodyWidget: HealthInstitutionFacilities(
-                      id: state.pathParameters['hid']!),
-                );
+      builder: (context, state) {
+        final userId = state.pathParameters['userID']!;
+        return ScaffoldLayoutWidget(
+          userid: userId,
+          bodyWidget: HomeScreen(),
+          actionsWidget: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined,
+                  color: _primaryColor),
+              onPressed: () {
+                // Notification action
+                print('Notification icon pressed');
               },
             ),
-            GoRoute(
-              path: 'Accredited-Insurance',
-              builder: (context, state) {
-                return ScaffoldLayoutWidget(
-                  leadingWidget: TextButton(
-                    onPressed: () {
-                      context.go(
-                          '/Health-Insititution/${state.pathParameters['hid']}');
-                    },
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFF5B50A0),
-                    ),
-                  ),
-                  bodyWidget: HealthInstitutionAccreditedInsurances(
-                      id: state.pathParameters['hid']!),
-                );
+            IconButton(
+              icon: const Icon(Icons.dark_mode_outlined, color: _primaryColor),
+              onPressed: () {
+                // Dark mode action
+                print('Dark mode icon pressed');
               },
             ),
-            GoRoute(
-              path: 'Doctors',
-              builder: (context, state) {
-                return ScaffoldLayoutWidget(
-                  leadingWidget: TextButton(
-                    onPressed: () {
-                      context.go(
-                          '/Health-Insititution/${state.pathParameters['hid']}');
-                    },
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFF5B50A0),
-                    ),
-                  ),
-                  bodyWidget: HealthInstitutionOncologists(
-                      id: state.pathParameters['hid']!),
-                );
+            IconButton(
+              icon: const Icon(Icons.translate_outlined, color: _primaryColor),
+              onPressed: () {
+                // Translation action
+                print('Translation icon pressed');
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings_outlined, color: _primaryColor),
+              onPressed: () {
+                // Settings action
+                print('Settings icon pressed');
               },
             ),
           ],
+          leadingWidget: null, // No back button for Home
+        );
+      },
+      routes: [
+        GoRoute(
+          path: 'journal',
+          builder: (context, state) {
+            final userId = state.pathParameters['userID']!;
+            return ScaffoldLayoutWidget(
+              userid: userId,
+              bodyWidget: JournalScreen(),
+              titleWidget: Text(
+                "My Journal",
+                style: GoogleFonts.poppins(
+                  fontSize: 30.0,
+                  fontWeight: FontWeight.w500,
+                  color: _primaryColor,
+                ),
+              ),
+              leadingWidget: BackButton(
+                color: _primaryColor,
+                onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'events',
+          builder: (context, state) {
+            final userId = state.pathParameters['userID']!;
+            return ScaffoldLayoutWidget(
+              userid: userId,
+              bodyWidget: EventsScreen(),
+              titleWidget: Text(
+                "Events",
+                style: GoogleFonts.poppins(
+                  fontSize: 30.0,
+                  fontWeight: FontWeight.w500,
+                  color: _primaryColor,
+                ),
+              ),
+              leadingWidget: BackButton(
+                color: _primaryColor,
+                onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'profile',
+          builder: (context, state) {
+            final userId = state.pathParameters['userID']!;
+            return ScaffoldLayoutWidget(
+              userid: userId,
+              bodyWidget: ProfileScreen(userid: userId),
+              titleWidget: Text(
+                "Profile",
+                style: GoogleFonts.poppins(
+                  fontSize: 30.0,
+                  fontWeight: FontWeight.w500,
+                  color: _primaryColor,
+                ),
+              ),
+              leadingWidget: BackButton(
+                color: _primaryColor,
+                onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+              ),
+            );
+          },
         ),
       ],
     ),
 
-    // ! Blogs Route
+    // Health Institution Screens
+    GoRoute(
+      path: '/Health-Institution',
+      builder: (context, state) {
+        final userId = state.pathParameters['userID'] ?? 'default';
+        return ScaffoldLayoutWidget(
+          userid: userId,
+          bodyWidget: HealthInstitutionScreen(),
+          titleWidget: Text(
+            "Health Institution",
+            style: GoogleFonts.poppins(
+              fontSize: 30.0,
+              fontWeight: FontWeight.w500,
+              color: _primaryColor,
+            ),
+          ),
+          leadingWidget: BackButton(
+            color: _primaryColor,
+            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+          ),
+        );
+      },
+    ),
+    // Blogs Screen
     GoRoute(
       path: '/Blog',
-      builder: (context, state) => BlogsScreen(),
-      routes: [
-        // ! More Info Intended for Blogs Route
-        GoRoute(
-          name: 'bid',
-          path: ':bid',
-          builder: (context, state) => MoreinfoBlogsscreen(
-            id: state.pathParameters['bid']!,
+      builder: (context, state) {
+        final userId = state.pathParameters['userID'] ?? 'default';
+        return ScaffoldLayoutWidget(
+          userid: userId,
+          bodyWidget: BlogsScreen(),
+          titleWidget: Text(
+            "Blogs & News",
+            style: GoogleFonts.poppins(
+              fontSize: 30.0,
+              fontWeight: FontWeight.w500,
+              color: _primaryColor,
+            ),
           ),
-        ),
-      ],
+          leadingWidget: BackButton(
+            color: _primaryColor,
+            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+          ),
+        );
+      },
     ),
-
-    // ! Financial Support Route
+    // Financial Support Screen
     GoRoute(
       path: '/Financial-Institution',
-      builder: (context, state) => ScaffoldLayoutWidget(
-        bodyWidget: FinancialSupportScreen(),
-        leadingWidget: TextButton(
-          onPressed: () {
-            context.go('/homescreen/:userID');
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-      ),
-      routes: [
-        // ! More Info Intended for Health Institution Route
-        GoRoute(
-          name: 'fid',
-          path: ':fid',
-          builder: (context, state) =>
-              Financialdetails(id: state.pathParameters['fid']!),
-        ),
-      ],
+      builder: (context, state) {
+        final userId = state.pathParameters['userID'] ?? 'default';
+        return ScaffoldLayoutWidget(
+          userid: userId,
+          bodyWidget: FinancialSupportScreen(),
+          titleWidget: Text(
+            "Financial Support",
+            style: GoogleFonts.poppins(
+              fontSize: 30.0,
+              fontWeight: FontWeight.w500,
+              color: _primaryColor,
+            ),
+          ),
+          leadingWidget: BackButton(
+            color: _primaryColor,
+            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+          ),
+        );
+      },
     ),
-
-    // ! Doctors Route
+    // Doctors Screen
     GoRoute(
-      path: "/doctors",
-      builder: (context, state) => DoctorsScreens(),
-    ),
-
-    GoRoute(
-      path: '/profile',
-      builder: (context, state) =>
-          ProfileScreen(userid: state.pathParameters['userID']!),
-    ),
-
-    GoRoute(
-      path: '/journal',
-      builder: (context, state) => JournalScreen(),
-    ),
-    GoRoute(
-      path: '/events',
-      builder: (context, state) => EventsScreen(),
+      path: '/Oncologists',
+      builder: (context, state) {
+        final userId = state.pathParameters['userID'] ?? 'default';
+        return ScaffoldLayoutWidget(
+          userid: userId,
+          bodyWidget: OncologistsScreens(),
+          titleWidget: Text(
+            "Oncologists",
+            style: GoogleFonts.poppins(
+              fontSize: 30.0,
+              fontWeight: FontWeight.w600,
+              color: _primaryColor,
+            ),
+          ),
+          leadingWidget: BackButton(
+            color: _primaryColor,
+            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+          ),
+        );
+      },
     ),
   ],
 );
-
-
-
-// gmelsword2131@gmail.com
-// sampledatafritz123
