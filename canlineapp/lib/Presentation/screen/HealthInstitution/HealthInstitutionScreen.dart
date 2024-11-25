@@ -139,10 +139,12 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   Widget _buildCurrentCategoryGrid() {
     // Display grid based on the selected category
     if (_currentCategoryIndex == 0) {
+      // TODO It should be 2 sections, one for public and one for private
       return _buildPublicHealthInstitutionsGrid();
     } else if (_currentCategoryIndex == 1) {
       return _buildClinicGrid();
     } else {
+      // TODO this should be for Brgy. Health Stations not Private Health Institutions
       return _buildPrivateHealthInstitutionsGrid();
     }
   }
@@ -268,7 +270,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
         return CardDesign1(
           goto: () {
             final clinicId = clinicData['Clinic-ID'];
-            context.go('/Health-Insititution/clinic/$clinicId');
+            context.go('/Health-Institution/clinic/$clinicId');
           },
           image: imageUrl,
           title: clinicData['Clinic-Name'] ?? 'Unknown Clinic',
@@ -308,7 +310,7 @@ class _HealthInstitutionCard extends StatelessWidget {
         return CardDesign1(
           goto: () {
             final id = healthInstData['Health-Institution-ID'];
-            context.go('/Health-Insititution/$id');
+            context.go('/Health-Institution/$id');
           },
           image: imageUrl,
           title: healthInstData['Health-Institution-Name'] ?? 'Unknown Name',

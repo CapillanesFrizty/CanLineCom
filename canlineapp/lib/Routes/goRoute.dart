@@ -23,6 +23,9 @@ final GoRouter linkrouter = GoRouter(
       path: '/HomeScreen/:userID',
       builder: (context, state) {
         final userId = state.pathParameters['userID']!;
+
+        // Scaffold Layout Widget for Home Screen
+        //  with bell Icon, Dark mode Icon, Translation Icon, Settings Icon
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: HomeScreen(),
@@ -152,6 +155,80 @@ final GoRouter linkrouter = GoRouter(
           ),
         );
       },
+      routes: [
+        GoRoute(
+          name: 'hid',
+          path: ':hid',
+          builder: (context, state) =>
+              MoreInfoInstitutionScreen(id: state.pathParameters['hid']!),
+          routes: [
+            // ! Health Institution Facilities Route
+            GoRoute(
+              path: 'facilities',
+              builder: (context, state) {
+                return ScaffoldLayoutWidget(
+                  leadingWidget: TextButton(
+                    onPressed: () {
+                      context.go(
+                          '/Health-Insititution/${state.pathParameters['hid']}');
+                    },
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  bodyWidget: HealthInstitutionFacilities(
+                      id: state.pathParameters['hid']!),
+                );
+              },
+            ),
+            GoRoute(
+              path: 'Accredited-Insurance',
+              builder: (context, state) {
+                return ScaffoldLayoutWidget(
+                  leadingWidget: TextButton(
+                    onPressed: () {
+                      context.go(
+                          '/Health-Insititution/${state.pathParameters['hid']}');
+                    },
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  bodyWidget: HealthInstitutionAccreditedInsurances(
+                      id: state.pathParameters['hid']!),
+                );
+              },
+            ),
+            GoRoute(
+              path: 'Doctors',
+              builder: (context, state) {
+                return ScaffoldLayoutWidget(
+                  leadingWidget: TextButton(
+                    onPressed: () {
+                      context.go(
+                          '/Health-Insititution/${state.pathParameters['hid']}');
+                    },
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  bodyWidget: HealthInstitutionOncologists(
+                      id: state.pathParameters['hid']!),
+                );
+              },
+            ),
+          ],
+        ),
+        GoRoute(
+          name: "id",
+          path: '/clinic/:id',
+          builder: (context, state) =>
+              MoreinfoClinicsscreen(id: state.pathParameters['id']!),
+        ),
+      ],
     ),
     // Blogs Screen
     GoRoute(

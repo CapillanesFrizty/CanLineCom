@@ -120,7 +120,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildIconButton(
-              Icons.arrow_back, () => context.go('/Health-Insititution')),
+              Icons.arrow_back, () => context.go('/Health-Institution')),
           Row(
             children: [
               _buildIconButton(Icons.share, () {}),

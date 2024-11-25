@@ -7,7 +7,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget? leadingWidget;
   final Widget? titleWidget;
   final double? elevation;
-  final String userid;
+  final String? userid;
 
   const ScaffoldLayoutWidget({
     super.key,
@@ -16,7 +16,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
     this.leadingWidget,
     this.titleWidget,
     this.elevation,
-    required this.userid,
+    this.userid,
   });
 
   @override
