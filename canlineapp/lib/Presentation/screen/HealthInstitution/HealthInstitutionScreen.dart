@@ -139,14 +139,59 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   Widget _buildCurrentCategoryGrid() {
     // Display grid based on the selected category
     if (_currentCategoryIndex == 0) {
-      // TODO It should be 2 sections, one for public and one for private
-      return _buildPublicHealthInstitutionsGrid();
+      return Column(
+        children: [
+          Expanded(child: _buildPublicHealthInstitutionsGrid()),
+          Expanded(child: _buildPrivateHealthInstitutionsGrid()),
+        ],
+      );
     } else if (_currentCategoryIndex == 1) {
       return _buildClinicGrid();
     } else {
-      // TODO this should be for Brgy. Health Stations not Private Health Institutions
-      return _buildPrivateHealthInstitutionsGrid();
+      return _buildBrgyHealthStationsGrid();
     }
+  }
+
+  Widget _buildBrgyHealthStationsGrid() {
+    // Implement the grid for Brgy. Health Stations
+    // Assuming you have a future for Brgy. Health Stations similar to _futurepublic and _futureprivate
+    final _futureBrgyHealthStations =
+        Supabase.instance.client.from('Brgy-Health-Stations').select();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _futureBrgyHealthStations,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
+
+          final healthStations = snapshot.data ?? [];
+
+          if (healthStations.isEmpty) {
+            return const Center(child: Text('No data available'));
+          }
+
+          return GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1 / 1.2,
+            ),
+            itemCount: healthStations.length,
+            itemBuilder: (context, index) => _HealthInstitutionCard(
+              healthInstData: healthStations[index],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildPublicHealthInstitutionsGrid() {
