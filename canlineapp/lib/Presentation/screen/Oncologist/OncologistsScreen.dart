@@ -13,7 +13,7 @@ class OncologistsScreens extends StatefulWidget {
 }
 
 class _OncologistsScreensState extends State<OncologistsScreens> {
-  final _getBlogs = Supabase.instance.client.from('Blogs').select();
+  final _getDoctors = Supabase.instance.client.from('Doctor').select();
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -28,13 +28,13 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 30),
-            _buildSearchBar(),
-            const SizedBox(height: 30),
-            _buildSectionTitle('Latest Events'),
-            const SizedBox(height: 16),
-            // _buildPopularBlogs(),
-            // const SizedBox(height: 20),
-            _buildSectionTitle('Other Events'),
+            // _buildSearchBar(),
+            // const SizedBox(height: 30),
+            // _buildSectionTitle('Latest Events'),
+            // const SizedBox(height: 16),
+            // // _buildPopularBlogs(),
+            // // const SizedBox(height: 20),
+            _buildSectionTitle('Available Oncologists'),
             const SizedBox(height: 30),
             _buildRecentBlogs(),
           ],
@@ -57,40 +57,39 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (query) {
-          setState(() {
-            _searchQuery = query;
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'Search',
-          prefixIcon:
-              const Icon(Icons.search, color: OncologistsScreens._primaryColor),
-          suffixIcon: const Icon(Icons.filter_list,
-              color: OncologistsScreens._primaryColor),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
-          ),
-        ),
-      ),
-    );
-  }
-
   // ? Parked for now, will be implemented in the future
+  // Widget _buildSearchBar() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
+  //     child: TextField(
+  //       controller: _searchController,
+  //       onChanged: (query) {
+  //         setState(() {
+  //           _searchQuery = query;
+  //         });
+  //       },
+  //       decoration: InputDecoration(
+  //         hintText: 'Search',
+  //         prefixIcon:
+  //             const Icon(Icons.search, color: OncologistsScreens._primaryColor),
+  //         suffixIcon: const Icon(Icons.filter_list,
+  //             color: OncologistsScreens._primaryColor),
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+  //         ),
+  //         enabledBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+  //         ),
+  //         focusedBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
   // Widget _buildLatestEvents) {
   //   return SizedBox(
   //     height: 200,
@@ -119,7 +118,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: FutureBuilder(
-        future: _getBlogs,
+        future: _getDoctors,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -127,16 +126,16 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
           if (snapshot.hasError) {
             return const Center(child: Text('Error fetching data'));
           }
-          final blogsdata = snapshot.data as List<Map<String, dynamic>>;
-          if (blogsdata.isEmpty) {
+          final Doctorsdata = snapshot.data as List<Map<String, dynamic>>;
+          if (Doctorsdata.isEmpty) {
             return const Center(child: Text('No data available'));
           }
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: blogsdata.length,
+            itemCount: Doctorsdata.length,
             itemBuilder: (context, index) {
-              return _buildRecentBlogCard(blogsdata[index]);
+              return _buildRecentBlogCard(Doctorsdata[index]);
             },
           );
         },
@@ -144,11 +143,8 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
     );
   }
 
-  Widget _buildRecentBlogCard(Map<String, dynamic> blogsdata) {
+  Widget _buildRecentBlogCard(Map<String, dynamic> Doctorsdata) {
     return GestureDetector(
-      onTap: () {
-        context.go('/Blog/${blogsdata['Blog-ID']}');
-      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(10),
@@ -173,15 +169,15 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    blogsdata['Blogs-Category'],
+                    Doctorsdata['Specialization'],
                     style: GoogleFonts.poppins(
                       color: OncologistsScreens._primaryColor,
-                      fontSize: 12,
+                      fontSize: 10,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    blogsdata['Blogs-Name'],
+                    '${Doctorsdata['Doctor-Firstname']}, ${Doctorsdata['Doctor-Lastname']}',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -190,10 +186,10 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    blogsdata['Blog-Published'],
+                    Doctorsdata['Doctor-Email'],
                     style: GoogleFonts.poppins(
                       color: OncologistsScreens._primaryColor,
-                      fontSize: 10,
+                      fontSize: 12,
                     ),
                   ),
                 ],

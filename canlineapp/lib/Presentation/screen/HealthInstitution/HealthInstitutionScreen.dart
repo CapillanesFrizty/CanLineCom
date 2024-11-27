@@ -168,7 +168,10 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           }
 
           if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
+            return const Center(
+                child: Text(
+                    textAlign: TextAlign.center,
+                    'Sorry for the inconvinience but this Page is Under Construction\n\nPlease check back soon.'));
           }
 
           final healthStations = snapshot.data ?? [];

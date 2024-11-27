@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -13,7 +12,7 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
-  final _getBlogs = Supabase.instance.client.from('Blogs').select();
+  final _getEvents = Supabase.instance.client.from('Events').select();
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -27,69 +26,69 @@ class _EventsScreenState extends State<EventsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // const SizedBox(height: 30),
+            // _buildSearchBar(),
             const SizedBox(height: 30),
-            _buildSearchBar(),
-            const SizedBox(height: 30),
-            _buildSectionTitle('Latest Events'),
-            const SizedBox(height: 30),
+            // _buildSectionTitle('Latest Events'),
+            // const SizedBox(height: 30),
             // _buildPopularBlogs(),
             // const SizedBox(height: 20),
-            _buildSectionTitle('Other Events'),
+            // _buildSectionTitle('Other Events'),
             const SizedBox(height: 30),
-            _buildRecentBlogs(),
+            _buildRecentBlogsSection(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: Text(
-        title,
-        style: GoogleFonts.poppins(
-          color: EventsScreen._primaryColor,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (query) {
-          setState(() {
-            _searchQuery = query;
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'Search',
-          prefixIcon:
-              const Icon(Icons.search, color: EventsScreen._primaryColor),
-          suffixIcon:
-              const Icon(Icons.filter_list, color: EventsScreen._primaryColor),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: EventsScreen._primaryColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: EventsScreen._primaryColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: EventsScreen._primaryColor),
-          ),
-        ),
-      ),
-    );
-  }
   // ? Parked for now, will be implemented in the future
+  // Widget _buildSectionTitle(String title) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 35.0),
+  //     child: Text(
+  //       title,
+  //       style: GoogleFonts.poppins(
+  //         color: EventsScreen._primaryColor,
+  //         fontSize: 18,
+  //         fontWeight: FontWeight.bold,
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildSearchBar() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
+  //     child: TextField(
+  //       controller: _searchController,
+  //       onChanged: (query) {
+  //         setState(() {
+  //           _searchQuery = query;
+  //         });
+  //       },
+  //       decoration: InputDecoration(
+  //         hintText: 'Search',
+  //         prefixIcon:
+  //             const Icon(Icons.search, color: EventsScreen._primaryColor),
+  //         suffixIcon:
+  //             const Icon(Icons.filter_list, color: EventsScreen._primaryColor),
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: EventsScreen._primaryColor),
+  //         ),
+  //         enabledBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: EventsScreen._primaryColor),
+  //         ),
+  //         focusedBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: EventsScreen._primaryColor),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
   // Widget _buildLatestEvents) {
   //   return SizedBox(
   //     height: 200,
@@ -112,13 +111,12 @@ class _EventsScreenState extends State<EventsScreen> {
   //     ),
   //   );
   // }
-  // Widget _buildLatestEventsCard({
 
-  Widget _buildRecentBlogs() {
+  Widget _buildRecentBlogsSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: FutureBuilder(
-        future: _getBlogs,
+        future: _getEvents,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -126,16 +124,16 @@ class _EventsScreenState extends State<EventsScreen> {
           if (snapshot.hasError) {
             return const Center(child: Text('Error fetching data'));
           }
-          final blogsdata = snapshot.data as List<Map<String, dynamic>>;
-          if (blogsdata.isEmpty) {
-            return const Center(child: Text('No data available'));
+          final Eventsdata = snapshot.data as List<Map<String, dynamic>>;
+          if (Eventsdata.isEmpty) {
+            return const Center(child: Text('No available events yet'));
           }
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: blogsdata.length,
+            itemCount: Eventsdata.length,
             itemBuilder: (context, index) {
-              return _buildRecentBlogCard(blogsdata[index]);
+              return _buildRecentBlogCard(Eventsdata[index]);
             },
           );
         },
@@ -143,11 +141,8 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _buildRecentBlogCard(Map<String, dynamic> blogsdata) {
+  Widget _buildRecentBlogCard(Map<String, dynamic> Eventsdata) {
     return GestureDetector(
-      onTap: () {
-        context.go('/Blog/${blogsdata['Blog-ID']}');
-      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(10),
@@ -172,7 +167,7 @@ class _EventsScreenState extends State<EventsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    blogsdata['Blogs-Category'],
+                    Eventsdata['Event_Organizer'],
                     style: GoogleFonts.poppins(
                       color: EventsScreen._primaryColor,
                       fontSize: 12,
@@ -180,7 +175,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    blogsdata['Blogs-Name'],
+                    Eventsdata['Event_name'],
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -189,7 +184,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    blogsdata['Blog-Published'],
+                    '${Eventsdata['Event_Date']}, ${Eventsdata['Event_Time']}',
                     style: GoogleFonts.poppins(
                       color: EventsScreen._primaryColor,
                       fontSize: 10,

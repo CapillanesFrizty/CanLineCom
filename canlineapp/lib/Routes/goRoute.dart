@@ -230,6 +230,7 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
+
     // Blogs Screen
     GoRoute(
       path: '/Blog',
@@ -252,6 +253,14 @@ final GoRouter linkrouter = GoRouter(
           ),
         );
       },
+      routes: [
+        GoRoute(
+          name: 'blogid',
+          path: ':blogid',
+          builder: (context, state) =>
+              MoreinfoBlogsscreen(id: state.pathParameters['blogid']!),
+        )
+      ],
     ),
     // Financial Support Screen
     GoRoute(
@@ -275,6 +284,15 @@ final GoRouter linkrouter = GoRouter(
           ),
         );
       },
+      routes: [
+        // ! More Info Intended for Health Institution Route
+        GoRoute(
+          name: 'fid',
+          path: ':fid',
+          builder: (context, state) =>
+              Financialdetails(id: state.pathParameters['fid']!),
+        ),
+      ],
     ),
     // Doctors Screen
     GoRoute(

@@ -64,6 +64,9 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     response['Doctors'] = number_of_doctor;
     response['Accredited-Insurance'] = number_of_acredited_insurance;
     response['Health-Institution-Image-Url'] = imageUrl;
+
+    debugPrint(
+        'GEOLOCATION: ${response['Health-Institution-Address-Lat']},${response['Health-Institution-Address-Long']}');
     return response;
   }
 
@@ -159,7 +162,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           const SizedBox(height: 16),
           _buildSubtitle(data['Health-Institution-Type'] ?? 'Unknown Type'),
           const SizedBox(height: 16),
-          _buildFacilitiesBox(),
+          _buildFacilitiesBox(data['Facilities'] ?? '0', data['Doctors'] ?? '0',
+              data['Accredited-Insurance'] ?? '0'),
           const SizedBox(height: 16),
           _buildAboutUsSection(
               data['Health-Institution-Desc'] ?? 'No description available'),
@@ -168,7 +172,12 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           const SizedBox(height: 16),
           _buildScheduleSection(),
           const SizedBox(height: 16),
-          _buildMapSection(),
+          _buildMapSection(
+            data['Health-Institution-Address'],
+            data['Health-Institution-Address-Lat'] ?? 0.0, // Ensure double
+            data['Health-Institution-Address-Long'] ?? 0.0, // Ensure double
+            data['Health-Institution-Name'],
+          ),
           const SizedBox(height: 16),
         ],
       ),
@@ -192,7 +201,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  Widget _buildFacilitiesBox() {
+  Widget _buildFacilitiesBox(param0, param1, param2) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -203,14 +212,17 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildFacilityItem(
-              title: 'Facilities', value: '10', type: 'Facilities'),
+              title: 'Facilities',
+              value: param0.toString(),
+              type: 'Facilities'),
           const VerticalDivider(thickness: 5, color: Color(0xff5B50A0)),
           _buildFacilityItem(
               title: 'Accredited Insurance',
-              value: '5',
+              value: param1.toString(),
               type: 'Accredited-Insurance'),
           const VerticalDivider(),
-          _buildFacilityItem(title: 'Doctors', value: '20', type: 'Doctors'),
+          _buildFacilityItem(
+              title: 'Doctors', value: param2.toString(), type: 'Doctors'),
         ],
       ),
     );
@@ -305,7 +317,12 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  Widget _buildMapSection() {
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  Widget _buildMapSection(String locationAddress, double lat, double long,
+      String InstitutionMarkerID) {
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -320,57 +337,33 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Valgosons Building, Bolton Extension, Poblacion District, Davao City, 8000 Davao del Sur, Philippines.',
+        Text(
+          locationAddress,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
         const SizedBox(height: 16),
-        Container(
-          height: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                offset: const Offset(0, 4),
-                blurRadius: 4,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              'https://via.placeholder.com/400x200', // Placeholder image URL
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(child: Text('Image not available'));
-              },
+        SizedBox(
+          height: 300,
+          width: 500,
+          child: GoogleMap(
+            onMapCreated: _onMapCreated,
+            liteModeEnabled: true,
+            zoomControlsEnabled: true,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(lat, long),
+              zoom: 18.0,
             ),
+            markers: {
+              Marker(
+                markerId: MarkerId(InstitutionMarkerID),
+                icon: BitmapDescriptor.defaultMarker,
+                position: LatLng(lat, long),
+              ),
+            },
           ),
         ),
       ],
-    );
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-
-  Widget _mapBuilder() {
-    return GoogleMap(
-      onMapCreated: _onMapCreated,
-      initialCameraPosition: const CameraPosition(
-        target: LatLng(7.099091, 125.616108),
-        zoom: 15.0,
-      ),
-      markers: {
-        const Marker(
-          markerId: MarkerId('Health-Institution'),
-          position: LatLng(7.099091, 125.616108),
-          infoWindow: InfoWindow(title: 'Health Institution'),
-        ),
-      },
     );
   }
 }

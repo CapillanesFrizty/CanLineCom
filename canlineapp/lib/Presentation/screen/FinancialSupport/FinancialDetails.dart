@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -12,6 +13,10 @@ class FinancialDetailsScreen extends StatefulWidget {
 }
 
 class _FinancialDetailsScreenState extends State<FinancialDetailsScreen> {
+  late GoogleMapController mapController;
+  final List<bool> _isExpandedBenefits = [false];
+  final List<bool> _isExpandedRequirements = [false];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,6 +103,9 @@ class Financialdetails extends StatefulWidget {
 class _FinancialdetailsState extends State<Financialdetails> {
   late Future<Map<String, dynamic>> _future;
   late Future<List<Map<String, dynamic>>> _futureInstitutionBenefits;
+  late GoogleMapController mapController;
+  final List<bool> _isBenefitsExpanded = [false];
+  final List<bool> _isRequirementsExpanded = [false];
 
   @override
   void initState() {
@@ -173,6 +181,10 @@ class _FinancialdetailsState extends State<Financialdetails> {
                   data['Financial-Institution-Desc'] ??
                       'No description available',
                   data['Financial-Institution-Type'] ?? 'Unknown Type',
+                  data['Financial-Institution-Address-Lat'] ?? 0.0,
+                  data['Financial-Institution-Address-Long'] ?? 0.0,
+                  data['Financial-Institution-Address'],
+                  data['Financial-Institution-Name'],
                 ),
                 const SizedBox(height: 50),
               ],
@@ -241,7 +253,13 @@ class _FinancialdetailsState extends State<Financialdetails> {
   }
 
   Widget _buildDetailsSection(
-      String name, String description, String hospitalType) {
+      String name,
+      String description,
+      String hospitalType,
+      double lat,
+      double long,
+      String locationAddress,
+      String InstitutionMarkerID) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
@@ -254,7 +272,7 @@ class _FinancialdetailsState extends State<Financialdetails> {
           const SizedBox(height: 16),
           _buildAboutUsSection(description),
           const SizedBox(height: 16),
-          _buildLocationSection(),
+          _buildMapSection(locationAddress, lat, long, InstitutionMarkerID),
           const SizedBox(height: 16),
           _buildBenefitsSection(),
           const SizedBox(height: 16),
@@ -343,31 +361,51 @@ class _FinancialdetailsState extends State<Financialdetails> {
     );
   }
 
-  Widget _buildLocationSection() {
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  Widget _buildMapSection(String locationAddress, double lat, double long,
+      String InstitutionMarkerID) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Where are we?',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Financialdetails._primaryColor,
+        const SizedBox(height: 20),
+        const Center(
+          child: Text(
+            'Where are we?',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff5B50A0),
+            ),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Barangay Bolton Extension, Poblacion District, Davao City, Davao del Sur',
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
+          locationAddress,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
         const SizedBox(height: 16),
-        Container(
-          height: 200,
-          color: Colors.grey[300], // Placeholder for map
-          child: const Center(child: Text('Map Placeholder')),
+        SizedBox(
+          height: 300,
+          width: 500,
+          child: GoogleMap(
+            onMapCreated: _onMapCreated,
+            liteModeEnabled: true,
+            zoomControlsEnabled: true,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(lat, long),
+              zoom: 18.0,
+            ),
+            markers: {
+              Marker(
+                markerId: MarkerId(InstitutionMarkerID),
+                icon: BitmapDescriptor.defaultMarker,
+                position: LatLng(lat, long),
+              ),
+            },
+          ),
         ),
       ],
     );
@@ -388,7 +426,7 @@ class _FinancialdetailsState extends State<Financialdetails> {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No facilities available.'));
+            return const Center(child: Text('No benefits available.'));
           }
 
           final Benefitsdata = snapshot.data!;
@@ -406,15 +444,21 @@ class _FinancialdetailsState extends State<Financialdetails> {
               ),
               const SizedBox(height: 20),
               ExpansionPanelList(
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() {
+                    _isBenefitsExpanded[index] =
+                        !_isBenefitsExpanded[index]; // Toggle the state
+                  });
+                },
                 children: [
                   ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
                       return ListTile(
                         leading: const CircleAvatar(
-                          radius: 30,
+                          radius: 25,
                           backgroundColor: Colors.blueAccent,
                           child: Icon(Icons.medical_services,
-                              color: Colors.white, size: 35),
+                              color: Colors.white, size: 30),
                         ),
                         title: Text(
                           'Benefits',
@@ -457,9 +501,6 @@ class _FinancialdetailsState extends State<Financialdetails> {
 
                               final BenefitsDetailsdata = snapshot.data!;
 
-                              debugPrint(
-                                  'Benefits Details: $BenefitsDetailsdata');
-
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: BenefitsDetailsdata.map(
@@ -493,7 +534,7 @@ class _FinancialdetailsState extends State<Financialdetails> {
                         ],
                       ),
                     ),
-                    isExpanded: true,
+                    isExpanded: _isBenefitsExpanded[0],
                   ),
                 ],
               )
@@ -505,107 +546,102 @@ class _FinancialdetailsState extends State<Financialdetails> {
   }
 
   Widget _buildRequirementsSection() {
-    return FutureBuilder(
-      future: _fetchRequirements(),
-      builder: (context, snapshot) {
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Requirements',
+            style: GoogleFonts.poppins(
+              fontSize: 30,
+              fontWeight: FontWeight.w500,
+              color: Financialdetails._primaryColor,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ExpansionPanelList(
+            expansionCallback: (int index, bool isExpanded) {
+              setState(() {
+                _isRequirementsExpanded[index] =
+                    !_isRequirementsExpanded[index]; // Toggle state
+              });
+            },
             children: [
-              Text(
-                'Requirements',
-                style: GoogleFonts.poppins(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w500,
-                  color: Financialdetails._primaryColor,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ExpansionPanelList(
-                children: [
-                  ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                        leading: const CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.blueAccent,
-                          child: Icon(Icons.medical_services,
-                              color: Colors.white, size: 35),
-                        ),
-                        title: Text(
-                          'Requirements',
-                          style: GoogleFonts.poppins(
-                            fontSize: 19,
-                            color: Financialdetails._primaryColor,
-                          ),
-                        ),
-                      );
-                    },
-                    body: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: FutureBuilder(
-                        future: _fetchRequirements(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error: ${snapshot.error}'));
-                          }
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const Center(
-                                child: Text('No requirements available.'));
-                          }
-
-                          final Requirementsdata = snapshot.data!;
-
-                          return Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: Requirementsdata.map(
-                                (e) => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      e['Financial-Institution-Requirements-Name'] ??
-                                          'No name',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.w600,
-                                        color: Financialdetails._primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      e['Financial-Institution-Requirements-Desc'] ??
-                                          'No name',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 15,
-                                        color: Financialdetails._primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                ),
-                              ).toList(),
-                            ),
-                          );
-                        },
+              ExpansionPanel(
+                headerBuilder: (context, isExpanded) {
+                  return ListTile(
+                    leading: const CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.blueAccent,
+                      child:
+                          Icon(Icons.assignment, color: Colors.white, size: 30),
+                    ),
+                    title: Text(
+                      'Requirements',
+                      style: GoogleFonts.poppins(
+                        fontSize: 19,
+                        color: Financialdetails._primaryColor,
                       ),
                     ),
-                    isExpanded: true,
+                  );
+                },
+                body: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FutureBuilder(
+                    future: _fetchRequirements(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(
+                            child: Text('No requirements available.'));
+                      }
+
+                      final Requirementsdata = snapshot.data!;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: Requirementsdata.map(
+                          (e) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                e['Financial-Institution-Requirements-Name'] ??
+                                    'No name',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w600,
+                                  color: Financialdetails._primaryColor,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                e['Financial-Institution-Requirements-Desc'] ??
+                                    'No description',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  color: Financialdetails._primaryColor,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        ).toList(),
+                      );
+                    },
                   ),
-                ],
-              )
+                ),
+                isExpanded: _isRequirementsExpanded[0],
+              ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

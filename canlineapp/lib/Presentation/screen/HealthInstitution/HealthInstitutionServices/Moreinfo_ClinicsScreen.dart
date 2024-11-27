@@ -23,7 +23,6 @@ class MoreinfoClinicsscreen extends StatefulWidget {
 
 class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
   late Future<Map<String, dynamic>> _clinicDetailsFuture;
-  static const LatLng _center = LatLng(7.099091, 125.616108);
   late GoogleMapController mapController;
 
   @override
@@ -35,7 +34,7 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
   Future<Map<String, dynamic>> _fetchClinicDetails() async {
     final response = await Supabase.instance.client
         .from('Clinic-External')
-        .select()
+        .select('*')
         .eq('Clinic-ID', widget.id)
         .single();
 
@@ -43,6 +42,9 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
     final imageUrl = Supabase.instance.client.storage
         .from('Assets')
         .getPublicUrl("Clinic-External/$fileName");
+
+    debugPrint('LATLONG: ${response['Clinic-Address-lat']},'
+        '${response['Clinic-Address-long']}');
 
     response['Clinic-Image-Url'] = imageUrl;
     return response;
@@ -68,8 +70,17 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
                   description:
                       data['Clinic-Description'] ?? 'No description available',
                   type: data['Clinic-Type'] ?? 'Unknown Type',
-                  address: data['Clinic-Address'] ?? 'Unknown Address',
+                  address: data['Clinic-External-Address'] ?? 'Unknown Address',
+                  InstitutionMarkerID:
+                      data['Clinic-Name'] ?? 'Unknown Marker ID',
+                  lat: data['Clinic-Address-lat'] ?? 0.0,
+                  long: data['Clinic-Address-long'] ?? 0.0,
                 ),
+                _buildMapSection(
+                    data['Clinic-External-Address'],
+                    data['Clinic-Address-lat'] ?? 0.0,
+                    data['Clinic-Address-long'] ?? 0.0,
+                    data['Clinic-Name']),
               ],
             );
           } else {
@@ -139,6 +150,9 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
     required String description,
     required String type,
     required String address,
+    required String InstitutionMarkerID,
+    required double lat,
+    required double long,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -155,15 +169,6 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
           const SizedBox(height: 16),
           const Divider(color: AppColors.divider, thickness: 1),
           _buildScheduleSection(),
-          const SizedBox(height: 16),
-          const Divider(color: AppColors.divider, thickness: 1),
-          _buildFacilitiesSection(),
-          const SizedBox(height: 16),
-          const Divider(color: AppColors.divider, thickness: 1),
-          _buildLocationSection(),
-          const SizedBox(height: 16),
-          const Divider(color: AppColors.divider, thickness: 1),
-          _buildAccreditedInsurancesSection(),
           const SizedBox(height: 16),
           const Divider(color: AppColors.divider, thickness: 1),
         ],
@@ -223,146 +228,52 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
     );
   }
 
-  Widget _buildFacilitiesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Available Facilities',
-          style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Dedicated to providing specialized care for cancer patients. With advanced treatments, compassionate support, and a team of expert oncologists, we are here to guide you every step of the way on your journey to healing.',
-          style: TextStyle(fontSize: 16),
-        ),
-        const SizedBox(height: 16),
-        _buildFacilityCard(),
-      ],
-    );
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
-  Widget _buildFacilityCard() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primary),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildMapSection(String locationAddress, double lat, double long,
+      String InstitutionMarkerID) {
+    return Padding(
+      padding: const EdgeInsets.all(30.0),
+      child: Column(
         children: [
-          Icon(Icons.medical_services_outlined,
-              size: 40, color: AppColors.primary),
-          SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Consultant Oncologists',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
+          const SizedBox(height: 20),
+          const Center(
+            child: Text(
+              'Where are we?',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff5B50A0),
               ),
-              SizedBox(height: 4),
-              Text(
-                'Patient Consultant',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+            ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Where are we?',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        const Text(
-          'Barangay Bolton Extension, Poblacion District, Davao City, Davao del Sur',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 200,
-          color: Colors.grey[300], // Placeholder for map
-          child: const Center(child: Text('Map Placeholder')),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAccreditedInsurancesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Accredited Insurances',
-          style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Where we collaborate with leading accredited insurance providers to ensure seamless access to quality cancer care. Your well-being is our priority, and we’re here to support you every step of the way.',
-          style: TextStyle(fontSize: 16),
-        ),
-        const SizedBox(height: 16),
-        _buildInsuranceCard(
-          'PhilHealth',
-          'Philippine Health Insurance Corporation Services',
-          'https://via.placeholder.com/50', // Replace with actual logo URL
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInsuranceCard(String name, String description, String logoUrl) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primary),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Image.network(logoUrl, width: 50, height: 50),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+          const SizedBox(height: 8),
+          Text(
+            locationAddress,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 300,
+            width: 500,
+            child: GoogleMap(
+              onMapCreated: _onMapCreated,
+              liteModeEnabled: true,
+              zoomControlsEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(lat, long),
+                zoom: 18.0,
+              ),
+              markers: {
+                Marker(
+                  markerId: MarkerId(InstitutionMarkerID),
+                  icon: BitmapDescriptor.defaultMarker,
+                  position: LatLng(lat, long),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
+              },
             ),
           ),
         ],
@@ -370,3 +281,128 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
     );
   }
 }
+  // Widget _buildAccreditedInsurancesSection() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const Text(
+  //         'Accredited Insurances',
+  //         style: TextStyle(
+  //             fontSize: 22,
+  //             fontWeight: FontWeight.bold,
+  //             color: AppColors.primary),
+  //       ),
+  //       const SizedBox(height: 8),
+  //       const Text(
+  //         'Where we collaborate with leading accredited insurance providers to ensure seamless access to quality cancer care. Your well-being is our priority, and we’re here to support you every step of the way.',
+  //         style: TextStyle(fontSize: 16),
+  //       ),
+  //       const SizedBox(height: 16),
+  //       _buildInsuranceCard(
+  //         'PhilHealth',
+  //         'Philippine Health Insurance Corporation Services',
+  //         'https://via.placeholder.com/50', // Replace with actual logo URL
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildInsuranceCard(String name, String description, String logoUrl) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16.0),
+  //     decoration: BoxDecoration(
+  //       border: Border.all(color: AppColors.primary),
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Image.network(logoUrl, width: 50, height: 50),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 name,
+  //                 style: const TextStyle(
+  //                   fontSize: 18,
+  //                   fontWeight: FontWeight.bold,
+  //                   color: AppColors.primary,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 4),
+  //               Text(
+  //                 description,
+  //                 style: const TextStyle(
+  //                   fontSize: 16,
+  //                   color: AppColors.textSecondary,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildFacilitiesSection() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const Text(
+  //         'Available Facilities',
+  //         style: TextStyle(
+  //             fontSize: 22,
+  //             fontWeight: FontWeight.bold,
+  //             color: AppColors.primary),
+  //       ),
+  //       const SizedBox(height: 8),
+  //       const Text(
+  //         'Dedicated to providing specialized care for cancer patients. With advanced treatments, compassionate support, and a team of expert oncologists, we are here to guide you every step of the way on your journey to healing.',
+  //         style: TextStyle(fontSize: 16),
+  //       ),
+  //       const SizedBox(height: 16),
+  //       _buildFacilityCard(),
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildFacilityCard() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16.0),
+  //     decoration: BoxDecoration(
+  //       border: Border.all(color: AppColors.primary),
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: const Row(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Icon(Icons.medical_services_outlined,
+  //             size: 40, color: AppColors.primary),
+  //         SizedBox(width: 12),
+  //         Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               'Consultant Oncologists',
+  //               style: TextStyle(
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: AppColors.primary,
+  //               ),
+  //             ),
+  //             SizedBox(height: 4),
+  //             Text(
+  //               'Patient Consultant',
+  //               style: TextStyle(
+  //                 fontSize: 16,
+  //                 color: AppColors.textSecondary,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
