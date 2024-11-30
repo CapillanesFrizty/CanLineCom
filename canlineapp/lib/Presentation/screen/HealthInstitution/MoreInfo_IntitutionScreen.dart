@@ -124,13 +124,13 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         children: [
           _buildIconButton(
               Icons.arrow_back, () => context.go('/Health-Institution')),
-          Row(
-            children: [
-              _buildIconButton(Icons.share, () {}),
-              const SizedBox(width: 10.0),
-              _buildIconButton(Icons.favorite_outline, () {}),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     _buildIconButton(Icons.share, () {}),
+          //     const SizedBox(width: 10.0),
+          //     _buildIconButton(Icons.favorite_outline, () {}),
+          //   ],
+          // ),
         ],
       ),
     );
@@ -168,9 +168,9 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildAboutUsSection(
               data['Health-Institution-Desc'] ?? 'No description available'),
           const SizedBox(height: 16),
-          _buildContactUsSection(),
+          _buildContactUsSection(data['Health-Institution-ContactNumber']),
           const SizedBox(height: 16),
-          _buildScheduleSection(),
+          _buildScheduleSection(data['Health-Institution-Opening_Hours']),
           const SizedBox(height: 16),
           _buildMapSection(
             data['Health-Institution-Address'],
@@ -234,7 +234,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     required String value,
   }) {
     return GestureDetector(
-      onTap: () => context.go('/Health-Insititution/${widget.id}/$type'),
+      onTap: () => context.go('/Health-Institution/${widget.id}/$type'),
       child: _buildClickableInfoColumn(title, value),
     );
   }
@@ -278,8 +278,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  Widget _buildScheduleSection() {
-    return const Column(
+  Widget _buildScheduleSection(OpeningHours) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 20),
@@ -291,7 +291,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
               color: Color(0xff5B50A0)),
         ),
         SizedBox(height: 20),
-        Text('Mon - Fri: 8:00am - 6:00pm',
+        Text(OpeningHours,
             style: TextStyle(fontSize: 18, color: Color(0xff5B50A0))),
         SizedBox(height: 8),
         Divider(color: Color(0xff5B50A0)),
@@ -299,8 +299,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  Widget _buildContactUsSection() {
-    return const Column(
+  Widget _buildContactUsSection(ContactNumber) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -310,7 +310,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
               fontWeight: FontWeight.bold,
               color: Color(0xff5B50A0)),
         ),
-        Text('09131112421',
+        Text(ContactNumber,
             style: TextStyle(fontSize: 18, color: Color(0xff5B50A0))),
         Divider(color: Color(0xff5B50A0)),
       ],

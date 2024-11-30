@@ -140,6 +140,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     // Display grid based on the selected category
     if (_currentCategoryIndex == 0) {
       return Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Expanded(child: _buildPublicHealthInstitutionsGrid()),
           Expanded(child: _buildPrivateHealthInstitutionsGrid()),
@@ -218,6 +219,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           }
 
           return GridView.builder(
+            physics: NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 16,
@@ -255,6 +257,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           }
 
           return GridView.builder(
+            physics: NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 16,

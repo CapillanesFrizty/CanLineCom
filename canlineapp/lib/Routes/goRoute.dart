@@ -67,9 +67,8 @@ final GoRouter linkrouter = GoRouter(
         GoRoute(
           path: 'journal',
           builder: (context, state) {
-            final userId = state.pathParameters['userID']!;
             return ScaffoldLayoutWidget(
-              userid: userId,
+              leadingWidget: null,
               bodyWidget: JournalScreen(),
               titleWidget: Text(
                 "My Journal",
@@ -78,10 +77,6 @@ final GoRouter linkrouter = GoRouter(
                   fontWeight: FontWeight.w500,
                   color: _primaryColor,
                 ),
-              ),
-              leadingWidget: BackButton(
-                color: _primaryColor,
-                onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
               ),
             );
           },
@@ -101,10 +96,6 @@ final GoRouter linkrouter = GoRouter(
                   color: _primaryColor,
                 ),
               ),
-              leadingWidget: BackButton(
-                color: _primaryColor,
-                onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
-              ),
             );
           },
         ),
@@ -122,10 +113,6 @@ final GoRouter linkrouter = GoRouter(
                   fontWeight: FontWeight.w500,
                   color: _primaryColor,
                 ),
-              ),
-              leadingWidget: BackButton(
-                color: _primaryColor,
-                onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
               ),
             );
           },
@@ -164,13 +151,13 @@ final GoRouter linkrouter = GoRouter(
           routes: [
             // ! Health Institution Facilities Route
             GoRoute(
-              path: 'facilities',
+              path: 'Facilities',
               builder: (context, state) {
                 return ScaffoldLayoutWidget(
                   leadingWidget: TextButton(
                     onPressed: () {
                       context.go(
-                          '/Health-Insititution/${state.pathParameters['hid']}');
+                          '/Health-Institution/${state.pathParameters['hid']}');
                     },
                     child: const Icon(
                       Icons.arrow_back,
@@ -181,6 +168,7 @@ final GoRouter linkrouter = GoRouter(
                       id: state.pathParameters['hid']!),
                 );
               },
+              //
             ),
             GoRoute(
               path: 'Accredited-Insurance',
@@ -189,7 +177,7 @@ final GoRouter linkrouter = GoRouter(
                   leadingWidget: TextButton(
                     onPressed: () {
                       context.go(
-                          '/Health-Insititution/${state.pathParameters['hid']}');
+                          '/Health-Institution/${state.pathParameters['hid']}');
                     },
                     child: const Icon(
                       Icons.arrow_back,
@@ -208,7 +196,7 @@ final GoRouter linkrouter = GoRouter(
                   leadingWidget: TextButton(
                     onPressed: () {
                       context.go(
-                          '/Health-Insititution/${state.pathParameters['hid']}');
+                          '/Health-Institution/${state.pathParameters['hid']}');
                     },
                     child: const Icon(
                       Icons.arrow_back,
