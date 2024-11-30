@@ -121,13 +121,13 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
         children: [
           _buildIconButton(
               Icons.arrow_back, () => context.go('/Health-Institution')),
-          Row(
-            children: [
-              _buildIconButton(Icons.share, () {}),
-              const SizedBox(width: 10.0),
-              _buildIconButton(Icons.favorite_border, () {}),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     _buildIconButton(Icons.share, () {}),
+          //     const SizedBox(width: 10.0),
+          //     _buildIconButton(Icons.favorite_border, () {}),
+          //   ],
+          // ),
         ],
       ),
     );

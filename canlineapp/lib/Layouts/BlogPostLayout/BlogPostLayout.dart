@@ -75,22 +75,22 @@ class BlogPostLayout extends StatelessWidget {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.favorite_border), // Change icon as needed
-                    onPressed: () {
-                      // Handle favorite action
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.share), // Change icon as needed
-                    onPressed: () {
-                      // Handle share action
-                    },
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     IconButton(
+              //       icon: Icon(Icons.favorite_border), // Change icon as needed
+              //       onPressed: () {
+              //         // Handle favorite action
+              //       },
+              //     ),
+              //     IconButton(
+              //       icon: Icon(Icons.share), // Change icon as needed
+              //       onPressed: () {
+              //         // Handle share action
+              //       },
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),

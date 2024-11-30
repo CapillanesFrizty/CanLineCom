@@ -76,6 +76,7 @@ class _RegisterscreenState extends State<Registerscreen> {
 
   // Init Supabase Client
   final supabase = Supabase.instance.client;
+
   // Sign Up Function
   Future<void> signup() async {
     try {
@@ -94,7 +95,7 @@ class _RegisterscreenState extends State<Registerscreen> {
           'city': _city.text.trim(),
           'province': _province.text.trim(),
           'patient_type': currentPatientTypeOption,
-          'date_of_birth': selectedDate.toString(),
+          'date_of_birth': selectedDate?.toIso8601String() ?? '',
           'cancer_type': selectedCancerType,
         },
       );
@@ -103,7 +104,136 @@ class _RegisterscreenState extends State<Registerscreen> {
       context.go('/');
     } on AuthException catch (e) {
       debugPrint('Error: ${e.message}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.message}')),
+      );
+    } catch (e) {
+      debugPrint('Unexpected Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unexpected Error: $e')),
+      );
     }
+  }
+
+  // Handle Step Continue
+  void _handleStepContinue() {
+    final isLastStep = _currentStep == getSteps().length - 1;
+
+    bool isValid = _formKeystep[_currentStep].currentState?.validate() ?? false;
+
+    // Additional validation for Step 4 (Medical Information)
+    if (_currentStep == 3) {
+      // Example: Make Date of Birth required
+      if (selectedDate == null) {
+        isValid = false;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select your Date of Birth')),
+        );
+        return;
+      }
+
+      // Add more custom validations if needed
+    }
+
+    if (isValid) {
+      if (isLastStep) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('Registered Successfully! You may proceed to login')),
+        );
+        signup();
+      } else {
+        setState(() {
+          _currentStep += 1;
+        });
+        debugPrint('Next Step');
+      }
+    } else {
+      // If the form is invalid, display a snackbar or handle accordingly
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Please provide the missing credentials to proceed')),
+      );
+    }
+  }
+
+  // Handle Step Cancel
+  void _handleStepCancel() {
+    setState(() {
+      if (_currentStep == 0) {
+        context.go('/');
+      } else {
+        _currentStep -= 1;
+      }
+    });
+  }
+
+  // Build Stepper Controls
+  Widget _buildStepperControls(ControlsDetails details) {
+    return Container(
+      margin: const EdgeInsets.only(top: 50),
+      child: Row(
+        children: [
+          if (_currentStep < 3)
+            Expanded(
+              child: ElevatedButton(
+                onPressed: details.onStepContinue,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(color: Registerscreen._primaryColor),
+                  ),
+                  backgroundColor: Registerscreen._primaryColor,
+                ),
+                child: Text(
+                  'Next',
+                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          const SizedBox(width: 12),
+          if (_currentStep >= 0 && _currentStep < 3)
+            Expanded(
+              child: ElevatedButton(
+                onPressed: details.onStepCancel,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(color: Colors.grey),
+                  ),
+                  backgroundColor: Colors.grey,
+                ),
+                child: Text(
+                  'Back',
+                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          const SizedBox(width: 12),
+          if (_currentStep == 3)
+            Expanded(
+              child: ElevatedButton(
+                onPressed: details.onStepContinue,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(color: Registerscreen._primaryColor),
+                  ),
+                  backgroundColor: Registerscreen._primaryColor,
+                ),
+                child: Text(
+                  'Finish',
+                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -115,8 +245,9 @@ class _RegisterscreenState extends State<Registerscreen> {
           preferredSize: Size.fromHeight(80.0), // Set the height here
           child: AppBar(
             backgroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
             title: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 'Create an Account',
                 style: GoogleFonts.poppins(
@@ -128,109 +259,63 @@ class _RegisterscreenState extends State<Registerscreen> {
             ),
           ),
         ),
-        body: Stepper(
-          steps: getSteps(),
-          elevation: 0,
-          connectorThickness: 1,
-          // type: StepperType.horizontal,
-          currentStep: _currentStep,
-          onStepContinue: () {
-            final isLastStep = _currentStep == getSteps().length - 1;
-
-            bool isValid = _formKeystep[_currentStep].currentState!.validate();
-
-            if (isValid) {
-              if (isLastStep) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text(
-                          'Registered Successfully! You may Proceed to login')),
-                );
-                signup();
-              } else {
-                setState(() {
-                  _currentStep += 1;
-                });
-                debugPrint('Next Step');
-              }
-            } else {
-              // If the form is invalid, display a snackbar or handle accordingly
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Please fix the errors before continuing')),
-              );
-            }
-          },
-          onStepCancel: () {
-            setState(() {
-              _currentStep == 0
-                  ? context.go('/')
-                  : setState(() {
-                      _currentStep -= 1;
-                    });
-            });
-          },
-
-          onStepTapped: (step) => setState(() => _currentStep = step),
-          controlsBuilder: (context, details) => Container(
-            margin: const EdgeInsets.only(top: 50),
-            child: Row(
+        body: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
+          // Make the entire body scrollable
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              // Change mainAxisSize to max to take full height
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_currentStep < 3)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: details.onStepContinue,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(
-                              color: Registerscreen._primaryColor),
+                // Static warning message about the required fields
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[100],
+                    border: Border.all(color: Colors.yellow[700]!),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.yellow[700],
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Please fill out all required fields (*), Put none if not applicable.',
+                          style: GoogleFonts.poppins(
+                            color: Colors.yellow[700],
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        'Next',
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                    ),
+                    ],
                   ),
-                const SizedBox(width: 12),
-                if (_currentStep < 3)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: details.onStepCancel,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(
-                              color: Registerscreen._primaryColor),
-                        ),
-                      ),
-                      child: Text(
-                        'Back',
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                    ),
+                ),
+                const SizedBox(height: 20),
+                // Use a ConstrainedBox to limit the Stepper's height
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    // Adjust the maxHeight as needed
+                    maxHeight: MediaQuery.of(context).size.height * 0.8,
                   ),
-                if (_currentStep == 3)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: details.onStepContinue,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(
-                              color: Registerscreen._primaryColor),
-                        ),
-                      ),
-                      child: Text(
-                        'Finish',
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                    ),
+                  child: Stepper(
+                    steps: getSteps(),
+                    elevation: 0,
+                    connectorThickness: 1,
+                    // type: StepperType.horizontal,
+                    currentStep: _currentStep,
+                    onStepContinue: _handleStepContinue,
+                    onStepCancel: _handleStepCancel,
+                    onStepTapped: null,
+                    controlsBuilder: (context, details) =>
+                        _buildStepperControls(details),
                   ),
+                ),
               ],
             ),
           ),
@@ -254,7 +339,7 @@ class _RegisterscreenState extends State<Registerscreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextfield('First Name', _fname),
+                    child: _buildTextfield('First Name*', _fname),
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
@@ -264,11 +349,11 @@ class _RegisterscreenState extends State<Registerscreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              _buildTextfield('Middle Name (Optional)', _mname),
+              _buildTextfield('Middle Name', _mname),
               const SizedBox(height: 20),
-              _buildTextfield('Last Name', _lname),
+              _buildTextfield('Last Name*', _lname),
               const SizedBox(height: 20),
-              _buildTextfield('Occupation', _occupation),
+              _buildTextfield('Occupation*', _occupation),
             ],
           ),
         ),
@@ -285,19 +370,19 @@ class _RegisterscreenState extends State<Registerscreen> {
           child: Column(
             children: <Widget>[
               const SizedBox(height: 20),
-              _buildTextfield('Citizenship', _citizenship),
+              _buildTextfield('Citizenship*', _citizenship),
               const SizedBox(height: 20),
-              _buildTextfield('Current Address', _currentAddress),
+              _buildTextfield('Current Address*', _currentAddress),
               const SizedBox(height: 20),
-              _buildTextfield('City', _city),
+              _buildTextfield('City*', _city),
               const SizedBox(height: 20),
-              _buildTextfield('Province', _province),
+              _buildTextfield('Province*', _province),
             ],
           ),
         ),
       ),
 
-      // Step 3 of registration process (Address)
+      // Step 3 of registration process (Account Information)
       Step(
         isActive: _currentStep >= 2,
         label: null,
@@ -308,9 +393,9 @@ class _RegisterscreenState extends State<Registerscreen> {
           child: Column(
             children: <Widget>[
               const SizedBox(height: 20),
-              _buildTextfield('Email Address', _email),
+              _buildTextfield('Email Address*', _email),
               const SizedBox(height: 20),
-              _buildTextfield('Password', _password),
+              _buildTextfield('Password*', _password),
             ],
           ),
         ),
@@ -330,7 +415,7 @@ class _RegisterscreenState extends State<Registerscreen> {
               const SizedBox(height: 10),
               // Patient Type
               Text(
-                'Patient Type',
+                'Patient Type*',
                 style: GoogleFonts.poppins(
                   fontSize: 24,
                   color: Registerscreen._primaryColor,
@@ -382,14 +467,19 @@ class _RegisterscreenState extends State<Registerscreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  fixedSize: Size(500, 50),
+                  side: BorderSide(
+                    color: selectedDate == null
+                        ? Colors.red
+                        : Registerscreen._primaryColor,
+                  ),
+                  fixedSize: Size(double.infinity, 50), // Make it responsive
                 ),
                 onPressed: () async {
                   final DateTime? dateTime = await showDatePicker(
                     context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(3000),
+                    initialDate: selectedDate ?? DateTime(2000),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
                   );
                   if (dateTime != null) {
                     setState(() {
@@ -399,18 +489,32 @@ class _RegisterscreenState extends State<Registerscreen> {
                 },
                 child: Text(
                   selectedDate == null
-                      ? 'Select Date of Birth'
+                      ? 'Select Date of Birth*'
                       : 'Date of Birth: ${selectedDate?.day}/${selectedDate?.month}/${selectedDate?.year}',
                   style: GoogleFonts.poppins(
-                      color: Registerscreen._primaryColor,
+                      color: selectedDate == null
+                          ? Colors.red
+                          : Registerscreen._primaryColor,
                       fontWeight: FontWeight.w600),
                   textAlign: TextAlign.start,
                 ),
               ),
+              // Display error message if Date of Birth is not selected
+              if (_currentStep == 3 && selectedDate == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                  child: Text(
+                    'Date of Birth is required',
+                    style: GoogleFonts.poppins(
+                      color: Colors.red,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
               const SizedBox(height: 10),
               // Sex
               Text(
-                'Sex',
+                'Sex*',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: Registerscreen._primaryColor,
@@ -477,7 +581,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                     controller: textEditingController,
                     focusNode: focusNode,
                     decoration: InputDecoration(
-                      hintText: 'Type of Cancer',
+                      hintText: 'Type of Cancer*',
                       hintStyle: TextStyle(
                           color: Registerscreen
                               ._primaryColor), // Your placeholder text here

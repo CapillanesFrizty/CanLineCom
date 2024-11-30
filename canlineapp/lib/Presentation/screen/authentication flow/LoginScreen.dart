@@ -40,19 +40,27 @@ class _LoginScreenState extends State<LoginScreen> {
       context.go('/HomeScreen/${user.user?.id}');
     } on AuthException catch (e) {
       debugPrint('Error: ${e.message}');
+      // Display error to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (e) {
+      debugPrint('Unexpected Error: $e');
+      // Handle other types of errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An unexpected error occurred.')),
+      );
     }
   }
 
   // Check session
   Future<void> checkSession() async {
     final session = Supabase.instance.client.auth.currentSession;
-
-    if (session != null) {
+    debugPrint('Session: $session');
+    if (session != null && session.user != null) {
       final userId = session.user.id;
-      debugPrint('Session: $session');
-      if (userId != null) {
-        context.go('/HomeScreen/$userId');
-      }
+      debugPrint('User ID: $userId');
+      context.go('/HomeScreen/$userId');
     } else {
       context.go('/');
     }
@@ -79,79 +87,75 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Container(
           height: MediaQuery.of(context).size.height, // Make it fill the screen
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Center content
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildWelcomeText(),
-              const SizedBox(height: 40.0),
-              Form(
-                child: Column(
-                  children: [
-                    // Email field
-                    TextField(
-                      controller: _email,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        labelStyle: GoogleFonts.poppins(
-                            color: LoginScreen._primaryColor),
-                        border: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: LoginScreen._primaryColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: LoginScreen._primaryColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: LoginScreen._primaryColor),
-                        ),
-                      ),
+          child: Form(
+            key: _formKey, // Assign the GlobalKey to the Form
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // Center content
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildWelcomeText(),
+                const SizedBox(height: 40.0),
+                // Email field
+                TextFormField(
+                  controller: _email,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    labelStyle:
+                        GoogleFonts.poppins(color: LoginScreen._primaryColor),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: LoginScreen._primaryColor),
                     ),
-                    const SizedBox(height: 20.0),
-                    // Password field
-                    TextField(
-                      controller: _password,
-                      obscureText: _obscurePassword!,
-                      decoration: InputDecoration(
-                          labelText: 'Password',
-                          labelStyle: GoogleFonts.poppins(
-                              color: LoginScreen._primaryColor),
-                          border: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: LoginScreen._primaryColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: LoginScreen._primaryColor),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: LoginScreen._primaryColor),
-                          ),
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                              icon: Icon(_obscurePassword!
-                                  ? Icons.visibility
-                                  : Icons.visibility_off))),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: LoginScreen._primaryColor),
                     ),
-                  ],
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: LoginScreen._primaryColor),
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: _validateEmail, // Use the existing email validator
                 ),
-              ),
-              const SizedBox(height: 40.0),
-              _buildLoginButton(login),
-              const SizedBox(height: 20.0),
-              _buildOrText(),
-              const SizedBox(height: 20.0),
-              _buildCreateAccountText(),
-              const SizedBox(height: 20.0),
-              _buildCreateAccountButton(),
-            ],
+                const SizedBox(height: 20.0),
+                // Password field
+                TextFormField(
+                  controller: _password,
+                  obscureText: _obscurePassword!,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    labelStyle:
+                        GoogleFonts.poppins(color: LoginScreen._primaryColor),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: LoginScreen._primaryColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: LoginScreen._primaryColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: LoginScreen._primaryColor),
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                      icon: Icon(_obscurePassword!
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                    ),
+                  ),
+                  validator: _validatePassword, // Add password validator
+                ),
+                const SizedBox(height: 40.0),
+                _buildLoginButton(login),
+                const SizedBox(height: 20.0),
+                _buildOrText(),
+                const SizedBox(height: 20.0),
+                _buildCreateAccountText(),
+                const SizedBox(height: 20.0),
+                _buildCreateAccountButton(),
+              ],
+            ),
           ),
         ),
       ),
@@ -169,10 +173,20 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginButton(Function login) {
+  Widget _buildLoginButton(Function loginFunction) {
     return ElevatedButton(
       onPressed: () {
-        login();
+        if (_formKey.currentState!.validate()) {
+          // If the form is valid, proceed with login
+          loginFunction();
+        } else {
+          // If the form is invalid, display a snackbar or handle accordingly
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content:
+                    Text('Please enter the nessecary credentials submitting.')),
+          );
+        }
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
@@ -223,5 +237,37 @@ class _LoginScreenState extends State<LoginScreen> {
         style: GoogleFonts.poppins(),
       ),
     );
+  }
+
+  // Validator function for Email
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email.';
+    }
+    // Regular expression for validating an Email
+    String pattern = r'^[^@]+@[^@]+\.[^@]+';
+    RegExp regex = RegExp(pattern);
+    if (!regex.hasMatch(value.trim())) {
+      return 'Enter a valid email address.';
+    }
+    return null; // Return null if the input is valid
+  }
+
+  // Validator function for Password
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password.';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long.';
+    }
+    return null; // Return null if the input is valid
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
   }
 }

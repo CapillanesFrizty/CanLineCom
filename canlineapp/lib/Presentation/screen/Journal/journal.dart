@@ -26,23 +26,55 @@ class _JournalScreenState extends State<JournalScreen> {
   User? _user;
   List<dynamic> journalEntries = [];
 
-  // Function to handle the submission of data
   Future<void> _submitJournalEntry() async {
-    // Collect data from fields
     final String title = _titleController.text.trim();
     final String content = _contentController.text.trim();
-    final String emotion = selectedEmotion != -1
-        ? [
-            "Awesome",
-            "Happy",
-            "Lovely",
-            "Blessed",
-            "Okay",
-            "Sad",
-            "Terrible",
-            "Angry"
-          ][selectedEmotion]
-        : "None";
+
+    // List of validation rules with conditions and error messages
+    final validationRules = [
+      {
+        'condition': selectedEmotion == -1,
+        'message': 'Please select an emotion.',
+      },
+      {
+        'condition': title.isEmpty,
+        'message': 'Please enter a title of the journal.',
+      },
+      {
+        'condition': content.isEmpty,
+        'message': 'Please provide the content of the journal.',
+      },
+    ];
+
+    // Iterate through the rules and show the first error message
+    for (var rule in validationRules) {
+      if (rule['condition'] as bool) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(rule['message'] as String),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+    }
+
+    // If all validations pass, proceed with submission
+    setState(() {
+      isLoading = true;
+    });
+
+    final String emotion = [
+      "Awesome",
+      "Happy",
+      "Lovely",
+      "Blessed",
+      "Okay",
+      "Sad",
+      "Terrible",
+      "Angry"
+    ][selectedEmotion];
 
     final Map<String, dynamic> journalEntry = {
       'title_of_the_journal': title,
@@ -51,29 +83,39 @@ class _JournalScreenState extends State<JournalScreen> {
       'created_by': _user!.id,
     };
 
-    // Print the submitted data
     try {
       // Insert data into the "Journal" table
-      final response = await supabase
-          .from('Journal')
-          .insert([journalEntry]) // Wrap data in a list
-          .select();
+      await supabase.from('Journal').insert([journalEntry]).select();
 
-      // Print the response
-      debugPrint('Journal Entry Submitted: $response');
+      // Show success message
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Journal entry submitted successfully!'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Update the journal entries
       fetchUserJournalEntries();
     } catch (e) {
-      // Handle unexpected exceptions
-      debugPrint('Unexpected error: $e');
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unexpected error occurred: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+        _titleController.clear();
+        _contentController.clear();
+        selectedEmotion = -1;
+      });
     }
-
-    // Optionally clear the fields after submission
-    _titleController.clear();
-    _contentController.clear();
-    setState(() {
-      selectedEmotion = -1;
-    });
-    Navigator.pop(context);
   }
 
 //  Function for fetching journal entries
@@ -111,6 +153,13 @@ class _JournalScreenState extends State<JournalScreen> {
           journalEntries.removeWhere((entry) => entry['id'] == id);
         });
       }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Journal entry deleted successfully!'),
+          backgroundColor: const Color.fromARGB(255, 255, 27, 27),
+          duration: const Duration(seconds: 2),
+        ),
+      );
       fetchUserJournalEntries();
     } catch (e) {
       debugPrint('Error deleting journal entry: $e');
@@ -139,27 +188,25 @@ class _JournalScreenState extends State<JournalScreen> {
 
   Future _buildBottomSheet() {
     return showModalBottomSheet(
-      isScrollControlled: true,
+      isScrollControlled: true, // Allows resizing when the keyboard opens
       context: context,
-      builder: (context) {
-        int localSelectedEmotion =
-            selectedEmotion; // Start with the current value
+      builder: (BuildContext context) {
+        int localSelectedEmotion = selectedEmotion;
+
         return StatefulBuilder(
           builder: (context, setModalState) {
             // Function to update the selected index
             void changeIndex(int index) {
               setModalState(() {
                 localSelectedEmotion = index;
-                debugPrint('Selected index in modal: $index');
               });
-              // Immediately reflect the change in the parent state
               setState(() {
                 selectedEmotion = index;
               });
             }
 
             // Radio button builder
-            Widget buildcustomRadio({
+            Widget buildCustomRadio({
               required String imagePath,
               required String label,
               required int index,
@@ -195,129 +242,149 @@ class _JournalScreenState extends State<JournalScreen> {
                   ),
                 );
 
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    'How are you feeling today?',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 120,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        buildcustomRadio(
-                          index: 0,
-                          label: 'Awesome',
-                          imagePath: 'lib/assets/images/Journal/Awsome.png',
-                        ),
-                        const SizedBox(width: 10),
-                        buildcustomRadio(
-                          index: 1,
-                          label: 'Happy',
-                          imagePath: 'lib/assets/images/Journal/Happy.png',
-                        ),
-                        const SizedBox(width: 10),
-                        buildcustomRadio(
-                          index: 2,
-                          label: 'Lovely',
-                          imagePath: 'lib/assets/images/Journal/Inlove.png',
-                        ),
-                        const SizedBox(width: 10),
-                        buildcustomRadio(
-                          index: 3,
-                          label: 'Blessed',
-                          imagePath: 'lib/assets/images/Journal/Angel.png',
-                        ),
-                        const SizedBox(width: 10),
-                        buildcustomRadio(
-                          index: 4,
-                          label: 'Okay',
-                          imagePath: 'lib/assets/images/Journal/Calm.png',
-                        ),
-                        const SizedBox(width: 10),
-                        buildcustomRadio(
-                          index: 5,
-                          label: 'Sad',
-                          imagePath: 'lib/assets/images/Journal/Sad.png',
-                        ),
-                        const SizedBox(width: 10),
-                        buildcustomRadio(
-                          index: 6,
-                          label: 'Terrible',
-                          imagePath:
-                              'lib/assets/images/Journal/Disappointed.png',
-                        ),
-                        const SizedBox(width: 10),
-                        buildcustomRadio(
-                          index: 7,
-                          label: 'Angry',
-                          imagePath: 'lib/assets/images/Journal/Angry.png',
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Form(
+            return DraggableScrollableSheet(
+              initialChildSize: 0.8, // Start at 80% of screen height
+              minChildSize: 0.5, // Minimum height is 50% of screen
+              maxChildSize: 1.0, // Can expand to full screen
+              expand: false,
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 20.0,
+                      right: 20.0,
+                      top: 20.0,
+                      bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
+                    ), // Adjust padding for the keyboard
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        TextFormField(
-                          controller: _titleController,
-                          decoration: const InputDecoration(
-                            labelText: 'Title of your Journal',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
-                              ),
-                            ),
+                        const Text(
+                          'How are you feeling today?',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        TextFormField(
-                          controller: _contentController,
-                          decoration: const InputDecoration(
-                            labelText: 'Share your thoughts here...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          height: 120,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              buildCustomRadio(
+                                index: 0,
+                                label: 'Awesome',
+                                imagePath:
+                                    'lib/assets/images/Journal/Awsome.png',
                               ),
-                            ),
-                            alignLabelWithHint: true,
+                              const SizedBox(width: 10),
+                              buildCustomRadio(
+                                index: 1,
+                                label: 'Happy',
+                                imagePath:
+                                    'lib/assets/images/Journal/Happy.png',
+                              ),
+                              const SizedBox(width: 10),
+                              buildCustomRadio(
+                                index: 2,
+                                label: 'Lovely',
+                                imagePath:
+                                    'lib/assets/images/Journal/Inlove.png',
+                              ),
+                              const SizedBox(width: 10),
+                              buildCustomRadio(
+                                index: 3,
+                                label: 'Blessed',
+                                imagePath:
+                                    'lib/assets/images/Journal/Angel.png',
+                              ),
+                              const SizedBox(width: 10),
+                              buildCustomRadio(
+                                index: 4,
+                                label: 'Okay',
+                                imagePath: 'lib/assets/images/Journal/Calm.png',
+                              ),
+                              const SizedBox(width: 10),
+                              buildCustomRadio(
+                                index: 5,
+                                label: 'Sad',
+                                imagePath: 'lib/assets/images/Journal/Sad.png',
+                              ),
+                              const SizedBox(width: 10),
+                              buildCustomRadio(
+                                index: 6,
+                                label: 'Terrible',
+                                imagePath:
+                                    'lib/assets/images/Journal/Disappointed.png',
+                              ),
+                              const SizedBox(width: 10),
+                              buildCustomRadio(
+                                index: 7,
+                                label: 'Angry',
+                                imagePath:
+                                    'lib/assets/images/Journal/Angry.png',
+                              ),
+                            ],
                           ),
-                          maxLines: 10,
+                        ),
+                        const SizedBox(height: 20),
+                        Form(
+                          child: Column(
+                            children: [
+                              TextFormField(
+                                controller: _titleController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Title of your Journal',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              TextFormField(
+                                controller: _contentController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Share your thoughts here...',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                  alignLabelWithHint: true,
+                                ),
+                                maxLines: 10,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 50),
+                        Center(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              minimumSize: const Size(double.infinity, 50),
+                              padding: EdgeInsets.zero,
+                            ),
+                            onPressed: () {
+                              _submitJournalEntry();
+                            },
+                            child: const Text(
+                              'Save',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 50),
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        minimumSize: const Size(double.infinity, 50),
-                        padding: EdgeInsets.zero,
-                      ),
-                      onPressed: () {
-                        // Trigger journal entry submission
-                        _submitJournalEntry();
-                      },
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         );

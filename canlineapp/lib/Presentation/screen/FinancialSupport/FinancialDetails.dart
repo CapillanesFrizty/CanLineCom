@@ -230,14 +230,14 @@ class _FinancialdetailsState extends State<Financialdetails> {
         children: [
           _buildIconButton(
               Icons.arrow_back, () => context.go('/Financial-Institution')),
-          Row(
-            children: [
-              _buildIconButton(
-                  Icons.share, () {}), // Placeholder for share action
-              _buildIconButton(Icons.favorite_outline,
-                  () {}), // Placeholder for favorite action
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     _buildIconButton(
+          //         Icons.share, () {}), // Placeholder for share action
+          //     _buildIconButton(Icons.favorite_outline,
+          //         () {}), // Placeholder for favorite action
+          //   ],
+          // ),
         ],
       ),
     );

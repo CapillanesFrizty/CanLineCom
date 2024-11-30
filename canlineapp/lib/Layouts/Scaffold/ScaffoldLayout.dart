@@ -13,7 +13,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
     super.key,
     required this.bodyWidget,
     this.actionsWidget,
-    this.leadingWidget,
+    this.leadingWidget = null,
     this.titleWidget,
     this.elevation,
     this.userid,

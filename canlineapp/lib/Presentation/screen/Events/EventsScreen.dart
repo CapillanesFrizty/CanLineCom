@@ -14,7 +14,7 @@ class EventsScreen extends StatefulWidget {
 class _EventsScreenState extends State<EventsScreen> {
   final _getEvents = Supabase.instance.client.from('Events').select();
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  // String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {

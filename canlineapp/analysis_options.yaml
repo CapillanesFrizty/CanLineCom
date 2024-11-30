@@ -9,11 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 analyzer:
   errors:
+    avoid_init_to_null: ignore
     avoid_unnecessary_containers: ignore
     deprecated_member_use: ignore
     file_names: ignore
+    no_leading_underscores_for_local_identifiers: ignore
     non_constant_identifier_names: ignore
     prefer_const_constructors: ignore
+    prefer_typing_uninitialized_variables: ignore
     sized_box_for_whitespace: ignore
     unnecessary_null_comparison: ignore
     unused_field: ignore

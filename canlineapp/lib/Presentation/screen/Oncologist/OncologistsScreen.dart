@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,7 +14,7 @@ class OncologistsScreens extends StatefulWidget {
 class _OncologistsScreensState extends State<OncologistsScreens> {
   final _getDoctors = Supabase.instance.client.from('Doctor').select();
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  // String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
