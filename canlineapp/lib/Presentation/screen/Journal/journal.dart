@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,38 +27,26 @@ class _JournalScreenState extends State<JournalScreen> {
   User? _user;
   List<dynamic> journalEntries = [];
 
+  // Add a GlobalKey for the Form
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   Future<void> _submitJournalEntry() async {
-    final String title = _titleController.text.trim();
-    final String content = _contentController.text.trim();
+    // First, validate the form fields
+    if (!_formKey.currentState!.validate()) {
+      // If form fields are invalid, do not proceed
+      return;
+    }
 
-    // List of validation rules with conditions and error messages
-    final validationRules = [
-      {
-        'condition': selectedEmotion == -1,
-        'message': 'Please select an emotion.',
-      },
-      {
-        'condition': title.isEmpty,
-        'message': 'Please enter a title of the journal.',
-      },
-      {
-        'condition': content.isEmpty,
-        'message': 'Please provide the content of the journal.',
-      },
-    ];
-
-    // Iterate through the rules and show the first error message
-    for (var rule in validationRules) {
-      if (rule['condition'] as bool) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(rule['message'] as String),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        return;
-      }
+    // Then, validate the emotion selection
+    if (selectedEmotion == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select an emotion.'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
     }
 
     // If all validations pass, proceed with submission
@@ -77,8 +66,8 @@ class _JournalScreenState extends State<JournalScreen> {
     ][selectedEmotion];
 
     final Map<String, dynamic> journalEntry = {
-      'title_of_the_journal': title,
-      'body_of_journal': content,
+      'title_of_the_journal': _titleController.text.trim(),
+      'body_of_journal': _contentController.text.trim(),
       'emotion': emotion,
       'created_by': _user!.id,
     };
@@ -118,7 +107,7 @@ class _JournalScreenState extends State<JournalScreen> {
     }
   }
 
-//  Function for fetching journal entries
+  // Function for fetching journal entries
   Future<void> fetchUserJournalEntries() async {
     // Fetch data from the "Journal" table with the User's ID
     final u = await supabase.auth.getUser();
@@ -138,7 +127,7 @@ class _JournalScreenState extends State<JournalScreen> {
     });
   }
 
-//  Function for deletion journal entries
+  // Function for deleting journal entries
   Future<void> deleteJournalEntry(int id) async {
     try {
       // Delete data from the "Journal" table with the specified ID
@@ -150,7 +139,7 @@ class _JournalScreenState extends State<JournalScreen> {
 
         // Update UI by removing the deleted entry
         setState(() {
-          journalEntries.removeWhere((entry) => entry['id'] == id);
+          journalEntries.removeWhere((entry) => entry['journal_id'] == id);
         });
       }
       ScaffoldMessenger.of(context).showSnackBar(
@@ -163,6 +152,13 @@ class _JournalScreenState extends State<JournalScreen> {
       fetchUserJournalEntries();
     } catch (e) {
       debugPrint('Error deleting journal entry: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting journal entry: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -261,8 +257,35 @@ class _JournalScreenState extends State<JournalScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.yellow[100],
+                            border: Border.all(color: Colors.yellow[700]!),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.yellow[700],
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Kindly fill out all required fields(*).',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.yellow[700],
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         const Text(
-                          'How are you feeling today?',
+                          'How are you feeling today?*',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -333,24 +356,31 @@ class _JournalScreenState extends State<JournalScreen> {
                         ),
                         const SizedBox(height: 20),
                         Form(
+                          key: _formKey, // Assign the GlobalKey here
                           child: Column(
                             children: [
                               TextFormField(
                                 controller: _titleController,
                                 decoration: const InputDecoration(
-                                  labelText: 'Title of your Journal',
+                                  labelText: 'Title of your Journal*',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.all(
                                       Radius.circular(10),
                                     ),
                                   ),
                                 ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter the title of the journal.';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 24),
                               TextFormField(
                                 controller: _contentController,
                                 decoration: const InputDecoration(
-                                  labelText: 'Share your thoughts here...',
+                                  labelText: 'Share your thoughts here...*',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.all(
                                       Radius.circular(10),
@@ -359,6 +389,12 @@ class _JournalScreenState extends State<JournalScreen> {
                                   alignLabelWithHint: true,
                                 ),
                                 maxLines: 10,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter the content of the journal.';
+                                  }
+                                  return null;
+                                },
                               ),
                             ],
                           ),
@@ -394,11 +430,11 @@ class _JournalScreenState extends State<JournalScreen> {
 
   Widget _buildBody() {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (journalEntries.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           "No journal entries yet. Start writing!",
           style: TextStyle(color: Colors.grey, fontSize: 16),
@@ -418,7 +454,7 @@ class _JournalScreenState extends State<JournalScreen> {
           //   weekday: 'Wednesday',
           //   color: primaryColor,
           // ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
 
           const SizedBox(height: 16),
           // Render Journal Entries

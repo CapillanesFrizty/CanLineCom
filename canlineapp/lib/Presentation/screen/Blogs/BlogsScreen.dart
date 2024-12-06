@@ -15,7 +15,32 @@ class BlogsScreen extends StatefulWidget {
 class _BlogsScreenState extends State<BlogsScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
-  final _getBlogs = Supabase.instance.client.from('Blogs').select();
+
+  Future<List<Map<String, dynamic>>> getBlogs() async {
+    try {
+      // Fetch blogs
+      final response = await Supabase.instance.client.from('Blogs').select();
+      if (response.isEmpty) {
+        return [];
+      }
+
+      final blogs = response as List<dynamic>;
+
+      // Add image URLs
+      for (var blog in blogs) {
+        final fileName = "${blog['Blogs-Name']}.png";
+        final imageUrl = Supabase.instance.client.storage
+            .from('Assets')
+            .getPublicUrl("Blogs-News/$fileName");
+        blog['im'] = imageUrl;
+      }
+
+      return blogs.cast<Map<String, dynamic>>();
+    } catch (e) {
+      debugPrint('Error fetching blogs: $e');
+      return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +56,6 @@ class _BlogsScreenState extends State<BlogsScreen> {
             _buildSearchBar(),
             const SizedBox(height: 30),
             _buildSectionTitle('New'),
-            // const SizedBox(height: 16),
-            // _buildPopularBlogs(),
-            // const SizedBox(height: 20),
             _buildSectionTitle('Other news and blogs'),
             const SizedBox(height: 16),
             _buildRecentBlogs(),
@@ -88,36 +110,11 @@ class _BlogsScreenState extends State<BlogsScreen> {
     );
   }
 
-  // ? Parked for now, will be implemented in the future
-  // Widget _buildPopularBlogs() {
-  //   return SizedBox(
-  //     height: 200,
-  //     child: ListView(
-  //       scrollDirection: Axis.horizontal,
-  //       padding: const EdgeInsets.symmetric(horizontal: 35.0),
-  //       children: [
-  //         _buildPopularBlogCard(
-  //           date: 'Aug 7, 2024',
-  //           title: 'Balancing the right treatments for metastatic cancer',
-  //           author: 'Karl Wood',
-  //         ),
-  //         const SizedBox(width: 16),
-  //         _buildPopularBlogCard(
-  //           date: 'September 19, 2024',
-  //           title: 'Therapy customized through stem cell treatments',
-  //           author: 'Jane Doe',
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-  // Widget _buildPopularBlogCard({
-
   Widget _buildRecentBlogs() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: FutureBuilder(
-        future: _getBlogs,
+        future: getBlogs(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -162,8 +159,16 @@ class _BlogsScreenState extends State<BlogsScreen> {
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(8),
+                image: blogsdata['im'] != null && blogsdata['im'] != ''
+                    ? DecorationImage(
+                        image: NetworkImage(blogsdata['im']),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
-              child: Icon(Icons.image, color: Colors.white70, size: 40),
+              child: (blogsdata['im'] == null || blogsdata['im'] == '')
+                  ? const Icon(Icons.image, color: Colors.white70, size: 40)
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -171,7 +176,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    blogsdata['Blogs-Category'],
+                    blogsdata['Blogs-Category'] ?? '',
                     style: GoogleFonts.poppins(
                       color: BlogsScreen._primaryColor,
                       fontSize: 12,
@@ -179,7 +184,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    blogsdata['Blogs-Name'],
+                    blogsdata['Blogs-Name'] ?? '',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -188,7 +193,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    blogsdata['Blog-Published'],
+                    blogsdata['Blog-Published'] ?? '',
                     style: GoogleFonts.poppins(
                       color: BlogsScreen._primaryColor,
                       fontSize: 10,
@@ -197,8 +202,6 @@ class _BlogsScreenState extends State<BlogsScreen> {
                 ],
               ),
             ),
-            // SizedBox(width: 15),
-            // Icon(Icons.favorite_border, color: BlogsScreen._primaryColor),
           ],
         ),
       ),

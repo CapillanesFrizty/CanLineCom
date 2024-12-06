@@ -181,11 +181,11 @@ class _LoginScreenState extends State<LoginScreen> {
           loginFunction();
         } else {
           // If the form is invalid, display a snackbar or handle accordingly
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content:
-                    Text('Please enter the nessecary credentials submitting.')),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   const SnackBar(
+          //       content:
+          //           Text('Please enter the nessecary credentials submitting.')),
+          // );
         }
       },
       style: ElevatedButton.styleFrom(
