@@ -10,12 +10,12 @@ final GoRouter linkrouter = GoRouter(
     // Login Screen
     GoRoute(
       path: '/',
-      builder: (context, state) => LoginScreen(),
+      builder: (context, state) => const LoginScreen(),
     ),
     // Registration Screen
     GoRoute(
       path: '/RegisterScreen',
-      builder: (context, state) => Registerscreen(),
+      builder: (context, state) => const Registerscreen(),
     ),
     // Home Screen with AppBar Icons
     GoRoute(
@@ -28,7 +28,7 @@ final GoRouter linkrouter = GoRouter(
         //  with bell Icon, Dark mode Icon, Translation Icon, Settings Icon
         return ScaffoldLayoutWidget(
           userid: userId,
-          bodyWidget: HomeScreen(),
+          bodyWidget: const HomeScreen(),
           actionsWidget: [
             IconButton(
               icon: const Icon(Icons.notifications_outlined,
@@ -69,7 +69,7 @@ final GoRouter linkrouter = GoRouter(
           builder: (context, state) {
             return ScaffoldLayoutWidget(
               leadingWidget: null,
-              bodyWidget: JournalScreen(),
+              bodyWidget: const JournalScreen(),
               titleWidget: Text(
                 "My Journal",
                 style: GoogleFonts.poppins(
@@ -87,7 +87,7 @@ final GoRouter linkrouter = GoRouter(
             final userId = state.pathParameters['userID']!;
             return ScaffoldLayoutWidget(
               userid: userId,
-              bodyWidget: EventsScreen(),
+              bodyWidget: const EventsScreen(),
               titleWidget: Text(
                 "Events",
                 style: GoogleFonts.poppins(
@@ -103,18 +103,7 @@ final GoRouter linkrouter = GoRouter(
           path: 'profile',
           builder: (context, state) {
             final userId = state.pathParameters['userID']!;
-            return ScaffoldLayoutWidget(
-              userid: userId,
-              bodyWidget: ProfileScreen(userid: userId),
-              titleWidget: Text(
-                "Profile",
-                style: GoogleFonts.poppins(
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.w500,
-                  color: _primaryColor,
-                ),
-              ),
-            );
+            return ProfileScreen(userid: userId);
           },
         ),
       ],
@@ -125,22 +114,7 @@ final GoRouter linkrouter = GoRouter(
       path: '/Health-Institution',
       builder: (context, state) {
         final userId = state.pathParameters['userID'] ?? 'default';
-        return ScaffoldLayoutWidget(
-          userid: userId,
-          bodyWidget: HealthInstitutionScreen(),
-          titleWidget: Text(
-            "Health Institution",
-            style: GoogleFonts.poppins(
-              fontSize: 30.0,
-              fontWeight: FontWeight.w500,
-              color: _primaryColor,
-            ),
-          ),
-          leadingWidget: BackButton(
-            color: _primaryColor,
-            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
-          ),
-        );
+        return HealthInstitutionScreen(userid: userId);
       },
       routes: [
         GoRoute(
@@ -226,7 +200,7 @@ final GoRouter linkrouter = GoRouter(
         final userId = state.pathParameters['userID'] ?? 'default';
         return ScaffoldLayoutWidget(
           userid: userId,
-          bodyWidget: BlogsScreen(),
+          bodyWidget: const BlogsScreen(),
           titleWidget: Text(
             "Blogs & News",
             style: GoogleFonts.poppins(
@@ -257,7 +231,7 @@ final GoRouter linkrouter = GoRouter(
         final userId = state.pathParameters['userID'] ?? 'default';
         return ScaffoldLayoutWidget(
           userid: userId,
-          bodyWidget: FinancialSupportScreen(),
+          bodyWidget: const FinancialSupportScreen(),
           titleWidget: Text(
             "Financial Support",
             style: GoogleFonts.poppins(
@@ -289,7 +263,7 @@ final GoRouter linkrouter = GoRouter(
         final userId = state.pathParameters['userID'] ?? 'default';
         return ScaffoldLayoutWidget(
           userid: userId,
-          bodyWidget: OncologistsScreens(),
+          bodyWidget: const OncologistsScreens(),
           titleWidget: Text(
             "Oncologists",
             style: GoogleFonts.poppins(

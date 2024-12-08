@@ -150,6 +150,7 @@ class _JournalScreenState extends State<JournalScreen> {
         ),
       );
       fetchUserJournalEntries();
+      Navigator.of(context).pop();
     } catch (e) {
       debugPrint('Error deleting journal entry: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -580,7 +581,28 @@ class _JournalEntry extends StatelessWidget {
               // ),
               IconButton(
                 icon: Icon(LucideIcons.trash, color: secondaryColor),
-                onPressed: onDelete, // Call the delete callback
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Note"),
+                      contentPadding: const EdgeInsets.all(20),
+                      content: Text("Are you sure to delete this Journal?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("No"),
+                        ),
+                        TextButton(
+                          onPressed: onDelete,
+                          child: Text("Yes"),
+                        ),
+                      ],
+                    ),
+                  );
+                }, // Call the delete callback
               ),
             ],
           ),

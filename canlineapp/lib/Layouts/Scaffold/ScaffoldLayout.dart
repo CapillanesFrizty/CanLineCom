@@ -58,25 +58,24 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
     final currentRoute =
         GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
 
-    if (currentRoute != null) {
-      for (int i = 0; i < _routes.length; i++) {
-        // Match exact route or nested route structure
-        if (currentRoute == _routes[i] ||
-            currentRoute.startsWith('${_routes[i]}/')) {
-          if (_currentIndex != i) {
-            setState(() {
-              _currentIndex = i;
-            });
-          }
-          return; // Stop once a match is found
-        }
-      }
+    if (currentRoute == null) return; // Exit if route is null
 
-      // If no match, reset index (for non-bottom-navigation routes)
-      setState(() {
-        _currentIndex = -1;
-      });
+    for (int i = 0; i < _routes.length; i++) {
+      if (currentRoute == _routes[i] ||
+          currentRoute.startsWith('${_routes[i]}/')) {
+        if (_currentIndex != i) {
+          setState(() {
+            _currentIndex = i;
+          });
+        }
+        return; // Stop once a match is found
+      }
     }
+
+    // If no match, reset index (non-navigation routes)
+    setState(() {
+      _currentIndex = -1;
+    });
   }
 
   static const List<({IconData outlined, IconData filled, String label})>
@@ -92,13 +91,11 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
   ];
 
   void _onTabSelected(int index) {
-    if (index >= 0 && index < _routes.length) {
-      if (_currentIndex != index) {
-        setState(() {
-          _currentIndex = index;
-        });
-        context.go(_routes[index]); // Navigate to the selected route
-      }
+    if (index >= 0 && index < _routes.length && _currentIndex != index) {
+      setState(() {
+        _currentIndex = index; // Update index immediately
+      });
+      context.go(_routes[index]); // Navigate to the selected route
     }
   }
 
@@ -172,13 +169,13 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
         backgroundColor: Colors.white,
         title: widget.titleWidget,
         actions: widget.actionsWidget,
-        leadingWidth: 65,
+        leadingWidth: widget.leadingWidget != null ? 50 : 10,
         leading: widget.leadingWidget != null
             ? Padding(
                 padding: const EdgeInsets.only(left: 10.0),
                 child: widget.leadingWidget,
               )
-            : null,
+            : Container(), // Suppress the default back button
       ),
       body: widget.bodyWidget,
       bottomNavigationBar: buildCustomNavigationBar(),
