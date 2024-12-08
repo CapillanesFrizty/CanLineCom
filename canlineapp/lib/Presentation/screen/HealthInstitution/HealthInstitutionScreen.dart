@@ -41,8 +41,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 30),
-          _buildSearchBar(),
+          // const SizedBox(height: 30),
+          // _buildSearchBar(),
           const SizedBox(height: 20),
           _buildCategories(),
           const SizedBox(height: 20),
@@ -55,36 +55,36 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (query) {
-          setState(() {
-            _searchQuery = query;
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'Search',
-          prefixIcon: const Icon(Icons.search, color: _primaryColor),
-          suffixIcon: const Icon(Icons.filter_list, color: _primaryColor),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _primaryColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _primaryColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _primaryColor),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildSearchBar() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
+  //     child: TextField(
+  //       controller: _searchController,
+  //       onChanged: (query) {
+  //         setState(() {
+  //           _searchQuery = query;
+  //         });
+  //       },
+  //       decoration: InputDecoration(
+  //         hintText: 'Search',
+  //         prefixIcon: const Icon(Icons.search, color: _primaryColor),
+  //         suffixIcon: const Icon(Icons.filter_list, color: _primaryColor),
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: _primaryColor),
+  //         ),
+  //         enabledBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: _primaryColor),
+  //         ),
+  //         focusedBorder: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: _primaryColor),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildCategories() {
     return Padding(
@@ -137,19 +137,85 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   }
 
   Widget _buildCurrentCategoryGrid() {
-    // Display grid based on the selected category
     if (_currentCategoryIndex == 0) {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(child: _buildPublicHealthInstitutionsGrid()),
-          Expanded(child: _buildPrivateHealthInstitutionsGrid()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
+            child: Text(
+              "Public Hospitals",
+              style: TextStyle(
+                fontFamily: 'Poppins', // Replace with your font
+                fontWeight: FontWeight.w600,
+                fontSize: 24,
+                color: _primaryColor, // Adjust to your theme
+              ),
+            ),
+          ),
+          Expanded(
+              child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: _buildPublicHealthInstitutionsGrid(),
+          )),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Text(
+              "Private Hospitals",
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 24,
+                color: _primaryColor,
+              ),
+            ),
+          ),
+          Expanded(
+              child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: _buildPrivateHealthInstitutionsGrid(),
+          )),
         ],
       );
     } else if (_currentCategoryIndex == 1) {
-      return _buildClinicGrid();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
+            child: Text(
+              "Clinics",
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 24,
+                color: _primaryColor,
+              ),
+            ),
+          ),
+          Expanded(child: _buildClinicGrid()),
+        ],
+      );
     } else {
-      return _buildBrgyHealthStationsGrid();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 8.0),
+          //   child: Text(
+          //     "Barangay Health Stations",
+          //     style: TextStyle(
+          //       fontFamily: 'Poppins',
+          //       fontWeight: FontWeight.w600,
+          //       fontSize: 18,
+          //       color: Colors.blueAccent,
+          //     ),
+          //   ),
+          // ),
+          Expanded(child: _buildBrgyHealthStationsGrid()),
+        ],
+      );
     }
   }
 
@@ -199,78 +265,72 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   }
 
   Widget _buildPublicHealthInstitutionsGrid() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      child: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _futurepublic,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _futurepublic,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
-          }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error fetching data'));
+        }
 
-          final healthInst = snapshot.data ?? [];
+        final healthInst = snapshot.data ?? [];
 
-          if (healthInst.isEmpty) {
-            return const Center(child: Text('No data available'));
-          }
+        if (healthInst.isEmpty) {
+          return const Center(child: Text('No data available'));
+        }
 
-          return GridView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1 / 1.2,
-            ),
-            itemCount: healthInst.length,
-            itemBuilder: (context, index) => _HealthInstitutionCard(
-              healthInstData: healthInst[index],
-            ),
-          );
-        },
-      ),
+        return GridView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1 / 1.2,
+          ),
+          itemCount: healthInst.length,
+          itemBuilder: (context, index) => _HealthInstitutionCard(
+            healthInstData: healthInst[index],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildPrivateHealthInstitutionsGrid() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      child: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _futureprivate,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _futureprivate,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
-          }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error fetching data'));
+        }
 
-          final healthInst = snapshot.data ?? [];
+        final healthInst = snapshot.data ?? [];
 
-          if (healthInst.isEmpty) {
-            return const Center(child: Text('No data available'));
-          }
+        if (healthInst.isEmpty) {
+          return const Center(child: Text('No data available'));
+        }
 
-          return GridView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1 / 1.2,
-            ),
-            itemCount: healthInst.length,
-            itemBuilder: (context, index) => _HealthInstitutionCard(
-              healthInstData: healthInst[index],
-            ),
-          );
-        },
-      ),
+        return GridView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1 / 1.2,
+          ),
+          itemCount: healthInst.length,
+          itemBuilder: (context, index) => _HealthInstitutionCard(
+            healthInstData: healthInst[index],
+          ),
+        );
+      },
     );
   }
 
