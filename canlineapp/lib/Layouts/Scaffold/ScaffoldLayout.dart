@@ -104,7 +104,7 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
       height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(0.6),
+        color: _primaryColor.withOpacity(1.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
