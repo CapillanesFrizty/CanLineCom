@@ -1,3 +1,4 @@
+import 'package:canerline_app/Layouts/Scaffold/ScaffoldLayout.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../widgets/BarrelFileWidget..dart';
 
 class HealthInstitutionScreen extends StatefulWidget {
-  const HealthInstitutionScreen({super.key});
+  final String? userid;
+  const HealthInstitutionScreen({super.key, this.userid});
 
   @override
   State<HealthInstitutionScreen> createState() =>
@@ -37,7 +39,21 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          "Health Institution",
+          style: GoogleFonts.poppins(
+            fontSize: 30.0,
+            fontWeight: FontWeight.w500,
+            color: _primaryColor,
+          ),
+        ),
+        leading: BackButton(
+          color: _primaryColor,
+          onPressed: () =>
+              GoRouter.of(context).go("/HomeScreen/${widget.userid}"),
+        ),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
