@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
     _animationController = AnimationController(
       vsync: this,
       duration:
-          const Duration(seconds: 2), // Total duration for fade-in and fade-out
+          const Duration(seconds: 3), // Total duration for fade-in and fade-out
     );
 
     // Define the fade animation
