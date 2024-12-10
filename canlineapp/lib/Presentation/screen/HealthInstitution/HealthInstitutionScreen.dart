@@ -1,4 +1,3 @@
-import 'package:canerline_app/Layouts/Scaffold/ScaffoldLayout.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +18,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   static const Color _primaryColor = Color(0xFF5B50A0);
 
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  final String _searchQuery = '';
   int _currentCategoryIndex =
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
 
@@ -104,13 +103,14 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
 
   Widget _buildCategories() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildCategoryButton(
-              LucideIcons.ambulance, "Hospitals", 0, Colors.red),
-          _buildCategoryButton(LucideIcons.hospital, "Clinics", 1, Colors.blue),
+              LucideIcons.hospital, "Hospitals", 0, Colors.red),
+          _buildCategoryButton(
+              LucideIcons.squareActivity, "Clinics", 1, Colors.blue),
           _buildCategoryButton(
               LucideIcons.housePlus, "Brgy. HS", 2, Colors.orange),
         ],
@@ -159,7 +159,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
             child: Text(
               "Public Hospitals",
               style: TextStyle(
@@ -176,7 +177,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             child: _buildPublicHealthInstitutionsGrid(),
           )),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
             child: Text(
               "Private Hospitals",
               style: TextStyle(

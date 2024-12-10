@@ -1,7 +1,7 @@
-name: canerline_app
-description: "app for canerline"
+name: cancerline_companion
+description: "A companion app for CancerLine"
 publish_to: "none"
-version: 0.1.0
+version: 2.0.0
 
 environment:
   sdk: ">=3.4.4 <4.0.0"
@@ -16,6 +16,8 @@ dependencies:
   google_maps_flutter: ^2.9.0
   lucide_icons: ^0.257.0
   lucide_icons_flutter: ^1.2.4
+  flutter_native_splash: ^2.2.15
+  flutter_launcher_icons: "^0.14.2"
 
 dev_dependencies:
   flutter_test:
@@ -45,3 +47,19 @@ flutter:
 
   uses-material-design: true
 
+flutter_native_splash:
+  color: "#ffffff" # Background color
+  image: lib/assets/images/logo/introduction.png # Path to your splash image
+  android: true
+  ios: true
+  android_gravity: center # Position of the image on Android
+  ios_content_mode: scaleAspectFill # Position of the image on iOS
+  web: false # Disable web splash screen
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "lib/assets/images/logo/Icon-Output(Release)/android/play_store_512.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_foreground: "lib/assets/images/logo/Icon-Output(Release)/android/play_store_512.png"
+  adaptive_icon_background: "#ffffff"
