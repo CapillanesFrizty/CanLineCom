@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:cancerline_companion/Presentation/widgets/onboarding/getstarted_button.dart'; // Update the import path as needed
+import '../../../Presentation/widgets/onboarding/getstarted_button.dart'; // Update the import path as needed
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

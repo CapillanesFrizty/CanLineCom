@@ -116,8 +116,11 @@ class _JournalScreenState extends State<JournalScreen> {
       _user = u.user;
     });
 
-    final response =
-        await supabase.from('Journal').select().eq('created_by', _user!.id);
+    final response = await supabase
+        .from('Journal')
+        .select()
+        .eq('created_by', _user!.id)
+        .order("created_at", ascending: false);
 
     debugPrint('Journal Entries: $response');
 
