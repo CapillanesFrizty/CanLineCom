@@ -26,7 +26,6 @@ class _JournalScreenState extends State<JournalScreen> {
   final TextEditingController _contentController = TextEditingController();
   bool isLoading = true;
   final supabase = Supabase.instance.client;
-  User? _user;
   List<dynamic> journalEntries = [];
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -66,7 +65,7 @@ class _JournalScreenState extends State<JournalScreen> {
       'title_of_the_journal': _titleController.text.trim(),
       'body_of_journal': _contentController.text.trim(),
       'emotion': emotion,
-      'created_by': _user!.id,
+      'created_by': u!.id, //? Need Fix
     };
 
     try {
@@ -99,13 +98,12 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 
   Future<void> fetchUserJournalEntries() async {
-    final u = await supabase.auth.getUser();
-    setState(() => _user = u.user);
+    final u = supabase.auth.currentSession;
 
     final response = await supabase
         .from('Journal')
         .select()
-        .eq('created_by', _user!.id)
+        .eq('created_by', u!.user.id)
         .order("created_at", ascending: false);
 
     debugPrint('Journal Entries: $response');
@@ -264,14 +262,18 @@ class _JournalScreenState extends State<JournalScreen> {
                                   style: TextStyle(color: Colors.grey),
                                 ),
                           onTap: () async {
-                            final result = await showDatePicker(
+                            final DateTime? result = await showDatePicker(
                               context: context,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2101),
                               initialDate: selectedStartDate ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: selectedEndDate ?? DateTime(2101),
                             );
                             if (result != null) {
-                              setState(() => selectedStartDate = result);
+                              setState(() {
+                                selectedStartDate = result;
+                                Navigator.pop(context);
+                                _showFilterDrawer(); // Reopen drawer to show updated dates
+                              });
                             }
                           },
                         ),
@@ -301,14 +303,30 @@ class _JournalScreenState extends State<JournalScreen> {
                                   style: TextStyle(color: Colors.grey),
                                 ),
                           onTap: () async {
-                            final result = await showDatePicker(
+                            if (selectedStartDate == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text('Please select a start date first'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            final DateTime? result = await showDatePicker(
                               context: context,
-                              firstDate: selectedStartDate ?? DateTime(2000),
+                              initialDate:
+                                  selectedEndDate ?? selectedStartDate!,
+                              firstDate: selectedStartDate!,
                               lastDate: DateTime(2101),
-                              initialDate: selectedEndDate ?? DateTime.now(),
                             );
                             if (result != null) {
-                              setState(() => selectedEndDate = result);
+                              setState(() {
+                                selectedEndDate = result;
+                                Navigator.pop(context);
+                                _showFilterDrawer(); // Reopen drawer to show updated dates
+                              });
                             }
                           },
                         ),
@@ -526,6 +544,7 @@ class _JournalScreenState extends State<JournalScreen> {
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (selectedFilterEmotion != null ||
               selectedStartDate != null ||
@@ -535,6 +554,7 @@ class _JournalScreenState extends State<JournalScreen> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
                       'Active Filters: ',
@@ -1059,6 +1079,7 @@ class _JournalEntry extends StatelessWidget {
                         const SizedBox(height: 24),
                         Container(
                           padding: const EdgeInsets.all(16),
+                          width: 500,
                           decoration: BoxDecoration(
                             color: Colors.grey[50],
                             borderRadius: BorderRadius.circular(12),
@@ -1184,6 +1205,7 @@ class _JournalEntry extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 content,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[800],
