@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class JournalScreen extends StatefulWidget {
   const JournalScreen({super.key});
@@ -14,30 +15,29 @@ class _JournalScreenState extends State<JournalScreen> {
   static const Color primaryColor = Color(0xFF5B50A0);
   static const Color secondaryColor = Color(0xFFFF0000);
 
-  // Todo: Returns none because -1 is the default value
   int selectedEmotion = -1;
+  String? selectedFilterEmotion;
+  DateTime? selectedStartDate;
+  DateTime? selectedEndDate;
+  String? selectedSortOption;
 
   final List<bool> selectedReasons = List.generate(14, (_) => false);
-
-  // Text controllers for the form fields
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   bool isLoading = true;
   final supabase = Supabase.instance.client;
   User? _user;
   List<dynamic> journalEntries = [];
-
-  // Add a GlobalKey for the Form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  Future<void> _submitJournalEntry() async {
-    // First, validate the form fields
-    if (!_formKey.currentState!.validate()) {
-      // If form fields are invalid, do not proceed
-      return;
-    }
+  @override
+  void initState() {
+    super.initState();
+    fetchUserJournalEntries();
+  }
 
-    // Then, validate the emotion selection
+  Future<void> _submitJournalEntry() async {
+    if (!_formKey.currentState!.validate()) return;
     if (selectedEmotion == -1) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -49,10 +49,7 @@ class _JournalScreenState extends State<JournalScreen> {
       return;
     }
 
-    // If all validations pass, proceed with submission
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     final String emotion = [
       "Awesome",
@@ -73,10 +70,7 @@ class _JournalScreenState extends State<JournalScreen> {
     };
 
     try {
-      // Insert data into the "Journal" table
       await supabase.from('Journal').insert([journalEntry]).select();
-
-      // Show success message
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -85,11 +79,8 @@ class _JournalScreenState extends State<JournalScreen> {
           duration: const Duration(seconds: 2),
         ),
       );
-
-      // Update the journal entries
       fetchUserJournalEntries();
     } catch (e) {
-      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Unexpected error occurred: $e'),
@@ -107,14 +98,9 @@ class _JournalScreenState extends State<JournalScreen> {
     }
   }
 
-  // Function for fetching journal entries
   Future<void> fetchUserJournalEntries() async {
-    // Fetch data from the "Journal" table with the User's ID
     final u = await supabase.auth.getUser();
-
-    setState(() {
-      _user = u.user;
-    });
+    setState(() => _user = u.user);
 
     final response = await supabase
         .from('Journal')
@@ -130,17 +116,13 @@ class _JournalScreenState extends State<JournalScreen> {
     });
   }
 
-  // Function for deleting journal entries
   Future<void> deleteJournalEntry(int id) async {
     try {
-      // Delete data from the "Journal" table with the specified ID
       final response =
           await supabase.from('Journal').delete().eq('journal_id', id);
 
       if (response != null) {
         debugPrint('Journal Entry Deleted: $response');
-
-        // Update UI by removing the deleted entry
         setState(() {
           journalEntries.removeWhere((entry) => entry['journal_id'] == id);
         });
@@ -166,265 +148,28 @@ class _JournalScreenState extends State<JournalScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchUserJournalEntries();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _buildBottomSheet();
-        },
-        backgroundColor: primaryColor,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Future _buildBottomSheet() {
-    return showModalBottomSheet(
-      isScrollControlled: true, // Allows resizing when the keyboard opens
+  void _showFilterDrawer() {
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        int localSelectedEmotion = selectedEmotion;
-
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            // Function to update the selected index
-            void changeIndex(int index) {
-              setModalState(() {
-                localSelectedEmotion = index;
-              });
-              setState(() {
-                selectedEmotion = index;
-              });
-            }
-
-            // Radio button builder
-            Widget buildCustomRadio({
-              required String imagePath,
-              required String label,
-              required int index,
-            }) =>
-                GestureDetector(
-                  onTap: () {
-                    changeIndex(index);
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircleAvatar(
-                        minRadius: 2.0,
-                        backgroundColor: (localSelectedEmotion == index)
-                            ? primaryColor.withOpacity(0.1)
-                            : primaryColor.withOpacity(0.5),
-                        child: Image.asset(
-                          imagePath,
-                          width: 80,
-                          height: 80,
-                        ),
-                      ),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontWeight: (localSelectedEmotion == index)
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-
-            return DraggableScrollableSheet(
-              initialChildSize: 0.8, // Start at 80% of screen height
-              minChildSize: 0.5, // Minimum height is 50% of screen
-              maxChildSize: 1.0, // Can expand to full screen
-              expand: false,
-              builder: (context, scrollController) {
-                return SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 20.0,
-                      right: 20.0,
-                      top: 20.0,
-                      bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
-                    ), // Adjust padding for the keyboard
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.yellow[100],
-                            border: Border.all(color: Colors.yellow[700]!),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.warning_amber_rounded,
-                                color: Colors.yellow[700],
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Kindly fill out all required fields(*).',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.yellow[700],
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          'How are you feeling today?*',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          height: 120,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              buildCustomRadio(
-                                index: 0,
-                                label: 'Awesome',
-                                imagePath:
-                                    'lib/assets/images/Journal/Awsome.png',
-                              ),
-                              const SizedBox(width: 10),
-                              buildCustomRadio(
-                                index: 1,
-                                label: 'Happy',
-                                imagePath:
-                                    'lib/assets/images/Journal/Happy.png',
-                              ),
-                              const SizedBox(width: 10),
-                              buildCustomRadio(
-                                index: 2,
-                                label: 'Lovely',
-                                imagePath:
-                                    'lib/assets/images/Journal/Inlove.png',
-                              ),
-                              const SizedBox(width: 10),
-                              buildCustomRadio(
-                                index: 3,
-                                label: 'Blessed',
-                                imagePath:
-                                    'lib/assets/images/Journal/Angel.png',
-                              ),
-                              const SizedBox(width: 10),
-                              buildCustomRadio(
-                                index: 4,
-                                label: 'Okay',
-                                imagePath: 'lib/assets/images/Journal/Calm.png',
-                              ),
-                              const SizedBox(width: 10),
-                              buildCustomRadio(
-                                index: 5,
-                                label: 'Sad',
-                                imagePath: 'lib/assets/images/Journal/Sad.png',
-                              ),
-                              const SizedBox(width: 10),
-                              buildCustomRadio(
-                                index: 6,
-                                label: 'Terrible',
-                                imagePath:
-                                    'lib/assets/images/Journal/Disappointed.png',
-                              ),
-                              const SizedBox(width: 10),
-                              buildCustomRadio(
-                                index: 7,
-                                label: 'Angry',
-                                imagePath:
-                                    'lib/assets/images/Journal/Angry.png',
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Form(
-                          key: _formKey, // Assign the GlobalKey here
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                controller: _titleController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Title of your Journal*',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(10),
-                                    ),
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter the title of the journal.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 24),
-                              TextFormField(
-                                controller: _contentController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Share your thoughts here...*',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(10),
-                                    ),
-                                  ),
-                                  alignLabelWithHint: true,
-                                ),
-                                maxLines: 10,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter the content of the journal.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 50),
-                        Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                              minimumSize: const Size(double.infinity, 50),
-                              padding: EdgeInsets.zero,
-                            ),
-                            onPressed: () {
-                              _submitJournalEntry();
-                            },
-                            child: const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+      isScrollControlled: true,
+      backgroundColor:
+          Colors.transparent, // Ensure the background is transparent
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 1.0,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white, // Set the background color to white
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: _buildDrawerContent(),
+              ),
             );
           },
         );
@@ -432,54 +177,710 @@ class _JournalScreenState extends State<JournalScreen> {
     );
   }
 
-  Widget _buildBody() {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (journalEntries.isEmpty) {
-      return const Center(
-        child: Text(
-          "No journal entries yet. Start writing!",
-          style: TextStyle(color: Colors.grey, fontSize: 16),
-        ),
-      );
-    }
-
+  Widget _buildDrawerContent() {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 26.0),
-      child: ListView(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Optional: Date section (example for one entry)
-          // _Header(
-          //   date: 'NOV 13',
-          //   day: 'Today',
-          //   weekday: 'Wednesday',
-          //   color: primaryColor,
-          // ),
+          Center(
+            child: Container(
+              width: 40,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Filter Journals',
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Customize your view',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
           const SizedBox(height: 20),
-
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey[200]!),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(LucideIcons.calendar, color: primaryColor),
+                  title: Text(
+                    'Select Date Range',
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Filter entries by date',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ListTile(
+                          title: Text(
+                            'Start',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: selectedStartDate != null
+                              ? Text(
+                                  DateFormat('MM/dd/yyyy')
+                                      .format(selectedStartDate!),
+                                  style: TextStyle(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                )
+                              : Text(
+                                  'Select date',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                          onTap: () async {
+                            final result = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2101),
+                              initialDate: selectedStartDate ?? DateTime.now(),
+                            );
+                            if (result != null) {
+                              setState(() => selectedStartDate = result);
+                            }
+                          },
+                        ),
+                      ),
+                      Icon(LucideIcons.arrowRight,
+                          size: 16, color: Colors.grey),
+                      Expanded(
+                        child: ListTile(
+                          title: Text(
+                            'End',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: selectedEndDate != null
+                              ? Text(
+                                  DateFormat('MM/dd/yyyy')
+                                      .format(selectedEndDate!),
+                                  style: TextStyle(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                )
+                              : Text(
+                                  'Select date',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                          onTap: () async {
+                            final result = await showDatePicker(
+                              context: context,
+                              firstDate: selectedStartDate ?? DateTime(2000),
+                              lastDate: DateTime(2101),
+                              initialDate: selectedEndDate ?? DateTime.now(),
+                            );
+                            if (result != null) {
+                              setState(() => selectedEndDate = result);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
-          // Render Journal Entries
-          ...journalEntries.map((entry) {
-            return _JournalEntry(
-              emoji: _getEmojiForEmotion(entry['emotion']),
-              title: entry['title_of_the_journal'],
-              time: entry['created_at'],
-              content: entry['body_of_journal'],
-              primaryColor: primaryColor,
-              secondaryColor: secondaryColor,
-              onDelete: () => deleteJournalEntry(entry['journal_id']),
-            );
-          }),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey[200]!),
+            ),
+            child: ExpansionTile(
+              leading: Icon(LucideIcons.smile, color: primaryColor),
+              title: Text(
+                'Filter by Emotion',
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              subtitle: Text('See entries with specific emotions'),
+              children: [
+                ...[
+                  'Awesome',
+                  'Happy',
+                  'Lovely',
+                  'Blessed',
+                  'Okay',
+                  'Sad',
+                  'Terrible',
+                  'Angry'
+                ].map((String value) {
+                  return ListTile(
+                    leading: Text(_getEmojiForEmotion(value)),
+                    title: Text(
+                      value,
+                      style: TextStyle(color: primaryColor),
+                    ),
+                    selected: selectedFilterEmotion == value,
+                    selectedColor: primaryColor,
+                    selectedTileColor: primaryColor.withOpacity(0.1),
+                    onTap: () {
+                      setState(() => selectedFilterEmotion = value);
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey[200]!),
+            ),
+            child: ExpansionTile(
+              leading: Icon(LucideIcons.arrowUpDown, color: primaryColor),
+              title: Text(
+                'Sort Entries',
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              subtitle: Text('Change the order of entries'),
+              children: [
+                ListTile(
+                  leading: Icon(LucideIcons.arrowUp),
+                  title: Text('Newest First'),
+                  selected: selectedSortOption == 'newest',
+                  selectedColor: primaryColor,
+                  selectedTileColor: primaryColor.withOpacity(0.1),
+                  onTap: () {
+                    setState(() {
+                      selectedSortOption = 'newest';
+                      journalEntries.sort(
+                          (a, b) => b['created_at'].compareTo(a['created_at']));
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(LucideIcons.arrowDown),
+                  title: Text('Oldest First'),
+                  selected: selectedSortOption == 'oldest',
+                  selectedColor: primaryColor,
+                  selectedTileColor: primaryColor.withOpacity(0.1),
+                  onTap: () {
+                    setState(() {
+                      selectedSortOption = 'oldest';
+                      journalEntries.sort(
+                          (a, b) => a['created_at'].compareTo(b['created_at']));
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // todo: update the Function to get emoji for emotion
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: Icon(LucideIcons.filter, color: primaryColor),
+                    onPressed: _showFilterDrawer,
+                  ),
+                ],
+              ),
+            ),
+            Expanded(child: _buildBody()),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _buildBottomSheet,
+        backgroundColor: primaryColor,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+        ),
+      );
+    }
+
+    if (journalEntries.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              LucideIcons.book,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "No journal entries yet",
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Start writing your thoughts!",
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    List<dynamic> filteredEntries = journalEntries;
+
+    // Filter by emotion
+    if (selectedFilterEmotion != null) {
+      filteredEntries = filteredEntries
+          .where((entry) => entry['emotion'] == selectedFilterEmotion)
+          .toList();
+    }
+
+    // Filter by date range
+    if (selectedStartDate != null && selectedEndDate != null) {
+      filteredEntries = filteredEntries.where((entry) {
+        DateTime entryDate = DateTime.parse(entry['created_at']);
+        return entryDate.isAfter(selectedStartDate!) &&
+            entryDate.isBefore(selectedEndDate!.add(Duration(days: 1)));
+      }).toList();
+    }
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          if (selectedFilterEmotion != null ||
+              selectedStartDate != null ||
+              selectedEndDate != null)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    Text(
+                      'Active Filters: ',
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (selectedFilterEmotion != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Chip(
+                          avatar:
+                              Text(_getEmojiForEmotion(selectedFilterEmotion!)),
+                          label: Text(selectedFilterEmotion!),
+                          onDeleted: () {
+                            setState(() => selectedFilterEmotion = null);
+                          },
+                          backgroundColor: primaryColor.withOpacity(0.1),
+                          deleteIconColor: primaryColor,
+                        ),
+                      ),
+                    if (selectedStartDate != null && selectedEndDate != null)
+                      Chip(
+                        avatar: Icon(LucideIcons.calendar,
+                            size: 16, color: primaryColor),
+                        label: Text(
+                          '${DateFormat('MM/dd').format(selectedStartDate!)} - ${DateFormat('MM/dd').format(selectedEndDate!)}',
+                        ),
+                        onDeleted: () {
+                          setState(() {
+                            selectedStartDate = null;
+                            selectedEndDate = null;
+                          });
+                        },
+                        backgroundColor: primaryColor.withOpacity(0.1),
+                        deleteIconColor: primaryColor,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredEntries.length,
+              itemBuilder: (context, index) {
+                final entry = filteredEntries[index];
+                return _JournalEntry(
+                  emoji: _getEmojiForEmotion(entry['emotion']),
+                  title: entry['title_of_the_journal'],
+                  time: entry['created_at'],
+                  content: entry['body_of_journal'],
+                  primaryColor: primaryColor,
+                  secondaryColor: secondaryColor,
+                  onDelete: () => deleteJournalEntry(entry['journal_id']),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future _buildBottomSheet() {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.9,
+                minChildSize: 0.5,
+                maxChildSize: 0.95,
+                expand: false,
+                builder: (context, scrollController) {
+                  return SingleChildScrollView(
+                    controller: scrollController,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        top: 20.0,
+                        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Drag indicator
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          // Title
+                          Text(
+                            'Add New Journal Entry',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _buildWarningMessage(),
+                          const SizedBox(height: 30),
+                          // Emotions section
+                          Text(
+                            'How are you feeling today?*',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              scrollDirection: Axis.horizontal,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount: 8,
+                              itemBuilder: (context, index) {
+                                final emotions = [
+                                  (
+                                    'Awesome',
+                                    'lib/assets/images/Journal/Awsome.png'
+                                  ),
+                                  (
+                                    'Happy',
+                                    'lib/assets/images/Journal/Happy.png'
+                                  ),
+                                  (
+                                    'Lovely',
+                                    'lib/assets/images/Journal/Inlove.png'
+                                  ),
+                                  (
+                                    'Blessed',
+                                    'lib/assets/images/Journal/Angel.png'
+                                  ),
+                                  (
+                                    'Okay',
+                                    'lib/assets/images/Journal/Calm.png'
+                                  ),
+                                  ('Sad', 'lib/assets/images/Journal/Sad.png'),
+                                  (
+                                    'Terrible',
+                                    'lib/assets/images/Journal/Disappointed.png'
+                                  ),
+                                  (
+                                    'Angry',
+                                    'lib/assets/images/Journal/Angry.png'
+                                  ),
+                                ];
+
+                                return Container(
+                                  margin: EdgeInsets.only(right: 16),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setModalState(() {
+                                        selectedEmotion = index;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: selectedEmotion == index
+                                            ? primaryColor.withOpacity(0.1)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: selectedEmotion == index
+                                              ? primaryColor
+                                              : Colors.grey[200]!,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.asset(
+                                            emotions[index].$2,
+                                            width: 50,
+                                            height: 50,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            emotions[index].$1,
+                                            style: TextStyle(
+                                              color: selectedEmotion == index
+                                                  ? primaryColor
+                                                  : Colors.grey[600],
+                                              fontWeight:
+                                                  selectedEmotion == index
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                          // Form section
+                          Text(
+                            'Your Thoughts',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildForm(),
+                          const SizedBox(height: 30),
+                          // Save button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed: _submitJournalEntry,
+                              child: const Text(
+                                'Save Entry',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildWarningMessage() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.yellow[100],
+        border: Border.all(color: Colors.yellow[700]!),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.yellow[700],
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Kindly fill out all required fields(*).',
+              style: GoogleFonts.poppins(
+                color: Colors.yellow[700],
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _titleController,
+            decoration: const InputDecoration(
+              labelText: 'Title of your Journal*',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter the title of the journal.';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
+          TextFormField(
+            controller: _contentController,
+            decoration: const InputDecoration(
+              labelText: 'Share your thoughts here...*',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              alignLabelWithHint: true,
+            ),
+            maxLines: 10,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter the content of the journal.';
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   String _getEmojiForEmotion(String emotion) {
     switch (emotion.toLowerCase()) {
       case 'awesome':
@@ -499,8 +900,57 @@ class _JournalScreenState extends State<JournalScreen> {
       case 'angry':
         return '😡';
       default:
-        return '🤔'; // Default emoji for undefined emotions
+        return '🤔';
     }
+  }
+
+  Widget buildCustomRadio({
+    required String imagePath,
+    required String label,
+    required int index,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      child: GestureDetector(
+        onTap: () => setState(() => selectedEmotion = index),
+        child: Container(
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: selectedEmotion == index
+                ? primaryColor.withOpacity(0.1)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color:
+                  selectedEmotion == index ? primaryColor : Colors.grey[200]!,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                imagePath,
+                width: 50,
+                height: 50,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: selectedEmotion == index
+                      ? primaryColor
+                      : Colors.grey[600],
+                  fontWeight: selectedEmotion == index
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -509,107 +959,240 @@ class _JournalEntry extends StatelessWidget {
   final String title;
   final String time;
   final String content;
-  // final String tag;
   final Color primaryColor;
   final Color secondaryColor;
-  final VoidCallback onDelete; // Add this parameter
+  final VoidCallback onDelete;
 
   const _JournalEntry({
     required this.emoji,
     required this.title,
     required this.time,
     required this.content,
-    // required this.tag,
     required this.primaryColor,
     required this.secondaryColor,
-    required this.onDelete, // Make it required
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: primaryColor.withOpacity(0.5)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: primaryColor.withOpacity(0.1)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: InkWell(
+        // Add InkWell for tap feedback
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => DraggableScrollableSheet(
+              initialChildSize: 0.9,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
+              builder: (_, controller) => Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: SingleChildScrollView(
+                  controller: controller,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 32),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    DateFormat('MMMM dd, yyyy - hh:mm a')
+                                        .format(DateTime.parse(time)),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            content,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[800],
+                              height: 1.6,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton.icon(
+                              onPressed: () => Navigator.pop(context),
+                              icon: Icon(LucideIcons.x, size: 18),
+                              label: Text('Close'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                onDelete();
+                              },
+                              icon: Icon(LucideIcons.trash, size: 18),
+                              label: Text('Delete'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: secondaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                emoji,
-                style: const TextStyle(fontSize: 24),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: primaryColor,
-                      ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(height: 4),
-                    Text(time, style: const TextStyle(color: Colors.grey)),
-                  ],
+                    child: Text(
+                      emoji,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          DateFormat('MMM dd, yyyy')
+                              .format(DateTime.parse(time)),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(LucideIcons.trash,
+                        color: secondaryColor, size: 20),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          title: Text("Delete Journal Entry?"),
+                          content: Text("This action cannot be undone."),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: onDelete,
+                              child: Text(
+                                "Delete",
+                                style: TextStyle(color: secondaryColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                content,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[800],
+                  height: 1.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(content, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              // Container(
-              //   padding:
-              //       const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-              //   decoration: BoxDecoration(
-              //     border: Border.all(color: primaryColor.withOpacity(0.5)),
-              //     borderRadius: BorderRadius.circular(8),
-              //   ),
-              //   child: Text(
-              //     tag,
-              //     style: TextStyle(color: primaryColor),
-              //   ),
-              // ),
-              IconButton(
-                icon: Icon(LucideIcons.trash, color: secondaryColor),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text("Note"),
-                      contentPadding: const EdgeInsets.all(20),
-                      content: Text("Are you sure to delete this Journal?"),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("No"),
-                        ),
-                        TextButton(
-                          onPressed: onDelete,
-                          child: Text("Yes"),
-                        ),
-                      ],
-                    ),
-                  );
-                }, // Call the delete callback
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
