@@ -167,6 +167,7 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
       appBar: AppBar(
         elevation: widget.elevation ?? 0,
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         title: widget.titleWidget,
         actions: widget.actionsWidget,
         leadingWidth: widget.leadingWidget != null ? 50 : 10,
