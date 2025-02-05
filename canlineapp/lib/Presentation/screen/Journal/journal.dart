@@ -444,44 +444,62 @@ class _JournalScreenState extends State<JournalScreen> {
     );
   }
 
+  bool _isButtonsVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: Icon(LucideIcons.filter, color: primaryColor),
-                    onPressed: _showFilterDrawer,
-                  ),
-                ],
-              ),
-            ),
-            Expanded(child: _buildBody()),
-          ],
-        ),
+        child: _buildBody(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _buildBottomSheet,
-        backgroundColor: primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (_isButtonsVisible) ...[
+            FloatingActionButton(
+              heroTag: "filter",
+              onPressed: _showFilterDrawer,
+              backgroundColor: primaryColor,
+              child: const Icon(LucideIcons.filter, color: Colors.white),
+            ),
+            SizedBox(height: 16),
+            FloatingActionButton(
+              heroTag: "analytics",
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Journal Analytics coming soon!'),
+                    backgroundColor: primaryColor,
+                  ),
+                );
+              },
+              backgroundColor: primaryColor,
+              child: const Icon(LucideIcons.lineChart, color: Colors.white),
+            ),
+            SizedBox(height: 16),
+            FloatingActionButton(
+              heroTag: "add",
+              onPressed: _buildBottomSheet,
+              backgroundColor: primaryColor,
+              child: const Icon(Icons.edit, color: Colors.white),
+            ),
+            SizedBox(height: 16),
+          ],
+          FloatingActionButton(
+            heroTag: "toggle",
+            onPressed: () {
+              setState(() {
+                _isButtonsVisible = !_isButtonsVisible;
+              });
+            },
+            backgroundColor: primaryColor,
+            child: Icon(
+              _isButtonsVisible ? Icons.close : Icons.add,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
