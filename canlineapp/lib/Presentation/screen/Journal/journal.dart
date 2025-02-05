@@ -109,10 +109,12 @@ class _JournalScreenState extends State<JournalScreen> {
 
     debugPrint('Journal Entries: $response');
 
-    setState(() {
-      journalEntries = response as List<dynamic>;
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        journalEntries = response as List<dynamic>;
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> deleteJournalEntry(int id) async {
@@ -126,6 +128,7 @@ class _JournalScreenState extends State<JournalScreen> {
           journalEntries.removeWhere((entry) => entry['journal_id'] == id);
         });
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Journal entry deleted successfully!'),
@@ -133,10 +136,11 @@ class _JournalScreenState extends State<JournalScreen> {
           duration: const Duration(seconds: 2),
         ),
       );
+
       fetchUserJournalEntries();
-      Navigator.of(context).pop();
     } catch (e) {
       debugPrint('Error deleting journal entry: $e');
+      // Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error deleting journal entry: $e'),
@@ -1190,7 +1194,8 @@ class _JournalEntry extends StatelessWidget {
                               child: Text("Cancel"),
                             ),
                             TextButton(
-                              onPressed: onDelete,
+                              onPressed: () =>
+                                  {onDelete(), Navigator.of(context).pop()},
                               child: Text(
                                 "Delete",
                                 style: TextStyle(color: secondaryColor),
