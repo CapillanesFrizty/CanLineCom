@@ -61,11 +61,12 @@ class _JournalScreenState extends State<JournalScreen> {
       "Angry"
     ][selectedEmotion];
 
+    final currentUser = supabase.auth.currentUser;
     final Map<String, dynamic> journalEntry = {
       'title_of_the_journal': _titleController.text.trim(),
       'body_of_journal': _contentController.text.trim(),
       'emotion': emotion,
-      'created_by': u!.id, //? Need Fix
+      'created_by': currentUser!.id,
     };
 
     try {
@@ -108,10 +109,12 @@ class _JournalScreenState extends State<JournalScreen> {
 
     debugPrint('Journal Entries: $response');
 
-    setState(() {
-      journalEntries = response as List<dynamic>;
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        journalEntries = response as List<dynamic>;
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> deleteJournalEntry(int id) async {
@@ -125,6 +128,7 @@ class _JournalScreenState extends State<JournalScreen> {
           journalEntries.removeWhere((entry) => entry['journal_id'] == id);
         });
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Journal entry deleted successfully!'),
@@ -132,10 +136,11 @@ class _JournalScreenState extends State<JournalScreen> {
           duration: const Duration(seconds: 2),
         ),
       );
+
       fetchUserJournalEntries();
-      Navigator.of(context).pop();
     } catch (e) {
       debugPrint('Error deleting journal entry: $e');
+      // Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error deleting journal entry: $e'),
@@ -379,7 +384,7 @@ class _JournalScreenState extends State<JournalScreen> {
                       Navigator.pop(context);
                     },
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -439,44 +444,62 @@ class _JournalScreenState extends State<JournalScreen> {
     );
   }
 
+  bool _isButtonsVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: Icon(LucideIcons.filter, color: primaryColor),
-                    onPressed: _showFilterDrawer,
-                  ),
-                ],
-              ),
-            ),
-            Expanded(child: _buildBody()),
-          ],
-        ),
+        child: _buildBody(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _buildBottomSheet,
-        backgroundColor: primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (_isButtonsVisible) ...[
+            FloatingActionButton(
+              heroTag: "filter",
+              onPressed: _showFilterDrawer,
+              backgroundColor: primaryColor,
+              child: const Icon(LucideIcons.filter, color: Colors.white),
+            ),
+            SizedBox(height: 16),
+            FloatingActionButton(
+              heroTag: "analytics",
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Journal Analytics coming soon!'),
+                    backgroundColor: primaryColor,
+                  ),
+                );
+              },
+              backgroundColor: primaryColor,
+              child: const Icon(LucideIcons.lineChart, color: Colors.white),
+            ),
+            SizedBox(height: 16),
+            FloatingActionButton(
+              heroTag: "add",
+              onPressed: _buildBottomSheet,
+              backgroundColor: primaryColor,
+              child: const Icon(Icons.edit, color: Colors.white),
+            ),
+            SizedBox(height: 16),
+          ],
+          FloatingActionButton(
+            heroTag: "toggle",
+            onPressed: () {
+              setState(() {
+                _isButtonsVisible = !_isButtonsVisible;
+              });
+            },
+            backgroundColor: primaryColor,
+            child: Icon(
+              _isButtonsVisible ? Icons.close : Icons.add,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1189,7 +1212,8 @@ class _JournalEntry extends StatelessWidget {
                               child: Text("Cancel"),
                             ),
                             TextButton(
-                              onPressed: onDelete,
+                              onPressed: () =>
+                                  {onDelete(), Navigator.of(context).pop()},
                               child: Text(
                                 "Delete",
                                 style: TextStyle(color: secondaryColor),
