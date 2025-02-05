@@ -61,11 +61,12 @@ class _JournalScreenState extends State<JournalScreen> {
       "Angry"
     ][selectedEmotion];
 
+    final currentUser = supabase.auth.currentUser;
     final Map<String, dynamic> journalEntry = {
       'title_of_the_journal': _titleController.text.trim(),
       'body_of_journal': _contentController.text.trim(),
       'emotion': emotion,
-      'created_by': u!.id, //? Need Fix
+      'created_by': currentUser!.id,
     };
 
     try {
@@ -379,7 +380,7 @@ class _JournalScreenState extends State<JournalScreen> {
                       Navigator.pop(context);
                     },
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
