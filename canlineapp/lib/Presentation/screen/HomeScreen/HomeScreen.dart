@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen>
         textColor: 0xff139E9E,
         bgColor: 0xffD1FFFF,
         iconColor: 0xff139E9E,
-        route: '/Oncologists',
+        route: '/Oncologist',
         controller: _controller,
         fadeAnimation: _fadeAnimation,
         scaleAnimation: _scaleAnimation,

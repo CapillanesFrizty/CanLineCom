@@ -38,68 +38,19 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Health Institution",
-          style: GoogleFonts.poppins(
-            fontSize: 30.0,
-            fontWeight: FontWeight.w500,
-            color: _primaryColor,
-          ),
-        ),
-        leading: BackButton(
-          color: _primaryColor,
-          onPressed: () =>
-              GoRouter.of(context).go("/HomeScreen/${widget.userid}"),
-        ),
-      ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // const SizedBox(height: 30),
-          // _buildSearchBar(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 30),
           _buildCategories(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 30),
           Expanded(
             child:
-                _buildCurrentCategoryGrid(), // Dynamic content based on category
+                _buildCurrentCategoryList(), // Dynamic content based on category
           ),
         ],
       ),
     );
   }
-
-  // Widget _buildSearchBar() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
-  //     child: TextField(
-  //       controller: _searchController,
-  //       onChanged: (query) {
-  //         setState(() {
-  //           _searchQuery = query;
-  //         });
-  //       },
-  //       decoration: InputDecoration(
-  //         hintText: 'Search',
-  //         prefixIcon: const Icon(Icons.search, color: _primaryColor),
-  //         suffixIcon: const Icon(Icons.filter_list, color: _primaryColor),
-  //         border: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(12),
-  //           borderSide: BorderSide(color: _primaryColor),
-  //         ),
-  //         enabledBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(12),
-  //           borderSide: BorderSide(color: _primaryColor),
-  //         ),
-  //         focusedBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(12),
-  //           borderSide: BorderSide(color: _primaryColor),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildCategories() {
     return Padding(
@@ -152,49 +103,11 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     );
   }
 
-  Widget _buildCurrentCategoryGrid() {
+  Widget _buildCurrentCategoryList() {
     if (_currentCategoryIndex == 0) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-            child: Text(
-              "Public Hospitals",
-              style: TextStyle(
-                fontFamily: 'Poppins', // Replace with your font
-                fontWeight: FontWeight.w600,
-                fontSize: 24,
-                color: _primaryColor, // Adjust to your theme
-              ),
-            ),
-          ),
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: _buildPublicHealthInstitutionsGrid(),
-          )),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-            child: Text(
-              "Private Hospitals",
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-                fontSize: 24,
-                color: _primaryColor,
-              ),
-            ),
-          ),
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: _buildPrivateHealthInstitutionsGrid(),
-          )),
-        ],
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: _buildHealthInstitutionsList(),
       );
     } else if (_currentCategoryIndex == 1) {
       return Column(
@@ -212,34 +125,57 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
               ),
             ),
           ),
-          Expanded(child: _buildClinicGrid()),
+          Expanded(child: _buildClinicList()),
         ],
       );
     } else {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 8.0),
-          //   child: Text(
-          //     "Barangay Health Stations",
-          //     style: TextStyle(
-          //       fontFamily: 'Poppins',
-          //       fontWeight: FontWeight.w600,
-          //       fontSize: 18,
-          //       color: Colors.blueAccent,
-          //     ),
-          //   ),
-          // ),
-          Expanded(child: _buildBrgyHealthStationsGrid()),
+          Expanded(child: _buildBrgyHealthStationsList()),
         ],
       );
     }
   }
 
-  Widget _buildBrgyHealthStationsGrid() {
-    // Implement the grid for Brgy. Health Stations
-    // Assuming you have a future for Brgy. Health Stations similar to _futurepublic and _futureprivate
+  Widget _buildHealthInstitutionsList() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: Future.wait([_futurepublic, _futureprivate]).then((responses) {
+        return [...responses[0], ...responses[1]];
+      }),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error fetching data'));
+        }
+
+        final healthInst = snapshot.data ?? [];
+
+        if (healthInst.isEmpty) {
+          return const Center(child: Text('No data available'));
+        }
+
+        return ListView.builder(
+          itemCount: healthInst.length,
+          itemBuilder: (context, index) => CardDesign1(
+            goto: () {
+              final id = healthInst[index]['Health-Institution-ID'];
+              context.go('/Health-Institution/$id');
+            },
+            image: healthInst[index]['Health-Institution-Image-Url'] ?? '',
+            title:
+                healthInst[index]['Health-Institution-Name'] ?? 'Unknown Name',
+            subtitle: healthInst[index]['Health-Institution-Type'] ?? '',
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBrgyHealthStationsList() {
     final _futureBrgyHealthStations =
         Supabase.instance.client.from('Brgy-Health-Stations').select();
 
@@ -256,7 +192,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             return const Center(
                 child: Text(
                     textAlign: TextAlign.center,
-                    'Sorry for the inconvinience but this Page is Under Construction\n\nPlease check back soon.'));
+                    'Sorry for the inconvenience but this Page is Under Construction\n\nPlease check back soon.'));
           }
 
           final healthStations = snapshot.data ?? [];
@@ -265,16 +201,18 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             return const Center(child: Text('No data available'));
           }
 
-          return GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1 / 1.2,
-            ),
+          return ListView.builder(
             itemCount: healthStations.length,
-            itemBuilder: (context, index) => _HealthInstitutionCard(
-              healthInstData: healthStations[index],
+            itemBuilder: (context, index) => CardDesign1(
+              goto: () {
+                final id = healthStations[index]['Health-Institution-ID'];
+                context.go('/Health-Institution/$id');
+              },
+              image:
+                  healthStations[index]['Health-Institution-Image-Url'] ?? '',
+              title: healthStations[index]['Health-Institution-Name'] ??
+                  'Unknown Name',
+              subtitle: healthStations[index]['Health-Institution-Type'] ?? '',
             ),
           );
         },
@@ -282,77 +220,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     );
   }
 
-  Widget _buildPublicHealthInstitutionsGrid() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _futurepublic,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching data'));
-        }
-
-        final healthInst = snapshot.data ?? [];
-
-        if (healthInst.isEmpty) {
-          return const Center(child: Text('No data available'));
-        }
-
-        return GridView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1 / 1.2,
-          ),
-          itemCount: healthInst.length,
-          itemBuilder: (context, index) => _HealthInstitutionCard(
-            healthInstData: healthInst[index],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPrivateHealthInstitutionsGrid() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _futureprivate,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching data'));
-        }
-
-        final healthInst = snapshot.data ?? [];
-
-        if (healthInst.isEmpty) {
-          return const Center(child: Text('No data available'));
-        }
-
-        return GridView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1 / 1.2,
-          ),
-          itemCount: healthInst.length,
-          itemBuilder: (context, index) => _HealthInstitutionCard(
-            healthInstData: healthInst[index],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildClinicGrid() {
+  Widget _buildClinicList() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -372,80 +240,23 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             return const Center(child: Text('No clinics available'));
           }
 
-          return GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1 / 1.2,
-            ),
+          return ListView.builder(
             itemCount: clinics.length,
             itemBuilder: (context, index) {
               final clinicData = clinics[index];
-              return _buildClinicCard(clinicData);
+              return CardDesign1(
+                goto: () {
+                  final clinicId = clinicData['Clinic-ID'];
+                  context.go('/Health-Institution/clinic/$clinicId');
+                },
+                image: clinicData['Clinic-Image-Url'] ?? '',
+                title: clinicData['Clinic-Name'] ?? 'Unknown Clinic',
+                subtitle: clinicData['Clinic-Type'] ?? 'Unknown Type',
+              );
             },
           );
         },
       ),
-    );
-  }
-
-  Widget _buildClinicCard(Map<String, dynamic> clinicData) {
-    return FutureBuilder<String>(
-      future: _getClinicImageUrl(clinicData),
-      builder: (context, snapshot) {
-        final imageUrl = snapshot.data ?? '';
-
-        return CardDesign1(
-          goto: () {
-            final clinicId = clinicData['Clinic-ID'];
-            context.go('/Health-Institution/clinic/$clinicId');
-          },
-          image: imageUrl,
-          title: clinicData['Clinic-Name'] ?? 'Unknown Clinic',
-          subtitle: clinicData['Clinic-Type'] ?? 'Unknown Type',
-        );
-      },
-    );
-  }
-
-  Future<String> _getClinicImageUrl(Map<String, dynamic> clinicData) async {
-    final fileName = "${clinicData['Clinic-Name']}.png";
-    return Supabase.instance.client.storage
-        .from('Assets')
-        .getPublicUrl("Clinic-External/$fileName");
-  }
-}
-
-class _HealthInstitutionCard extends StatelessWidget {
-  final Map<String, dynamic> healthInstData;
-
-  const _HealthInstitutionCard({required this.healthInstData});
-
-  Future<String> _getImageUrl() async {
-    final fileName = "${healthInstData['Health-Institution-Name']}.png";
-    return Supabase.instance.client.storage
-        .from('Assets')
-        .getPublicUrl("Health-Institution/$fileName");
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: _getImageUrl(),
-      builder: (context, snapshot) {
-        final imageUrl = snapshot.data ?? '';
-
-        return CardDesign1(
-          goto: () {
-            final id = healthInstData['Health-Institution-ID'];
-            context.go('/Health-Institution/$id');
-          },
-          image: imageUrl,
-          title: healthInstData['Health-Institution-Name'] ?? 'Unknown Name',
-          subtitle: healthInstData['Health-Institution-Type'] ?? '',
-        );
-      },
     );
   }
 }

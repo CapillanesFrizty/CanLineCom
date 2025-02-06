@@ -1,94 +1,55 @@
+import 'package:cancerline_companion/Presentation/screen/HealthInstitution/ClinicInstitutionDetails/ClinicAccreditedInsurance.dart';
+import 'package:cancerline_companion/Presentation/screen/HealthInstitution/ClinicInstitutionDetails/ClinicServicesOffered.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// 1. Update Constants structure
-class UIConstants {
-  static const Color primaryColor = Color(0xFF5B50A0);
-  static const Color secondaryColor = Color(0xFFF3EBFF);
-  static const Color accentColor = Color(0xffFFA133);
-  static const Color textColor = Colors.black;
-  static const Color bulletColor = Colors.black;
-
-  static const double defaultSpacing = 32.0;
-  static const double defaultPadding = 16.0;
-  static const double imageHeight = 300.0;
-  static const double mapHeight = 300.0;
-  static const double mapWidth = 500.0;
-  static const double mapZoom = 18.0;
-  static const double iconSize = 25.0;
-  static const double bulletSize = 8.0;
-  static const double buttonHeight = 50.0;
-  static const double borderRadius = 15.0;
+// Centralized color definitions
+class AppColors {
+  static const Color primary = Color(0xff5B50A0);
+  static const Color secondary = Colors.green;
+  static const Color divider = Colors.grey;
+  static const Color textPrimary = Colors.black87;
+  static const Color textSecondary = Colors.black54;
+  static const Color background = Colors.white;
 }
 
-// 2. Update Text Styles
-class TextStyles {
-  static final heading = GoogleFonts.poppins(
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
-    color: UIConstants.primaryColor,
-  );
-
-  static final body = GoogleFonts.poppins(
-    fontSize: 15,
-    color: UIConstants.textColor,
-  );
-
-  static final subtitle = GoogleFonts.poppins(
-    fontSize: 15,
-    color: Colors.grey,
-  );
-
-  static final button = GoogleFonts.poppins(
-    fontSize: 15,
-    color: UIConstants.primaryColor,
-    fontWeight: FontWeight.w600,
-  );
-}
-
-// 3. Database Constants
-class DBConstants {
-  static const String institutionTable = 'Financial-Institution';
-  static const String benefitsTable = 'Financial-Institution-Benefit';
-  static const String benefitDetailsTable =
-      'Benefit-Details-Financial-Institution';
-  static const String requirementsTable = 'Financial-Institution-Requirement';
-}
-
-class FinancialDetails extends StatefulWidget {
+class MoreinfoClinicsscreen extends StatefulWidget {
   final String id;
-  const FinancialDetails({super.key, required this.id});
+  const MoreinfoClinicsscreen({super.key, required this.id});
 
   @override
-  State<FinancialDetails> createState() => _FinancialDetailsState();
+  State<MoreinfoClinicsscreen> createState() => _MoreinfoClinicsscreenState();
 }
 
-class _FinancialDetailsState extends State<FinancialDetails> {
+class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
   late Future<Map<String, dynamic>> _future;
   late GoogleMapController mapController;
 
   @override
   void initState() {
     super.initState();
-    _future = _fetchInstitutionDetails();
+    _future = _fetchClinicDetails();
   }
 
-  Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
+  Future<Map<String, dynamic>> _fetchClinicDetails() async {
     final response = await Supabase.instance.client
-        .from('Financial-Institution')
-        .select()
-        .eq('Financial-Institution-ID', widget.id)
+        .from('Clinic-External')
+        .select('*')
+        .eq('Clinic-ID', widget.id)
         .single();
 
-    final fileName = "${response['Financial-Institution-Name']}.png";
+    final fileName = "${response['Clinic-Name']}.png";
     final imageUrl = Supabase.instance.client.storage
         .from('Assets')
-        .getPublicUrl("Financial-Institution/$fileName");
+        .getPublicUrl("Clinic-External/$fileName");
 
-    response['Financial-Institution-Image-Url'] = imageUrl;
+    debugPrint('LATLONG: ${response['Clinic-Address-lat']},'
+        '${response['Clinic-Address-long']}');
+
+    response['Clinic-Image-Url'] = imageUrl;
     return response;
   }
 
@@ -100,7 +61,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,
-          () => context.go('/Financial-Institution'),
+          () => context.go('/Health-Institution'),
         ),
       ),
       extendBodyBehindAppBar: true,
@@ -115,7 +76,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             final data = snapshot.data!;
             return ListView(
               children: [
-                _buildBackgroundImage(data['Financial-Institution-Image-Url']),
+                _buildBackgroundImage(data['Clinic-Image-Url']),
                 _buildDetailsSection(data),
               ],
             );
@@ -140,7 +101,9 @@ class _FinancialDetailsState extends State<FinancialDetails> {
 
   Widget _buildIconButton(IconData icon, VoidCallback onPressed) {
     return Container(
-      decoration: const BoxDecoration(color: Colors.transparent),
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
+      ),
       child: IconButton(
         onPressed: onPressed,
         icon: Icon(icon),
@@ -164,9 +127,9 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           _buildDividerWithSpacing(),
           _buildLocationSection(data),
           _buildDividerWithSpacing(),
-          _buildBenefitsSection(),
+          _buildServicesSection(),
           _buildDividerWithSpacing(),
-          _buildRequirementsSection(),
+          _buildInsuranceSection(),
           _buildDividerWithSpacing(),
           _buildContactSection(data),
           _buildDividerWithSpacing(),
@@ -182,9 +145,9 @@ class _FinancialDetailsState extends State<FinancialDetails> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        _buildTitle(data['Financial-Institution-Name'] ?? 'Unknown Name'),
+        _buildTitle(data['Clinic-Name'] ?? 'Unknown Name'),
         const SizedBox(height: 10),
-        _buildSubtitle(data['Financial-Institution-Type'] ?? 'Unknown Type'),
+        _buildSubtitle(data['Clinic-Type'] ?? 'Unknown Type'),
         const SizedBox(height: 32),
       ],
     );
@@ -272,7 +235,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         ),
         const SizedBox(height: 20),
         Text(
-          data['Financial-Institution-Desc'] ?? 'No description available',
+          data['Clinic-Description'] ?? 'No description available',
           style: GoogleFonts.poppins(fontSize: 15),
         ),
       ],
@@ -300,7 +263,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         ),
         const SizedBox(height: 8),
         Text(
-          data['Financial-Institution-Address'] ?? '',
+          data['Clinic-External-Address'] ?? '',
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
         ),
@@ -314,18 +277,18 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             zoomControlsEnabled: true,
             initialCameraPosition: CameraPosition(
               target: LatLng(
-                data['Financial-Institution-Address-Lat'] ?? 0.0,
-                data['Financial-Institution-Address-Long'] ?? 0.0,
+                data['Clinic-Address-lat'] ?? 0.0,
+                data['Clinic-Address-long'] ?? 0.0,
               ),
               zoom: 18.0,
             ),
             markers: {
               Marker(
-                markerId: MarkerId(data['Financial-Institution-Name']),
+                markerId: MarkerId(data['Clinic-Name']),
                 icon: BitmapDescriptor.defaultMarker,
                 position: LatLng(
-                  data['Financial-Institution-Address-Lat'] ?? 0.0,
-                  data['Financial-Institution-Address-Long'] ?? 0.0,
+                  data['Clinic-Address-lat'] ?? 0.0,
+                  data['Clinic-Address-long'] ?? 0.0,
                 ),
               ),
             },
@@ -335,29 +298,38 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     );
   }
 
-  Widget _buildBenefitsSection() {
+  // Service Section
+  Widget _buildServicesSection() {
     return _buildSectionWithList(
-      title: 'Benefits Offered',
+      title: 'Services Offered',
       items: const [
-        'Education Loan',
-        'Business Loan',
-        'Personal Loan',
-        'Health Care Loan'
+        'Therapeutics',
+        'Diagnostics (Including Children)',
+        'Radiotherapy (Including Children)',
+        'Brachytherapy',
+        'Outpatient chemotherapy',
       ],
-      buttonText: 'Show all Benefits',
-      onButtonPressed: () => _showSnackBar('Show all benefits clicked'),
+      buttonText: 'Show all Services',
+      onButtonPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const Clinicservicesoffered()),
+      ),
     );
   }
 
-  Widget _buildRequirementsSection() {
+  // Insurance Section
+  Widget _buildInsuranceSection() {
     return _buildSectionWithList(
-      title: 'Requirements',
-      items: const ['Valid ID', 'Proof of Income', 'Bank Statement'],
-      buttonText: 'Show all Requirements',
-      onButtonPressed: () => _showSnackBar('Show all requirements clicked'),
+      title: 'Accredited Insurances',
+      items: const ['Maxicare', 'Intellicare', 'PhilHealth'],
+      buttonText: 'Show all insurances',
+      onButtonPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (context) => const Clinicaccreditedinsurance()),
+      ),
     );
   }
 
+  // Generic list builder with bullet points
   Widget _buildSectionWithList({
     required String title,
     required List<String> items,
@@ -367,12 +339,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xff5B50A0),
-            )),
+        _buildSectionTitle(title),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.only(left: 16.0),
@@ -386,6 +353,52 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           ),
         ),
       ],
+    );
+  }
+
+  // Contact Section
+  Widget _buildContactSection(Map<String, dynamic> data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Contact Us'),
+        const SizedBox(height: 16),
+        _buildContactInfo(
+            data['Clinic-ContactNumber'] ?? 'No contact available'),
+      ],
+    );
+  }
+
+  // Report Section
+  Widget _buildReportSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => _showSnackBar('This feature is not available right now'),
+          child: _buildReportHeader(),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'if bugs and inaccuracy occurred',
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            color: const Color(0xffFFA133),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper Widgets
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.poppins(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xff5B50A0),
+      ),
     );
   }
 
@@ -440,60 +453,31 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     );
   }
 
-  Widget _buildContactSection(Map<String, dynamic> data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildContactInfo(String contactNumber) {
+    return Row(
       children: [
-        Text('Contact Us',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xff5B50A0),
-            )),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            const Icon(Icons.phone_outlined, color: Colors.black, size: 25),
-            const SizedBox(width: 10),
-            Text(
-              data['Financial-Institution-ContactNumber'] ??
-                  'No contact available',
-              style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
-            ),
-          ],
+        const Icon(Icons.phone_outlined, color: Colors.black, size: 25),
+        const SizedBox(width: 10),
+        Text(
+          contactNumber,
+          style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
         ),
       ],
     );
   }
 
-  Widget _buildReportSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildReportHeader() {
+    return Row(
       children: [
-        InkWell(
-          onTap: () => _showSnackBar('This feature is not available right now'),
-          child: Row(
-            children: [
-              const Icon(Icons.flag_outlined, color: Colors.black, size: 25),
-              const SizedBox(width: 10),
-              Text(
-                'Report Listing',
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
+        const Icon(Icons.flag_outlined, color: Colors.black, size: 25),
+        const SizedBox(width: 10),
         Text(
-          'if bugs and inaccuracy occurred',
+          'Report Listing',
           style: GoogleFonts.poppins(
-            fontSize: 15,
-            color: const Color(0xffFFA133),
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+            decoration: TextDecoration.underline,
           ),
         ),
       ],
