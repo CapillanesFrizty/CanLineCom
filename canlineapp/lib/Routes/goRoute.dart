@@ -35,28 +35,28 @@ final GoRouter linkrouter = GoRouter(
                   color: _primaryColor),
               onPressed: () {
                 // Notification action
-                print('Notification icon pressed');
+                debugPrint('Notification icon pressed');
               },
             ),
             IconButton(
               icon: const Icon(Icons.dark_mode_outlined, color: _primaryColor),
               onPressed: () {
                 // Dark mode action
-                print('Dark mode icon pressed');
+                debugPrint('Dark mode icon pressed');
               },
             ),
             IconButton(
               icon: const Icon(Icons.translate_outlined, color: _primaryColor),
               onPressed: () {
                 // Translation action
-                print('Translation icon pressed');
+                debugPrint('Translation icon pressed');
               },
             ),
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: _primaryColor),
               onPressed: () {
                 // Settings action
-                print('Settings icon pressed');
+                debugPrint('Settings icon pressed');
               },
             ),
           ],
@@ -88,14 +88,6 @@ final GoRouter linkrouter = GoRouter(
             return ScaffoldLayoutWidget(
               userid: userId,
               bodyWidget: const EventsScreen(),
-              titleWidget: Text(
-                "Events",
-                style: GoogleFonts.poppins(
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.w500,
-                  color: _primaryColor,
-                ),
-              ),
             );
           },
         ),
@@ -114,7 +106,14 @@ final GoRouter linkrouter = GoRouter(
       path: '/Health-Institution',
       builder: (context, state) {
         final userId = state.pathParameters['userID'] ?? 'default';
-        return HealthInstitutionScreen(userid: userId);
+        return ScaffoldLayoutWidget(
+          userid: userId,
+          bodyWidget: HealthInstitutionScreen(userid: userId),
+          leadingWidget: BackButton(
+            color: _primaryColor,
+            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+          ),
+        );
       },
       routes: [
         GoRoute(
@@ -122,67 +121,6 @@ final GoRouter linkrouter = GoRouter(
           path: ':hid',
           builder: (context, state) =>
               MoreInfoInstitutionScreen(id: state.pathParameters['hid']!),
-          routes: [
-            // ! Health Institution Facilities Route
-            GoRoute(
-              path: 'Facilities',
-              builder: (context, state) {
-                return ScaffoldLayoutWidget(
-                  leadingWidget: TextButton(
-                    onPressed: () {
-                      context.go(
-                          '/Health-Institution/${state.pathParameters['hid']}');
-                    },
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFF5B50A0),
-                    ),
-                  ),
-                  bodyWidget: HealthInstitutionFacilities(
-                      id: state.pathParameters['hid']!),
-                );
-              },
-              //
-            ),
-            GoRoute(
-              path: 'Accredited-Insurance',
-              builder: (context, state) {
-                return ScaffoldLayoutWidget(
-                  leadingWidget: TextButton(
-                    onPressed: () {
-                      context.go(
-                          '/Health-Institution/${state.pathParameters['hid']}');
-                    },
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFF5B50A0),
-                    ),
-                  ),
-                  bodyWidget: HealthInstitutionAccreditedInsurances(
-                      id: state.pathParameters['hid']!),
-                );
-              },
-            ),
-            GoRoute(
-              path: 'Doctors',
-              builder: (context, state) {
-                return ScaffoldLayoutWidget(
-                  leadingWidget: TextButton(
-                    onPressed: () {
-                      context.go(
-                          '/Health-Institution/${state.pathParameters['hid']}');
-                    },
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFF5B50A0),
-                    ),
-                  ),
-                  bodyWidget: HealthInstitutionOncologists(
-                      id: state.pathParameters['hid']!),
-                );
-              },
-            ),
-          ],
         ),
         GoRoute(
           name: "id",
@@ -201,14 +139,6 @@ final GoRouter linkrouter = GoRouter(
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: const BlogsScreen(),
-          titleWidget: Text(
-            "Blogs & News",
-            style: GoogleFonts.poppins(
-              fontSize: 30.0,
-              fontWeight: FontWeight.w500,
-              color: _primaryColor,
-            ),
-          ),
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
@@ -232,14 +162,6 @@ final GoRouter linkrouter = GoRouter(
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: const FinancialSupportScreen(),
-          titleWidget: Text(
-            "Financial Support",
-            style: GoogleFonts.poppins(
-              fontSize: 30.0,
-              fontWeight: FontWeight.w500,
-              color: _primaryColor,
-            ),
-          ),
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
@@ -252,26 +174,18 @@ final GoRouter linkrouter = GoRouter(
           name: 'fid',
           path: ':fid',
           builder: (context, state) =>
-              Financialdetails(id: state.pathParameters['fid']!),
+              FinancialDetails(id: state.pathParameters['fid']!),
         ),
       ],
     ),
     // Doctors Screen
     GoRoute(
-      path: '/Oncologists',
+      path: '/Oncologist',
       builder: (context, state) {
         final userId = state.pathParameters['userID'] ?? 'default';
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: const OncologistsScreens(),
-          titleWidget: Text(
-            "Oncologists",
-            style: GoogleFonts.poppins(
-              fontSize: 30.0,
-              fontWeight: FontWeight.w600,
-              color: _primaryColor,
-            ),
-          ),
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),

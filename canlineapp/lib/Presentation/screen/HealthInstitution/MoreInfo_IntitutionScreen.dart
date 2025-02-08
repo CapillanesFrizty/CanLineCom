@@ -4,6 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../BarrelFileScreen.dart';
+
 class MoreInfoInstitutionScreen extends StatefulWidget {
   final String id;
 
@@ -106,50 +108,82 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 32),
-          _buildTitle(data['Health-Institution-Name'] ?? 'Unknown Name'),
-          const SizedBox(height: 10),
-          _buildSubtitle(data['Health-Institution-Type'] ??
-              'Unknown Type'), // Removed Center
-          const SizedBox(height: 32),
-          const Divider(color: Colors.black),
-          const SizedBox(height: 16),
-          _buildSchedule(), // Removed Center
-          const Divider(color: Colors.black),
-          const SizedBox(height: 16),
-          Center(
-            child: _buildAboutUsSection(
-                data['Health-Institution-Desc'] ?? 'No description available'),
-          ),
-          const SizedBox(height: 32),
-          const Divider(color: Colors.black),
-          _buildMapSection(
-            data['Health-Institution-Address'],
-            data['Health-Institution-Address-Lat'] ?? 0.0,
-            data['Health-Institution-Address-Long'] ?? 0.0,
-            data['Health-Institution-Name'],
-          ),
-          const Divider(color: Colors.black),
-          const SizedBox(height: 32),
-          Center(child: _buildServicesOffers()),
-          const SizedBox(height: 32),
-          const Divider(color: Colors.black),
-          const SizedBox(height: 32),
-          Center(child: _buildAccreditedInsurance()),
-          const SizedBox(height: 32),
-          const Divider(color: Colors.black),
-          const SizedBox(height: 32),
-          Center(
-              child: _buildContactUsSection(
-                  data['Health-Institution-ContactNumber'])),
-          const SizedBox(height: 32),
-          const Divider(color: Colors.black),
-          const SizedBox(height: 32),
-          Center(child: _buildReportListing()),
+          _buildHeaderSection(data),
+          _buildDividerWithSpacing(),
+          _buildSchedule(),
+          _buildDividerWithSpacing(),
+          _buildAboutSection(data),
+          _buildDividerWithSpacing(),
+          _buildLocationSection(data),
+          _buildDividerWithSpacing(),
+          _buildServicesSection(),
+          _buildDividerWithSpacing(),
+          _buildInsuranceSection(),
+          _buildDividerWithSpacing(),
+          _buildContactSection(data),
+          _buildDividerWithSpacing(),
+          _buildReportSection(),
           const SizedBox(height: 32),
         ],
       ),
     );
+  }
+
+  Widget _buildHeaderSection(Map<String, dynamic> data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 32),
+        _buildTitle(data['Health-Institution-Name'] ?? 'Unknown Name'),
+        const SizedBox(height: 10),
+        _buildSubtitle(data['Health-Institution-Type'] ?? 'Unknown Type'),
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  Widget _buildDividerWithSpacing() {
+    return Column(
+      children: const [
+        Divider(color: Colors.black),
+        SizedBox(height: 32),
+      ],
+    );
+  }
+
+  Widget _buildAboutSection(Map<String, dynamic> data) {
+    return Center(
+      child: _buildAboutUsSection(
+        data['Health-Institution-Desc'] ?? 'No description available',
+      ),
+    );
+  }
+
+  Widget _buildLocationSection(Map<String, dynamic> data) {
+    return _buildMapSection(
+      data['Health-Institution-Address'],
+      data['Health-Institution-Address-Lat'] ?? 0.0,
+      data['Health-Institution-Address-Long'] ?? 0.0,
+      data['Health-Institution-Name'],
+    );
+  }
+
+  Widget _buildServicesSection() {
+    return Center(child: _buildServicesOffers());
+  }
+
+  Widget _buildInsuranceSection() {
+    return Center(child: _buildAccreditedInsurance());
+  }
+
+  Widget _buildContactSection(Map<String, dynamic> data) {
+    return Center(
+      child: _buildContactUsSection(data['Health-Institution-ContactNumber']),
+    );
+  }
+
+  Widget _buildReportSection() {
+    return Center(child: _buildReportListing());
   }
 
   Widget _buildTitle(String title) {
@@ -288,137 +322,56 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
+  // Service Section
   Widget _buildServicesOffers() {
+    return _buildSectionWithList(
+      title: 'Services Offered',
+      items: const [
+        'Therapeutics',
+        'Diagnostics (Including Children)',
+        'Radiotherapy (Including Children)',
+        'Brachytherapy',
+        'Outpatient chemotherapy',
+      ],
+      buttonText: 'Show all Services',
+      onButtonPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const Servicesoffered()),
+      ),
+    );
+  }
+
+  // Insurance Section
+  Widget _buildAccreditedInsurance() {
+    return _buildSectionWithList(
+      title: 'Accredited Insurances',
+      items: const ['Maxicare', 'Intellicare', 'PhilHealth'],
+      buttonText: 'Show all insurances',
+      onButtonPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const Accreditedinsurances()),
+      ),
+    );
+  }
+
+  // Generic list builder with bullet points
+  Widget _buildSectionWithList({
+    required String title,
+    required List<String> items,
+    required String buttonText,
+    required VoidCallback onButtonPressed,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Services Offered',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xff5B50A0),
-          ),
-        ),
+        _buildSectionTitle(title),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.only(left: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Covid-19 Testing',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Vaccination',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Consultation',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Emergency Services',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 25),
-              Center(
-                child: SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    onPressed: () {
-                      // TODO: Implement show all insurances functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                          'Show all insurances clicked',
-                        )),
-                      );
-                    },
-                    child: const Text(
-                      'Show all Services',
-                      style: TextStyle(
-                          fontSize: 15,
-                          color: Color(0xff5B50A0),
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ),
+              ...items.map((item) => _buildBulletItem(item)),
+              const SizedBox(height: 25),
+              _buildShowAllButton(buttonText, onButtonPressed),
             ],
           ),
         ),
@@ -426,195 +379,136 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     );
   }
 
-  Widget _buildAccreditedInsurance() {
-    return Column(
-      children: [
-        Text(
-          'Accredited Insurances',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xff5B50A0),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Maxicare',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Intellicare',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'PhilHealth',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 25),
-              Center(
-                child: SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    onPressed: () {
-                      // TODO: Implement show all insurances functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                          'Show all insurances clicked',
-                        )),
-                      );
-                    },
-                    child: const Text(
-                      'Show all insurances',
-                      style: TextStyle(
-                          fontSize: 15,
-                          color: Color(0xff5B50A0),
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
+  // Contact Section
   Widget _buildContactUsSection(String contactNumber) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Contact Us',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xff5B50A0),
-          ),
+        _buildSectionTitle('Contact Us'),
+        const SizedBox(height: 16),
+        _buildContactInfo(contactNumber),
+      ],
+    );
+  }
+
+  // Report Section
+  Widget _buildReportListing() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => _showSnackBar('This feature is not available right now'),
+          child: _buildReportHeader(),
         ),
-        SizedBox(height: 16),
-        Row(
-          children: [
-            const Icon(
-              Icons.phone_outlined,
-              color: Colors.black,
-              size: 25,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              contactNumber,
-              style: GoogleFonts.poppins(
-                fontSize: 15,
-                color: Colors.black,
-              ),
-            ),
-          ],
+        const SizedBox(height: 10),
+        Text(
+          'if bugs and inaccuracy occurred',
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            color: const Color(0xffFFA133),
+          ),
         ),
       ],
     );
   }
 
-  _buildReportListing() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('This feature is not available right now'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          },
-          child: Row(
-            children: [
-              const Icon(
-                Icons.flag_outlined,
-                color: Colors.black,
-                size: 25,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Report Listing',
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ],
+  // Helper Widgets
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.poppins(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xff5B50A0),
+      ),
+    );
+  }
+
+  Widget _buildBulletItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShowAllButton(String text, VoidCallback onPressed) {
+    return Center(
+      child: SizedBox(
+        height: 50,
+        width: double.infinity,
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+          onPressed: onPressed,
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Color(0xff5B50A0),
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        SizedBox(height: 10),
+      ),
+    );
+  }
+
+  Widget _buildContactInfo(String contactNumber) {
+    return Row(
+      children: [
+        const Icon(Icons.phone_outlined, color: Colors.black, size: 25),
+        const SizedBox(width: 10),
         Text(
-          'if bugs and inaccuracy occurred',
-          style: GoogleFonts.poppins(fontSize: 15, color: Color(0xffFFA133)),
+          contactNumber,
+          style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
         ),
       ],
+    );
+  }
+
+  Widget _buildReportHeader() {
+    return Row(
+      children: [
+        const Icon(Icons.flag_outlined, color: Colors.black, size: 25),
+        const SizedBox(width: 10),
+        Text(
+          'Report Listing',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 }

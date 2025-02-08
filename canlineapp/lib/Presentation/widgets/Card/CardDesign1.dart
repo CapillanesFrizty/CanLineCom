@@ -17,44 +17,53 @@ class CardDesign1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: InkWell(
         onTap: goto,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (image.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(
-                    12.0), // Rounded corners for the image
-                child: Image.network(
-                  image,
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit
-                      .cover, // Ensure the image fills the space proportionally
-                ),
-              )
-            else
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: Container(
-                  height: 120, // Placeholder for missing image
-                  width: double.infinity,
-                  color: Colors.grey,
-                  child: const Icon(
-                    Icons.image_not_supported,
-                    size: 40,
-                    color: Colors.white,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            color: Colors.transparent,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (image.isNotEmpty)
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12.0),
+                    topRight: Radius.circular(12.0),
+                  ),
+                  child: Image.network(
+                    image,
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              else
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12.0),
+                    topRight: Radius.circular(12.0),
+                  ),
+                  child: Container(
+                    height: 200,
+                    width: double.infinity,
+                    color: Colors.grey,
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _cardTitleAndSecondaryText(title, subtitle),
               ),
-            const SizedBox(height: 20),
-            _cardTitleAndSecondaryText(
-              title,
-              subtitle,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -68,7 +77,7 @@ class CardDesign1 extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Color(0xff5B50A0),
           ),
@@ -77,7 +86,7 @@ class CardDesign1 extends StatelessWidget {
         Text(
           secondaryText,
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 14,
             fontWeight: FontWeight.normal,
             color: _getSubtitleColor(secondaryText),
           ),

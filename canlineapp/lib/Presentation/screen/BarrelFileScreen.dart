@@ -13,9 +13,10 @@ export 'Events/EventsScreen.dart';
 // ! Health Institution Screens
 export 'HealthInstitution/HealthInstitutionScreen.dart';
 export 'HealthInstitution/MoreInfo_IntitutionScreen.dart';
-export 'HealthInstitution/HealthInstitutionServices/HealthinstitutionFacilities.dart';
-export 'HealthInstitution/HealthInstitutionServices/HealthInstitutionOncologists.dart';
-export 'HealthInstitution/HealthInstitutionServices/HealthInstitutionAccreditedInsurances.dart';
+
+// ! Health Institution Details Screen
+export 'HealthInstitution/HealthInstitutionDetails/ServicesOffered.dart';
+export 'HealthInstitution/HealthInstitutionDetails/AccreditedInsurances.dart';
 
 // ! Blogs Screen
 export 'Blogs/BlogsScreen.dart';
@@ -25,11 +26,10 @@ export 'Blogs/MoreInfo_BlogsScreen.dart';
 export 'FinancialSupport/FinancialSupportScreen.dart';
 export 'FinancialSupport/FinancialDetails.dart';
 
-// ! Doctors Screen
+// ! Oncologist\
 export 'Oncologist/OncologistsScreen.dart';
-
 // ! Clinic
-export 'HealthInstitution/HealthInstitutionServices/Moreinfo_ClinicsScreen.dart';
+export 'HealthInstitution/Moreinfo_ClinicsScreen.dart';
 
 // ! Login Screen
 export 'authentication flow/LoginScreen.dart';
