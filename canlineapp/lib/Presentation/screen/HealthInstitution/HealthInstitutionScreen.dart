@@ -22,18 +22,52 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   int _currentCategoryIndex =
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
 
-  final _futurepublic = Supabase.instance.client
-      .from('Health-Institution')
-      .select()
-      .eq("Health-Institution-Type", "Government Hospital");
+  Future<List<Map<String, dynamic>>> _getHealthInstitutionData() async {
+    final response =
+        await Supabase.instance.client.from('Health-Institution').select();
+
+    List<Map<String, dynamic>> result = [];
+
+    for (var institution in response) {
+      if (institution['Health-Institution-Name'] != null) {
+        final fileName = "${institution['Health-Institution-Name']}.png";
+        final imageUrl = Supabase.instance.client.storage
+            .from('Assets')
+            .getPublicUrl("Health-Institution/$fileName");
+
+        institution['Health-Institution-Image-Url'] = imageUrl;
+        result.add(institution); // Add the institution to the result list
+      }
+    }
+
+    return result; // Return all institutions with image URLs
+  }
 
   final _futureprivate = Supabase.instance.client
       .from('Health-Institution')
       .select()
       .eq("Health-Institution-Type", "Private Hospital");
 
-  final _futureclinics =
-      Supabase.instance.client.from('Clinic-External').select();
+  Future<List<Map<String, dynamic>>> _getClinics() async {
+    final responses =
+        await Supabase.instance.client.from('Clinic-External').select();
+
+    List<Map<String, dynamic>> result = [];
+
+    for (var clinics in responses) {
+      if (clinics['Clinic-Name'] != null) {
+        final fileName = "${clinics['Clinic-Name']}.png";
+        final imageUrl = Supabase.instance.client.storage
+            .from('Assets')
+            .getPublicUrl("Clinic-External/$fileName");
+
+        clinics['Clinic-Image-Url'] = imageUrl;
+        result.add(clinics); // Add the institution to the result list
+      }
+    }
+
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +174,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
 
   Widget _buildHealthInstitutionsList() {
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: Future.wait([_futurepublic, _futureprivate]).then((responses) {
-        return [...responses[0], ...responses[1]];
-      }),
+      future: _getHealthInstitutionData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -224,7 +256,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       child: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _futureclinics,
+        future: _getClinics(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
