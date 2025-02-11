@@ -1,3 +1,4 @@
+import 'package:cancerline_companion/Presentation/screen/Oncologist/OncologistDetailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
@@ -180,18 +181,26 @@ final GoRouter linkrouter = GoRouter(
     ),
     // Doctors Screen
     GoRoute(
-      path: '/Oncologist',
-      builder: (context, state) {
-        final userId = state.pathParameters['userID'] ?? 'default';
-        return ScaffoldLayoutWidget(
-          userid: userId,
-          bodyWidget: const OncologistsScreens(),
-          leadingWidget: BackButton(
-            color: _primaryColor,
-            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+        path: '/Oncologist',
+        builder: (context, state) {
+          final userId = state.pathParameters['userID'] ?? 'default';
+          return ScaffoldLayoutWidget(
+            userid: userId,
+            bodyWidget: const OncologistsScreens(),
+            leadingWidget: BackButton(
+              color: _primaryColor,
+              onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+            ),
+          );
+        },
+        routes: [
+          GoRoute(
+            name: ':docid',
+            path: ':docid',
+            builder: (context, state) => OncologistDetailScreen(
+              docid: state.pathParameters['docid']!,
+            ),
           ),
-        );
-      },
-    ),
+        ]),
   ],
 );

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OncologistDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> doctor;
-  const OncologistDetailScreen({super.key, required this.doctor});
+  final String docid;
+  const OncologistDetailScreen({super.key, required this.docid});
 
   @override
   State<OncologistDetailScreen> createState() => _OncologistDetailScreenState();
@@ -23,7 +24,7 @@ class _OncologistDetailScreenState extends State<OncologistDetailScreen> {
     final response = await Supabase.instance.client
         .from('Doctor')
         .select()
-        .eq('id', widget.doctor['id'])
+        .eq('id', int.parse(widget.docid))
         .maybeSingle();
 
     if (response == null) {
@@ -49,12 +50,12 @@ class _OncologistDetailScreenState extends State<OncologistDetailScreen> {
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,
-          () => Navigator.pop(context),
+          () => context.go('/Oncologist'),
         ),
       ),
       extendBodyBehindAppBar: true,
       body: FutureBuilder<Map<String, dynamic>>(
-        future: _future,
+        future: _fetchDoctorDetails(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -64,7 +65,7 @@ class _OncologistDetailScreenState extends State<OncologistDetailScreen> {
             final data = snapshot.data!;
             return ListView(
               children: [
-                _buildBackgroundImage(data['Doctor-Image-Url']),
+                _buildBackgroundImage(),
                 _buildDetailsSection(data),
               ],
             );
@@ -76,13 +77,12 @@ class _OncologistDetailScreenState extends State<OncologistDetailScreen> {
     );
   }
 
-  Widget _buildBackgroundImage(String imageUrl) {
+  Widget _buildBackgroundImage() {
     return SizedBox(
       height: 300,
       child: ClipRRect(
-        child: imageUrl.isNotEmpty
-            ? Image.network(imageUrl, fit: BoxFit.cover)
-            : const Center(child: Text('Image not available')),
+        child: Center(
+            child: Icon(Icons.person_4_rounded, color: Colors.grey, size: 300)),
       ),
     );
   }
