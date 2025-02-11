@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'OncologistDetailScreen.dart';
 
 class OncologistsScreens extends StatefulWidget {
   const OncologistsScreens({super.key});
@@ -35,34 +35,29 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
     super.dispose();
   }
 
-  Future<List<Map<String, dynamic>>> _fetchDoctors(String type) async {
-    try {
-      // Build the query
-      var query = Supabase.instance.client.from('Doctor').select();
+  Future<List<Map<String, dynamic>>> _fetchDoctors() async {
+    // Build the query
+    var query = Supabase.instance.client.from('Doctor').select();
 
-      if (type != "All") {
-        query = query.eq('Specialization', type);
-      }
+    // if (type != "All") {
+    //   query = query.eq('Specialization', type);
+    // }
 
-      if (_searchInput != null && _searchInput.isNotEmpty) {
-        query = query.ilike("Doctor-Firstname", "%$_searchInput%");
-      }
-
-      // Execute the query
-      final response = await query;
-
-      // Check if the response contains an error
-      if (response == null) {
-        throw Exception("Error fetching doctors: Response is null");
-      }
-
-      debugPrint("Raw Response: $response"); // Debugging step
-
-      return response;
-    } catch (e) {
-      debugPrint("Fetch Error: $e");
-      return [];
+    if (_searchInput != null && _searchInput.isNotEmpty) {
+      query = query.ilike("Doctor-Firstname", "%$_searchInput%");
     }
+
+    // Execute the query
+    final response = await query;
+
+    // Check if the response contains an error
+    if (response == null) {
+      throw Exception("Error fetching doctors: Response is null");
+    }
+
+    debugPrint("Raw Response: $response"); // Debugging step
+
+    return response;
   }
 
   @override
@@ -168,7 +163,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
 
   Widget _buildDoctorSection(String type) {
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _fetchDoctors(type),
+      future: _fetchDoctors(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -199,12 +194,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
   Widget _buildDoctorCard(Map<String, dynamic> doctor) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OncologistDetailScreen(doctor: doctor),
-          ),
-        );
+        context.go('/Oncologist/${doctor['id']}');
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -222,7 +212,8 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.image, color: Colors.white70, size: 40),
+              child:
+                  Icon(Icons.person_4_rounded, color: Colors.white70, size: 40),
             ),
             const SizedBox(width: 16),
             Expanded(

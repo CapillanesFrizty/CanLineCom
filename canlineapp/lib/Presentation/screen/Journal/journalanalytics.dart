@@ -4,7 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 const Color _primaryColor = Color(0xFF5B50A0);
 
 class AnalyticsJournal extends StatefulWidget {
-  const AnalyticsJournal({Key? key}) : super(key: key);
+  const AnalyticsJournal({super.key});
 
   @override
   State<AnalyticsJournal> createState() => _AnalyticsJournalState();
