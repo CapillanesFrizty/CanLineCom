@@ -21,10 +21,16 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   final String _searchQuery = '';
   int _currentCategoryIndex =
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
+  String _selectedFilter = 'All'; // Track selected filter
 
   Future<List<Map<String, dynamic>>> _getHealthInstitutionData() async {
-    final response =
-        await Supabase.instance.client.from('Health-Institution').select();
+    var query = Supabase.instance.client.from('Health-Institution').select();
+
+    if (_selectedFilter != 'All') {
+      query = query.eq('Health-Institution-Type', _selectedFilter);
+    }
+
+    final response = await query;
 
     List<Map<String, dynamic>> result = [];
 
@@ -77,6 +83,9 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           const SizedBox(height: 30),
           _buildCategories(),
           const SizedBox(height: 30),
+          if (_currentCategoryIndex == 0)
+            _buildFilterButton(), // Add filter button only for hospitals
+          const SizedBox(height: 10),
           Expanded(
             child:
                 _buildCurrentCategoryList(), // Dynamic content based on category
@@ -131,6 +140,39 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             height: 2,
             width: isSelected ? 40 : 0,
             color: isSelected ? color : Colors.transparent,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Filter by Type:',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          DropdownButton<String>(
+            value: _selectedFilter,
+            items: <String>['All', 'Private Hospital', 'Government Hospital']
+                .map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedFilter = newValue!;
+              });
+            },
           ),
         ],
       ),
