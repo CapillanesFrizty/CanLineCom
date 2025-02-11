@@ -56,7 +56,9 @@ class _MoreinfoClinicsscreenState extends State<MoreinfoClinicsscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        surfaceTintColor: Colors.white,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: _buildIconButton(

@@ -98,6 +98,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,
@@ -165,9 +166,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           _buildDividerWithSpacing(),
           _buildLocationSection(data),
           _buildDividerWithSpacing(),
-          _buildBenefitsSection(),
-          _buildDividerWithSpacing(),
-          _buildRequirementsSection(),
+          _buildBenefitsSection(data),
           _buildDividerWithSpacing(),
           _buildContactSection(data),
           _buildDividerWithSpacing(),
@@ -336,26 +335,21 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     );
   }
 
-  Widget _buildBenefitsSection() {
+  Widget _buildBenefitsSection(Map<String, dynamic> data) {
     return _buildSectionWithList(
-      title: 'Benefits Offered',
+      title: 'Benefits & Requirements for Cancer Patients',
       items: const [
-        'Education Loan',
-        'Business Loan',
-        'Personal Loan',
-        'Health Care Loan'
+        'Inpatient Benefits',
+        'Outpatient Benefits',
+        'Z Benefits for Catastrophic Illnesses'
       ],
-      buttonText: 'Show all Benefits',
-      onButtonPressed: () => _showSnackBar('Show all benefits clicked'),
-    );
-  }
-
-  Widget _buildRequirementsSection() {
-    return _buildSectionWithList(
-      title: 'Requirements',
-      items: const ['Valid ID', 'Proof of Income', 'Bank Statement'],
-      buttonText: 'Show all Requirements',
-      onButtonPressed: () => _showSnackBar('Show all requirements clicked'),
+      buttonText: 'View More',
+      onButtonPressed: () => GoRouter.of(context).goNamed(
+        "benefits",
+        pathParameters: {
+          'fid': data['Financial-Institution-ID'].toString(),
+        },
+      ),
     );
   }
 

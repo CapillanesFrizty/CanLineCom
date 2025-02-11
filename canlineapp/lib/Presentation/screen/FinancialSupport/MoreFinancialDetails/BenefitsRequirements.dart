@@ -10,6 +10,13 @@ class Benefitsrequirements extends StatefulWidget {
 class _BenefitsrequirementsState extends State<Benefitsrequirements> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Requirements'),
+      ),
+      body: const Center(
+        child: Text('Benefits Requirements'),
+      ),
+    );
   }
 }

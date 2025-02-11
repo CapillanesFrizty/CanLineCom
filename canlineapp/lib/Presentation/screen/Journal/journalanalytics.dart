@@ -1,5 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:flutter/services.dart'; // For permissions
+import 'package:permission_handler/permission_handler.dart';
 
 const Color _primaryColor = Color(0xFF5B50A0);
 
@@ -26,6 +35,45 @@ class _AnalyticsJournalState extends State<AnalyticsJournal>
     super.dispose();
   }
 
+  // Future<void> generatePdf() async {
+  //   final pdf = pw.Document();
+  //   Directory dir;
+
+  //   if (Platform.isAndroid) {
+  //     // For Android: get the download folder path
+  //     dir = (await getExternalStorageDirectory())!;
+  //     String downloadFolderPath =
+  //         "${dir.path}/Download"; // Append 'Download' folder
+  //     Directory(downloadFolderPath)
+  //         .createSync(recursive: true); // Create folder if it doesn't exist
+  //   } else {
+  //     // For iOS, still saving to Documents folder
+  //     dir = await getApplicationDocumentsDirectory();
+  //   }
+
+  //   debugPrint("Download Directory: $dir");
+
+  //   pdf.addPage(pw.Page(
+  //     pageFormat: PdfPageFormat.a4,
+  //     build: (pw.Context context) {
+  //       return pw.Center(
+  //         child: pw.Column(children: [
+  //           pw.Text(
+  //             "CancerLine Summary Report",
+  //             style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+  //           ),
+  //         ]),
+  //       ); // Center
+  //     },
+  //   ));
+
+  //   String filePath = "${dir.path}/example.pdf";
+  //   final file = File(filePath);
+  //   await file.writeAsBytes(await pdf.save());
+
+  //   debugPrint("PDF saved at: $filePath");
+  // }
+
   @override
   Widget build(BuildContext context) {
     // Weekly emotion data
@@ -48,6 +96,19 @@ class _AnalyticsJournalState extends State<AnalyticsJournal>
 
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download_outlined),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('PDF generation is not implemented yet.'),
+                ),
+              );
+              // generatePdf();
+            },
+          ),
+        ],
         backgroundColor: Colors.transparent,
         title: const Text('Journal Analytics',
             style: TextStyle(color: _primaryColor)),

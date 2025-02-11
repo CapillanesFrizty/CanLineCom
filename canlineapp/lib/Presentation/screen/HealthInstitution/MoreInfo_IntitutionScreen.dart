@@ -45,8 +45,10 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,

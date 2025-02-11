@@ -25,6 +25,7 @@ export 'Blogs/MoreInfo_BlogsScreen.dart';
 // ! Financial Support Screen
 export 'FinancialSupport/FinancialSupportScreen.dart';
 export 'FinancialSupport/FinancialDetails.dart';
+export 'FinancialSupport/MoreFinancialDetails/BenefitsDetails.dart';
 
 // ! Oncologist\
 export 'Oncologist/OncologistsScreen.dart';

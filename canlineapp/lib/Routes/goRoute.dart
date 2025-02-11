@@ -170,15 +170,23 @@ final GoRouter linkrouter = GoRouter(
         );
       },
       routes: [
-        // ! More Info Intended for Health Institution Route
         GoRoute(
           name: 'fid',
           path: ':fid',
           builder: (context, state) =>
               FinancialDetails(id: state.pathParameters['fid']!),
+          routes: [
+            GoRoute(
+              name: 'benefits',
+              path: 'benefits', // ❌ Removed leading '/'
+              builder: (context, state) =>
+                  Benefitsdetails(fid: state.pathParameters['fid']!),
+            ),
+          ],
         ),
       ],
     ),
+
     // Doctors Screen
     GoRoute(
         path: '/Oncologist',

@@ -49,7 +49,11 @@ class _MoreinfoBlogsscreenState extends State<MoreinfoBlogsscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+      ),
       body: SingleChildScrollView(
         child: FutureBuilder<Map<String, dynamic>>(
           future: _blogData,

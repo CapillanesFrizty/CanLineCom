@@ -20,6 +20,10 @@ dependencies:
   flutter_launcher_icons: ^0.14.3
   intl: ^0.20.2
   syncfusion_flutter_charts: ^28.2.4
+  pdf: ^3.11.2
+  path_provider: ^2.1.5
+  permission_handler: ^11.3.1
+  flutter_pdfview: ^1.4.0
 
 dev_dependencies:
   flutter_test:
