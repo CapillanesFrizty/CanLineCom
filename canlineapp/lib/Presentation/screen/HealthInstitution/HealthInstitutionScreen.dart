@@ -78,6 +78,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           const SizedBox(height: 30),
