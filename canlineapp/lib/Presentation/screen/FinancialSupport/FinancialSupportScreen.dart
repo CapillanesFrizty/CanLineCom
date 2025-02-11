@@ -37,6 +37,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   // Controllers
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  int _currentCategoryIndex = 0;
 
   @override
   void initState() {
@@ -84,30 +85,24 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding:
-            const EdgeInsets.only(bottom: 20.0), // Extra padding for safety
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSearchField(),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Government Assistance'),
-            const SizedBox(height: 16),
-            _buildInstitutionSection("Government Institution"),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Private Assistance'),
-            const SizedBox(height: 16),
-            _buildInstitutionSection("Private Institution"),
-          ],
-        ),
+      body: Column(
+        children: [
+          const SizedBox(height: 30),
+          _buildSearchField(),
+          const SizedBox(height: 30),
+          _buildCategories(),
+          const SizedBox(height: 30),
+          Expanded(
+            child: _buildCurrentCategoryList(),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSearchField() {
     return Padding(
-      padding: const EdgeInsets.all(35.0), // Matches BlogsScreen padding
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
@@ -130,54 +125,87 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildCategories() {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 35.0), // Matches BlogsScreen
-      child: Text(
-        title,
-        style: _sectionTitleStyle,
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildCategoryButton(
+              Icons.account_balance, "Government", 0, Colors.red),
+          _buildCategoryButton(Icons.business, "Private", 1, Colors.blue),
+        ],
       ),
     );
+  }
+
+  Widget _buildCategoryButton(
+      IconData icon, String label, int categoryIndex, Color color) {
+    final bool isSelected = _currentCategoryIndex == categoryIndex;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentCategoryIndex = categoryIndex; // Change category on click
+        });
+      },
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 30), // Updated icon without background
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: 2,
+            width: isSelected ? 40 : 0,
+            color: isSelected ? color : Colors.transparent,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrentCategoryList() {
+    if (_currentCategoryIndex == 0) {
+      return _buildInstitutionSection("Government Institution");
+    } else {
+      return _buildInstitutionSection("Private Institution");
+    }
   }
 
   Widget _buildInstitutionSection(String type) {
-    return SizedBox(
-      height: _cardHeight,
-      child: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _fetchInstitutions(type),
-        builder: _buildInstitutionList,
-      ),
-    );
-  }
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _fetchInstitutions(type),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
 
-  Widget _buildInstitutionList(
-    BuildContext context,
-    AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
-  ) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (snapshot.hasError) {
-      return Center(child: Text('Error: ${snapshot.error}'));
-    }
+        final institutions = snapshot.data ?? [];
+        if (institutions.isEmpty) {
+          return const Center(child: Text('No institutions found'));
+        }
 
-    final institutions = snapshot.data ?? [];
-    if (institutions.isEmpty) {
-      return const Center(child: Text('No institutions found'));
-    }
-
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(
-          horizontal: 35.0), // Centered effect like BlogsScreen
-      itemCount: institutions.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.only(
-            right: index == institutions.length - 1 ? 0.0 : 16.0,
-          ),
-          child: _buildInstitutionCard(institutions[index]),
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          itemCount: institutions.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: _buildInstitutionCard(institutions[index]),
+            );
+          },
         );
       },
     );

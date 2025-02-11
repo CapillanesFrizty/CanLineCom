@@ -1,3 +1,4 @@
+import 'package:cancerline_companion/Presentation/screen/Journal/journalanalytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -467,11 +468,9 @@ class _JournalScreenState extends State<JournalScreen> {
             FloatingActionButton(
               heroTag: "analytics",
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Journal Analytics coming soon!'),
-                    backgroundColor: primaryColor,
-                  ),
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const AnalyticsJournal()),
                 );
               },
               backgroundColor: primaryColor,

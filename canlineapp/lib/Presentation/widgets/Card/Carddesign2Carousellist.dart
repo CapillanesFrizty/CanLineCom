@@ -35,11 +35,14 @@ class Carddesign2Carousellist extends StatelessWidget {
   // Method to build the image widget
   Widget _buildImage() {
     return image.isNotEmpty
-        ? Image.network(
-            image,
-            fit: BoxFit.cover,
-            height: 300.0,
-            width: 300.0, // Set fixed width for each card
+        ? Center(
+            child: Image.network(
+              image,
+              fit: BoxFit.cover,
+
+              height: 300.0,
+              width: 300.0, // Set fixed width for each card
+            ),
           )
         : Container(
             height: 300.0, // Placeholder for missing image
