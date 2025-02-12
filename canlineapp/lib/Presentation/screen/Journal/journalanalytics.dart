@@ -1,14 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:pdf/pdf.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:flutter/services.dart'; // For permissions
-import 'package:permission_handler/permission_handler.dart';
+// For permissions
 
 const Color _primaryColor = Color(0xFF5B50A0);
 
