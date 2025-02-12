@@ -221,7 +221,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    doctor['Specialization'],
+                    doctor?['Specialization'],
                     style: GoogleFonts.poppins(
                       color: OncologistsScreens._primaryColor,
                       fontSize: 10,

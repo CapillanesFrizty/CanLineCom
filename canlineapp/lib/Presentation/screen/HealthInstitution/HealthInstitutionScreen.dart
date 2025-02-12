@@ -23,6 +23,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
   String _selectedFilter = 'All'; // Track selected filter
 
+  // Get the health institutions data
+
   Future<List<Map<String, dynamic>>> _getHealthInstitutionData() async {
     var query = Supabase.instance.client.from('Health-Institution').select();
 
@@ -54,6 +56,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       .select()
       .eq("Health-Institution-Type", "Private Hospital");
 
+  // Get the clinics data
   Future<List<Map<String, dynamic>>> _getClinics() async {
     final responses =
         await Supabase.instance.client.from('Clinic-External').select();

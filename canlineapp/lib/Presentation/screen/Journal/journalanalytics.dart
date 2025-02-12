@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:syncfusion_flutter_charts/charts.dart';
 // For permissions
 
@@ -27,44 +32,154 @@ class _AnalyticsJournalState extends State<AnalyticsJournal>
     super.dispose();
   }
 
-  // Future<void> generatePdf() async {
-  //   final pdf = pw.Document();
-  //   Directory dir;
+  Future<void> generatePdf() async {
+    final pdf = pw.Document();
+    Directory dir;
 
-  //   if (Platform.isAndroid) {
-  //     // For Android: get the download folder path
-  //     dir = (await getExternalStorageDirectory())!;
-  //     String downloadFolderPath =
-  //         "${dir.path}/Download"; // Append 'Download' folder
-  //     Directory(downloadFolderPath)
-  //         .createSync(recursive: true); // Create folder if it doesn't exist
-  //   } else {
-  //     // For iOS, still saving to Documents folder
-  //     dir = await getApplicationDocumentsDirectory();
-  //   }
+    if (Platform.isAndroid) {
+      // For Android: get the download folder path
+      dir = (await getExternalStorageDirectory())!;
+      String downloadFolderPath =
+          "${dir.path}/Download"; // Append 'Download' folder
+      Directory(downloadFolderPath)
+          .createSync(recursive: true); // Create folder if it doesn't exist
+    } else {
+      // For iOS, still saving to Documents folder
+      dir = await getApplicationDocumentsDirectory();
+    }
 
-  //   debugPrint("Download Directory: $dir");
+    debugPrint("Download Directory: $dir");
 
-  //   pdf.addPage(pw.Page(
-  //     pageFormat: PdfPageFormat.a4,
-  //     build: (pw.Context context) {
-  //       return pw.Center(
-  //         child: pw.Column(children: [
-  //           pw.Text(
-  //             "CancerLine Summary Report",
-  //             style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-  //           ),
-  //         ]),
-  //       ); // Center
-  //     },
-  //   ));
+    pdf.addPage(pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      build: (pw.Context context) {
+        return pw.Center(
+          child: pw.Column(
+            children: [
+              pw.Text(
+                "CancerLine Summary Report",
+                style:
+                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.Table(
+                border: pw.TableBorder.all(width: 1.0),
+                children: [
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey300,
+                      child: pw.Text('Week/Month'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey300,
+                      child: pw.Text('Emotion'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey300,
+                      child: pw.Text('Mood'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Week 1'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('😁'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Awesome'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Week 2'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('😄'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Happy'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Week 3'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('😊'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Neutral'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Week 4'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('😢'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Sad'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Week 5'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('😣'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Terrible'),
+                    ),
+                  ]),
+                ],
+              )
+            ],
+          ),
+        ); // Center
+      },
+    ));
 
-  //   String filePath = "${dir.path}/example.pdf";
-  //   final file = File(filePath);
-  //   await file.writeAsBytes(await pdf.save());
+    String filePath = "${dir.path}/example.pdf";
+    final file = File(filePath);
+    await file.writeAsBytes(await pdf.save());
 
-  //   debugPrint("PDF saved at: $filePath");
-  // }
+    debugPrint("PDF saved at: $filePath");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +207,7 @@ class _AnalyticsJournalState extends State<AnalyticsJournal>
           IconButton(
             icon: const Icon(Icons.download_outlined),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('PDF generation is not implemented yet.'),
-                ),
-              );
-              // generatePdf();
+              generatePdf();
             },
           ),
         ],

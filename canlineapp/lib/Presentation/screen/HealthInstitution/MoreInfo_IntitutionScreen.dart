@@ -26,19 +26,37 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     _future = _fetchInstitutionDetails();
   }
 
+  // Fetch institution details
   Future<Map<String, dynamic>> _fetchInstitutionDetails() async {
+    // Get the institution details
     final response = await Supabase.instance.client
         .from('Health-Institution')
         .select()
         .eq('Health-Institution-ID', widget.id)
         .single();
 
+    // Get the services of the insitution
+    final services = await Supabase.instance.client
+        .from('Health-Institution-Service')
+        .select()
+        .eq('Health-Institution-ID', widget.id);
+
+    // Get the acredited insurance of the insitution
+    final acreditedInsurance = await Supabase.instance.client
+        .from('healthinstitutionacreditedinsurance')
+        .select()
+        .eq('healthinstitutionid', widget.id);
+
+    // Get the image url of the insitution
     final fileName = "${response['Health-Institution-Name']}.png";
     final imageUrl = Supabase.instance.client.storage
         .from('Assets')
         .getPublicUrl("Health-Institution/$fileName");
 
+    // Return the institution details
     response['Health-Institution-Image-Url'] = imageUrl;
+    response['Health-Institution-Services'] = services;
+    response['Health-Institution-Acredited-Insurance'] = acreditedInsurance;
     return response;
   }
 
@@ -118,9 +136,20 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildDividerWithSpacing(),
           _buildLocationSection(data),
           _buildDividerWithSpacing(),
-          _buildServicesSection(),
+          _buildServicesOffers(
+            (data['Health-Institution-Services'] as List)
+                .map((service) =>
+                    service['Health-Institution-Service-Name'] as String)
+                .toList(),
+          ),
           _buildDividerWithSpacing(),
-          _buildInsuranceSection(),
+          _buildAccreditedInsurance(
+            (data['Health-Institution-Acredited-Insurance'] as List? ?? [])
+                .map((service) =>
+                    service['healthinstitutionacreditedinsurancename']
+                        as String)
+                .toList(),
+          ),
           _buildDividerWithSpacing(),
           _buildContactSection(data),
           _buildDividerWithSpacing(),
@@ -168,14 +197,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       data['Health-Institution-Address-Long'] ?? 0.0,
       data['Health-Institution-Name'],
     );
-  }
-
-  Widget _buildServicesSection() {
-    return Center(child: _buildServicesOffers());
-  }
-
-  Widget _buildInsuranceSection() {
-    return Center(child: _buildAccreditedInsurance());
   }
 
   Widget _buildContactSection(Map<String, dynamic> data) {
@@ -325,7 +346,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
   // Service Section
-  Widget _buildServicesOffers() {
+  Widget _buildServicesOffers(List<String> servicename) {
     return _buildSectionWithList(
       title: 'Services Offered',
       items: const [
@@ -337,19 +358,24 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       ],
       buttonText: 'Show all Services',
       onButtonPressed: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const Servicesoffered()),
+        MaterialPageRoute(
+            builder: (context) => Servicesoffered(
+                  servicename: servicename,
+                )),
       ),
     );
   }
 
   // Insurance Section
-  Widget _buildAccreditedInsurance() {
+  Widget _buildAccreditedInsurance(List<String> acreditedinsurances) {
     return _buildSectionWithList(
       title: 'Accredited Insurances',
       items: const ['Maxicare', 'Intellicare', 'PhilHealth'],
       buttonText: 'Show all insurances',
       onButtonPressed: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const Accreditedinsurances()),
+        MaterialPageRoute(
+            builder: (context) =>
+                Accreditedinsurances(acreditedinsurances: acreditedinsurances)),
       ),
     );
   }

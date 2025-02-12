@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Benefitsdetails extends StatefulWidget {
   final String fid;
@@ -12,7 +13,34 @@ class Benefitsdetails extends StatefulWidget {
 
 class _BenefitsdetailsState extends State<Benefitsdetails> {
   late List<bool> _isOpen;
-  Future<void> _benefitsDetails() async {}
+
+  Future<PostgrestList> _benefitsDetails() async {
+    final benfits = await Supabase.instance.client
+        .from('Financial-Institution-Benefit')
+        .select()
+        .eq('Financial-Institution-Benefits-ID', widget.fid);
+
+    return benfits;
+  }
+
+  Future<PostgrestList> _requirementsDetails() async {
+    final requirements = await Supabase.instance.client
+        .from('Financial-Institution-Requirement')
+        .select()
+        .eq("Fiancial-Institution-ID", widget.fid);
+
+    return requirements;
+  }
+
+  Future<PostgrestList> _ProcessDetails() async {
+    final requirements = await Supabase.instance.client
+        .from('financialinstitutionprocess')
+        .select()
+        .eq("financialinstitutionbenefitid", widget.fid)
+        .order('ProcessNumber', ascending: true);
+
+    return requirements;
+  }
 
   @override
   void initState() {
@@ -49,8 +77,10 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                     color: Colors.black,
                   ),
                   textAlign: TextAlign.justify,
-                  'Cancer patients admitted to PhilHealth-accredited hospitals can access the following benefits:'),
+                  'Cancer patients admitted to this accredited hospitals can access the following benefits:'),
               const SizedBox(height: 40),
+
+              //TODO Make this Dynamic
               ExpansionPanelList(
                 dividerColor: Colors.black,
                 expansionCallback: (i, isOpen) {
@@ -178,6 +208,7 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 20),
               Divider(height: 10),
               const SizedBox(height: 20),
@@ -204,36 +235,55 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                   ),
                   'General Requirements:'),
               const SizedBox(height: 20),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
+
+              // TODO Add the Requirements
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FutureBuilder(
+                    future: _requirementsDetails(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData ||
+                          (snapshot.data as List).isEmpty) {
+                        return const Center(
+                            child: Text('No requirements found.'));
+                      } else {
+                        final data = snapshot.data as List<dynamic>;
+                        return ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true, // Important to use inside Column
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: data.length,
+                          itemBuilder: (context, index) {
+                            final item = data[index];
+                            return ListTile(
+                              title: Text(
+                                "${index + 1}.) ${item['Financial-Institution-Requirements-Name'].toString()}",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              subtitle: Text(
+                                item['Financial-Institution-Requirements-Desc']
+                                    .toString(),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
                   ),
-                  '1. PhilHealth Member Registration Form (PMRF): Fully accomplished and signed.'),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                  '2. PhilHealth ID or Member Data Record (MDR): To verify membership.'),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                  '3. Proof of Contribution Payments, For employed members: Latest PhilHealth contributions from the employer. For self-employed or voluntary members: Official receipt or proof of contribution payment.'),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                  '4. Valid ID: Government-issued ID or other proof of identity.'),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                  '5. Doctor’s recommendation or referral or Medical abstract detailing the cancer diagnosis and treatment plan.'),
+                ],
+              ),
               const SizedBox(height: 20),
               Divider(height: 10),
               Text(
@@ -242,33 +292,54 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                     fontWeight: FontWeight.w600,
                     color: const Color(0xff5B50A0),
                   ),
-                  'Step-by-Step Guide to Avail of PhilHealth Benefits'),
+                  'Step-by-Step Guide to Avail of the Benefits'),
+
+              const SizedBox(height: 20),
+              // TODO Make this Dynamic
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                      '1. Visit a PhilHealth-accredited hospital or facility offering cancer-related treatments.'),
-                  Text(
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                      '2. Present the following PhilHealth ID or MDR, Valid ID. Proof of contributions.'),
-                  Text(
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                      '3. Submit necessary medical documents (e.g., doctor’s referral, medical abstract).'),
-                  Text(
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                      '4. Ensure the facility files your claims directly with PhilHealth to reduce upfront expenses.'),
+                  FutureBuilder(
+                    future: _ProcessDetails(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData ||
+                          (snapshot.data as List).isEmpty) {
+                        return const Center(child: Text('No Process found.'));
+                      } else {
+                        final data = snapshot.data as List<dynamic>;
+                        return ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true, // Important to use inside Column
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: data.length,
+                          itemBuilder: (context, index) {
+                            final item = data[index];
+                            return ListTile(
+                              title: Text(
+                                "Step ${index + 1}",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              subtitle: Text(
+                                item['financialinstitutionprocessdesc']
+                                    .toString(),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -281,18 +352,24 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                   ),
                   "Notes and Reminders"),
               const SizedBox(height: 20),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                  "1. Accredited Facilities: Ensure treatments are received in PhilHealth-accredited hospitals and clinics to qualify for benefits."),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                  "2. Active Membership: Contributions must be updated to avail of benefits. Members under the Indigent or Senior Citizen categories are automatically covered."),
+
+              // TODO Make this Dynamic
+              Column(
+                children: [
+                  Text(
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                      "1. Accredited Facilities: Ensure treatments are received in PhilHealth-accredited hospitals and clinics to qualify for benefits."),
+                  Text(
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                      "2. Active Membership: Contributions must be updated to avail of benefits. Members under the Indigent or Senior Citizen categories are automatically covered."),
+                ],
+              ),
             ],
           ),
         ),
