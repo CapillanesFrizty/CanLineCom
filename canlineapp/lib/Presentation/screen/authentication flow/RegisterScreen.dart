@@ -12,8 +12,8 @@ class Registerscreen extends StatefulWidget {
 }
 
 // Available options for the radio buttons
-List<String> patientType = ['', 'Outpatient', 'Inpatient'];
-List<String> sex = ['', 'Male', 'Female'];
+List<String> patientType = ['Outpatient', 'Inpatient'];
+List<String> sex = ['Male', 'Female'];
 
 class _RegisterscreenState extends State<Registerscreen> {
   // Current Step of stepper
@@ -27,23 +27,21 @@ class _RegisterscreenState extends State<Registerscreen> {
   DateTime? selectedDate;
 
   // Obscure password variable
-  var _obscurePassword;
+  bool _obscurePassword = true;
 
-  // Dropdown initial Value
-  String _DropdownValue = "none";
-  // Dropdown items
-  static const List<DropdownMenuItem<String>> _dropdownitems = [
+  // Dropdown initial Values
+  String _selectedCancerType = "none"; // Set to one of the dropdown items
+  String _selectedCitizenship = "none"; // Set to one of the dropdown items
+
+  // Dropdown items for cancer types
+  final List<DropdownMenuItem<String>> _dropdownItems = [
     DropdownMenuItem(
       value: "none",
-      child: Text("Select an option"), // Display text for "none"
+      child: Text("Select an option"),
     ),
     DropdownMenuItem(
       value: "Breast Cancer",
       child: Text("Breast Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Cervical Cancer",
-      child: Text("Cervical Cancer"),
     ),
     DropdownMenuItem(
       value: "Lung Cancer",
@@ -54,8 +52,100 @@ class _RegisterscreenState extends State<Registerscreen> {
       child: Text("Prostate Cancer"),
     ),
     DropdownMenuItem(
-      value: "Ovarian cancer",
-      child: Text("Prostate Cancer"),
+      value: "Colorectal Cancer",
+      child: Text("Colorectal Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Skin Cancer",
+      child: Text("Skin Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Bladder Cancer",
+      child: Text("Bladder Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Non-Hodgkin Lymphoma",
+      child: Text("Non-Hodgkin Lymphoma"),
+    ),
+    DropdownMenuItem(
+      value: "Kidney Cancer",
+      child: Text("Kidney Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Leukemia",
+      child: Text("Leukemia"),
+    ),
+    DropdownMenuItem(
+      value: "Pancreatic Cancer",
+      child: Text("Pancreatic Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Thyroid Cancer",
+      child: Text("Thyroid Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Liver Cancer",
+      child: Text("Liver Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Endometrial Cancer",
+      child: Text("Endometrial Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Cervical Cancer",
+      child: Text("Cervical Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Esophageal Cancer",
+      child: Text("Esophageal Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Ovarian Cancer",
+      child: Text("Ovarian Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Brain Cancer",
+      child: Text("Brain Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Stomach Cancer",
+      child: Text("Stomach Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Oral Cancer",
+      child: Text("Oral Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Testicular Cancer",
+      child: Text("Testicular Cancer"),
+    ),
+    DropdownMenuItem(
+      value: "Hodgkin Lymphoma",
+      child: Text("Hodgkin Lymphoma"),
+    ),
+    DropdownMenuItem(
+      value: "Multiple Myeloma",
+      child: Text("Multiple Myeloma"),
+    ),
+    DropdownMenuItem(
+      value: "Melanoma",
+      child: Text("Melanoma"),
+    ),
+  ];
+
+  // Dropdown items for citizenship
+  final List<DropdownMenuItem<String>> _citizenshipItems = [
+    DropdownMenuItem(
+      value: "none",
+      child: Text("Select an option"),
+    ),
+    DropdownMenuItem(
+      value: "Filipino",
+      child: Text("Filipino"),
+    ),
+    DropdownMenuItem(
+      value: "Foreigner",
+      child: Text("Foreigner"),
     ),
   ];
 
@@ -72,7 +162,6 @@ class _RegisterscreenState extends State<Registerscreen> {
   late final TextEditingController _mname;
   late final TextEditingController _suffix;
   late final TextEditingController _occupation;
-  late final TextEditingController _citizenship;
   late final TextEditingController _currentAddress;
   late final TextEditingController _city;
   late final TextEditingController _province;
@@ -87,14 +176,11 @@ class _RegisterscreenState extends State<Registerscreen> {
     _mname = TextEditingController();
     _suffix = TextEditingController();
     _occupation = TextEditingController();
-    _citizenship = TextEditingController();
     _currentAddress = TextEditingController();
     _city = TextEditingController();
     _province = TextEditingController();
     _email = TextEditingController();
     _password = TextEditingController();
-
-    _obscurePassword = true;
   }
 
   // Init Supabase Client
@@ -114,13 +200,13 @@ class _RegisterscreenState extends State<Registerscreen> {
           'suffix': _suffix.text.trim(),
           'sex': currentSexOption,
           'occupation': _occupation.text.trim(),
-          'citizenship': _citizenship.text.trim(),
+          'citizenship': _selectedCitizenship,
           'current_address': _currentAddress.text.trim(),
           'city': _city.text.trim(),
           'province': _province.text.trim(),
           'patient_type': currentPatientTypeOption,
           'date_of_birth': selectedDate?.toIso8601String() ?? '',
-          'cancer_type': _DropdownValue, // Use validated dropdown value
+          'cancer_type': _selectedCancerType, // Use validated dropdown value
         },
       );
 
@@ -128,12 +214,15 @@ class _RegisterscreenState extends State<Registerscreen> {
 
       // Check if signup was successful
       if (response.user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
               content:
-                  Text('Registered successfully! You may proceed to login.')),
-        );
-        context.go('/');
+                  Text('Registered successfully! You may proceed to login.'),
+            ),
+          );
+          context.go('/');
+        }
       } else {
         throw AuthException('Sign-up failed. Please try again.');
       }
@@ -225,7 +314,7 @@ class _RegisterscreenState extends State<Registerscreen> {
       }
 
       // Validate Dropdown Value
-      if (_DropdownValue == "none") {
+      if (_selectedCancerType == "none") {
         isValid = false;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please select the type of cancer')),
@@ -265,7 +354,7 @@ class _RegisterscreenState extends State<Registerscreen> {
   // Build Stepper Controls
   Widget _buildStepperControls(ControlsDetails details) {
     return Container(
-      margin: const EdgeInsets.only(top: 50),
+      margin: const EdgeInsets.only(top: 20),
       child: Row(
         children: [
           if (_currentStep < 3)
@@ -276,7 +365,6 @@ class _RegisterscreenState extends State<Registerscreen> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
-                    side: const BorderSide(color: Registerscreen._primaryColor),
                   ),
                   backgroundColor: Registerscreen._primaryColor,
                 ),
@@ -286,26 +374,6 @@ class _RegisterscreenState extends State<Registerscreen> {
                 ),
               ),
             ),
-
-          // if (_currentStep == 0 && _currentStep < 3)
-          //   Expanded(
-          //     child: ElevatedButton(
-          //       onPressed: details.onStepCancel,
-          //       style: ElevatedButton.styleFrom(
-          //         padding: const EdgeInsets.symmetric(vertical: 15),
-          //         shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(10),
-          //           side: const BorderSide(color: Colors.grey),
-          //         ),
-          //         backgroundColor: Colors.grey,
-          //       ),
-          //       child: Text(
-          //         'Back',
-          //         style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
-          //       ),
-          //     ),
-          //   ),
-          // const SizedBox(width: 12),
           if (_currentStep == 3)
             Expanded(
               child: ElevatedButton(
@@ -314,7 +382,6 @@ class _RegisterscreenState extends State<Registerscreen> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
-                    side: const BorderSide(color: Registerscreen._primaryColor),
                   ),
                   backgroundColor: Registerscreen._primaryColor,
                 ),
@@ -340,32 +407,6 @@ class _RegisterscreenState extends State<Registerscreen> {
           key: _formKeystep[0],
           child: Column(
             children: <Widget>[
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.yellow[100],
-                  border: Border.all(color: Colors.yellow[700]!),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.yellow[700],
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Kindly fill out all required fields (*), leave blank if not applicable.',
-                        style: GoogleFonts.poppins(
-                          color: Colors.yellow[700],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -401,34 +442,33 @@ class _RegisterscreenState extends State<Registerscreen> {
           key: _formKeystep[1],
           child: Column(
             children: <Widget>[
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.yellow[100],
-                  border: Border.all(color: Colors.yellow[700]!),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.yellow[700],
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Kindly fill out all required fields (*), leave blank if not applicable.',
-                        style: GoogleFonts.poppins(
-                          color: Colors.yellow[700],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 20),
-              _buildTextfield('Citizenship*', _citizenship),
+              // Citizenship Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedCitizenship,
+                icon: const Icon(Icons.arrow_drop_down_outlined),
+                iconEnabledColor: Colors.blue,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+                items: _citizenshipItems,
+                onChanged: _citizenshipCallback,
+                decoration: InputDecoration(
+                  labelText: "Citizenship*",
+                  labelStyle: GoogleFonts.poppins(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: Registerscreen._primaryColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                dropdownColor: Colors.white,
+                isExpanded: true,
+              ),
               const SizedBox(height: 20),
               _buildTextfield('Current Address*', _currentAddress),
               const SizedBox(height: 20),
@@ -474,19 +514,19 @@ class _RegisterscreenState extends State<Registerscreen> {
                   return null; // Validation passed
                 },
                 controller: _password,
-                obscureText: _obscurePassword!,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle:
                       GoogleFonts.poppins(color: Registerscreen._primaryColor),
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Registerscreen._primaryColor),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Registerscreen._primaryColor),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Registerscreen._primaryColor),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -495,7 +535,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                       });
                     },
                     icon: Icon(
-                      _obscurePassword!
+                      _obscurePassword
                           ? Icons.visibility
                           : Icons.visibility_off,
                     ),
@@ -518,34 +558,7 @@ class _RegisterscreenState extends State<Registerscreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Warning Sign
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.yellow[100],
-                  border: Border.all(color: Colors.yellow[700]!),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.yellow[700],
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Kindly fill out all required fields (*), leave blank if not applicable.',
-                        style: GoogleFonts.poppins(
-                          color: Colors.yellow[700],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
               // Patient Type
               Text(
@@ -591,9 +604,18 @@ class _RegisterscreenState extends State<Registerscreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
               // Date of Birth
+              Text(
+                'Birthday*',
+                style: GoogleFonts.poppins(
+                  fontSize: 16, // Adjusted to 16 for consistency
+                  color: Registerscreen._primaryColor,
+                ),
+              ),
+              const SizedBox(height: 20),
+
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   alignment: Alignment.centerLeft,
@@ -636,7 +658,7 @@ class _RegisterscreenState extends State<Registerscreen> {
               ),
               // Display error message if Date of Birth is not selected
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               // Sex
               Text(
                 'Sex*',
@@ -681,46 +703,34 @@ class _RegisterscreenState extends State<Registerscreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
               // Type of Cancer
-              Column(
-                crossAxisAlignment: CrossAxisAlignment
-                    .start, // Align label and dropdown to the start
-                children: [
-                  const Text(
-                    "Type of Cancer*", // Label text
-                    style: TextStyle(
-                      color: Registerscreen._primaryColor,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+              DropdownButtonFormField<String>(
+                value: _selectedCancerType,
+                icon: const Icon(Icons.arrow_drop_down_outlined),
+                iconEnabledColor: Colors.blue,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+                items: _dropdownItems,
+                onChanged: _dropdownCallback,
+                decoration: InputDecoration(
+                  labelText: "Type of Cancer*",
+                  labelStyle: GoogleFonts.poppins(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: Registerscreen._primaryColor),
                   ),
-                  const SizedBox(
-                      height: 8.0), // Spacing between label and dropdown
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white, // Dropdown background color
-                      border: Border.all(
-                          color: Colors.grey, width: 1.5), // Outline color
-                      borderRadius: BorderRadius.circular(8), // Rounded corners
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12), // Padding for the dropdown
-                    child: DropdownButton<String>(
-                      value: _DropdownValue,
-                      icon: const Icon(Icons.arrow_drop_down_outlined),
-                      iconEnabledColor: Colors.blue,
-                      style: const TextStyle(color: Colors.black, fontSize: 16),
-                      items: _dropdownitems,
-                      onChanged: _DropdownCallabck,
-                      dropdownColor: Colors.white,
-                      underline: Container(), // Removes the default underline
-                      isExpanded: true,
-                    ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
-              )
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                dropdownColor: Colors.white,
+                isExpanded: true,
+              ),
             ],
           ),
         ),
@@ -728,11 +738,20 @@ class _RegisterscreenState extends State<Registerscreen> {
     ];
   }
 
-  void _DropdownCallabck(String? Selectedvalue) {
-    if (Selectedvalue is String) {
+  void _dropdownCallback(String? selectedValue) {
+    if (selectedValue is String) {
       setState(() {
-        _DropdownValue = Selectedvalue;
-        debugPrint(_DropdownValue);
+        _selectedCancerType = selectedValue;
+        debugPrint('Selected: $_selectedCancerType');
+      });
+    }
+  }
+
+  void _citizenshipCallback(String? selectedValue) {
+    if (selectedValue is String) {
+      setState(() {
+        _selectedCitizenship = selectedValue;
+        debugPrint('Selected: $_selectedCitizenship');
       });
     }
   }
@@ -756,11 +775,9 @@ class _RegisterscreenState extends State<Registerscreen> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Registerscreen._primaryColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Registerscreen._primaryColor),
         ),
       ),
     );
@@ -773,7 +790,6 @@ class _RegisterscreenState extends State<Registerscreen> {
     _mname.dispose();
     _suffix.dispose();
     _occupation.dispose();
-    _citizenship.dispose();
     _currentAddress.dispose();
     _city.dispose();
     _province.dispose();
