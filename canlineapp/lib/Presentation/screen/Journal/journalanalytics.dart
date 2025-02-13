@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -50,16 +51,188 @@ class _AnalyticsJournalState extends State<AnalyticsJournal>
 
     debugPrint("Download Directory: $dir");
 
-    pdf.addPage(pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      build: (pw.Context context) {
-        return pw.Center(
-          child: pw.Column(
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Column(
+            mainAxisAlignment: pw.MainAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
+              // Header Title
+              pw.Container(
+                child: pw.Text(
+                  "Journal Summary Report",
+                  style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              // Summation of Entries
+              pw.SizedBox(height: 20),
+
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.center,
+                children: [
+                  // Total Entries
+                  pw.Container(
+                    alignment: pw.Alignment.center,
+                    padding: const pw.EdgeInsets.all(8.0),
+                    child: pw.Column(children: [
+                      pw.Text(
+                        textAlign: pw.TextAlign.center,
+                        'Total\nJournals',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                          color: PdfColors.black,
+                        ),
+                      ),
+                      pw.Text(
+                        '5',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                          color: PdfColors.black,
+                        ),
+                      ),
+                    ]),
+                  ),
+                  pw.SizedBox(width: 10),
+                  // Positive Emotions
+                  pw.Container(
+                    alignment: pw.Alignment.center,
+                    padding: const pw.EdgeInsets.all(8.0),
+                    child: pw.Column(children: [
+                      pw.Text(
+                        textAlign: pw.TextAlign.center,
+                        'Positive\nEmotions',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                          color: PdfColors.black,
+                        ),
+                      ),
+                      pw.Text(
+                        '1',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                          color: PdfColors.black,
+                        ),
+                      ),
+                    ]),
+                  ),
+                  pw.SizedBox(width: 10),
+                  // Negative Emotions
+                  pw.Container(
+                    alignment: pw.Alignment.center,
+                    padding: const pw.EdgeInsets.all(8.0),
+                    child: pw.Column(children: [
+                      pw.Text(
+                        textAlign: pw.TextAlign.center,
+                        'Negative\nEmotions',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                          color: PdfColors.black,
+                        ),
+                      ),
+                      pw.Text(
+                        '4',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                          color: PdfColors.black,
+                        ),
+                      ),
+                    ]),
+                  ),
+                ],
+              ),
+
+              // Table 1.1: Emotions Distribution\
+              pw.SizedBox(height: 20),
+              pw.Text("Table 1.1: Emotions Distribution",
+                  style: pw.TextStyle(
+                      fontSize: 20, fontWeight: pw.FontWeight.bold)),
+              pw.Table(
+                border: pw.TableBorder.all(width: 1.0),
+                children: [
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey300,
+                      child: pw.Text('Emotions'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey300,
+                      child: pw.Text('Number of Intances'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Awesome'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('5'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Happy'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('3'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Okay'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('7'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Sad'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('1'),
+                    ),
+                  ]),
+                  pw.TableRow(children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('Terrible'),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8.0),
+                      color: PdfColors.grey100,
+                      child: pw.Text('1'),
+                    ),
+                  ]),
+                ],
+              ),
+
+              //Table 1.2: Changes in Emotions
+              pw.SizedBox(height: 20),
               pw.Text(
-                "CancerLine Summary Report",
+                'Table 1.2: Weekly Positive Emotions',
                 style:
-                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                    pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
               ),
               pw.Table(
                 border: pw.TableBorder.all(width: 1.0),
@@ -68,111 +241,81 @@ class _AnalyticsJournalState extends State<AnalyticsJournal>
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey300,
-                      child: pw.Text('Week/Month'),
+                      child: pw.Text('Day'),
                     ),
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey300,
-                      child: pw.Text('Emotion'),
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(8.0),
-                      color: PdfColors.grey300,
-                      child: pw.Text('Mood'),
+                      child: pw.Text('Number Emotions'),
                     ),
                   ]),
                   pw.TableRow(children: [
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('Week 1'),
+                      child: pw.Text('Monday'),
                     ),
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('😁'),
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(8.0),
-                      color: PdfColors.grey100,
-                      child: pw.Text('Awesome'),
+                      child: pw.Text('5'),
                     ),
                   ]),
                   pw.TableRow(children: [
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('Week 2'),
+                      child: pw.Text('Teusday'),
                     ),
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('😄'),
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(8.0),
-                      color: PdfColors.grey100,
-                      child: pw.Text('Happy'),
+                      child: pw.Text('3'),
                     ),
                   ]),
                   pw.TableRow(children: [
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('Week 3'),
+                      child: pw.Text('Wednesday'),
                     ),
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('😊'),
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(8.0),
-                      color: PdfColors.grey100,
-                      child: pw.Text('Neutral'),
+                      child: pw.Text('7'),
                     ),
                   ]),
                   pw.TableRow(children: [
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('Week 4'),
+                      child: pw.Text('Thursday'),
                     ),
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('😢'),
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(8.0),
-                      color: PdfColors.grey100,
-                      child: pw.Text('Sad'),
+                      child: pw.Text('1'),
                     ),
                   ]),
                   pw.TableRow(children: [
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('Week 5'),
+                      child: pw.Text('Friday'),
                     ),
                     pw.Container(
                       padding: const pw.EdgeInsets.all(8.0),
                       color: PdfColors.grey100,
-                      child: pw.Text('😣'),
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(8.0),
-                      color: PdfColors.grey100,
-                      child: pw.Text('Terrible'),
+                      child: pw.Text('1'),
                     ),
                   ]),
                 ],
-              )
+              ),
             ],
-          ),
-        ); // Center
-      },
-    ));
+          );
+        },
+      ),
+    );
 
     String filePath = "${dir.path}/example.pdf";
     final file = File(filePath);
