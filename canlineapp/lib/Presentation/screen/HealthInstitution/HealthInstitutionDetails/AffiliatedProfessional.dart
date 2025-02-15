@@ -184,7 +184,7 @@ class _AffiliatedProfessionalState extends State<AffiliatedProfessional> {
             return Card(
               margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(5),
               ),
               elevation: 4,
               child: ListTile(
