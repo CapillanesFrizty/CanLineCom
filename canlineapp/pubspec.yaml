@@ -25,6 +25,7 @@ dependencies:
   permission_handler: ^11.3.1
   flutter_pdfview: ^1.4.0
   device_info_plus: ^11.3.0
+  url_launcher: ^6.1.7
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +38,7 @@ flutter:
     - lib/assets/images/logo/introduction.png
     - lib/assets/images/logo/LogoText.svg
     - lib/assets/images/logo/HeartLogo.svg
+    - lib/assets/icons/Supportgroups.svg
     - lib/assets/icons/Hospital.svg
     - lib/assets/icons/Financial.svg
     - lib/assets/icons/Oncologists.svg

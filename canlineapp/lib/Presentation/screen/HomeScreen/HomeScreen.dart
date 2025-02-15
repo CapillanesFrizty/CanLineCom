@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? userid;
@@ -57,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen>
       padding: const EdgeInsets.symmetric(
         horizontal: 30.0,
       ),
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       shrinkWrap: true,
       children: [
         _buildGreetingText(context),
@@ -139,6 +140,20 @@ class _HomeScreenState extends State<HomeScreen>
         controller: _controller,
         fadeAnimation: _fadeAnimation,
         scaleAnimation: _scaleAnimation,
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 20.0),
+        child: _AnimatedGridItem(
+          label: "Support Groups",
+          iconAsset: 'lib/assets/icons/Supportgroups.svg',
+          textColor: 0xffFF3C84,
+          bgColor: 0xffF6E0E9,
+          iconColor: 0xffFF3C84,
+          route: '/Support-Groups',
+          controller: _controller,
+          fadeAnimation: _fadeAnimation,
+          scaleAnimation: _scaleAnimation,
+        ),
       ),
     ];
   }

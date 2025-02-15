@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../BarrelFileScreen.dart';
+import 'HealthInstitutionDetails/AffiliatedProfessional.dart';
 
 class MoreInfoInstitutionScreen extends StatefulWidget {
   final String id;
@@ -150,6 +151,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                         as String)
                 .toList(),
           ),
+          _buildDividerWithSpacing(),
+          _buildAffiliatedProfessionalsSection(), // Add this line
           _buildDividerWithSpacing(),
           _buildContactSection(data),
           _buildDividerWithSpacing(),
@@ -347,36 +350,118 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
 
   // Service Section
   Widget _buildServicesOffers(List<String> servicename) {
-    return _buildSectionWithList(
-      title: 'Services Offered',
-      items: const [
-        'Therapeutics',
-        'Diagnostics (Including Children)',
-        'Radiotherapy (Including Children)',
-        'Brachytherapy',
-        'Outpatient chemotherapy',
+    return Column(
+      children: [
+        _buildSectionWithList(
+          title: 'Services & Guidelines',
+          items: const ['CT Scan', 'Biopsy'],
+          buttonText: 'Show all Services',
+          onButtonPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+                builder: (context) => Servicesoffered(
+                      servicename: servicename,
+                    )),
+          ),
+        ),
+        SizedBox(height: 10),
       ],
-      buttonText: 'Show all Services',
-      onButtonPressed: () => Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (context) => Servicesoffered(
-                  servicename: servicename,
-                )),
-      ),
     );
   }
 
   // Insurance Section
   Widget _buildAccreditedInsurance(List<String> acreditedinsurances) {
-    return _buildSectionWithList(
-      title: 'Accredited Insurances',
-      items: const ['Maxicare', 'Intellicare', 'PhilHealth'],
-      buttonText: 'Show all insurances',
-      onButtonPressed: () => Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (context) =>
-                Accreditedinsurances(acreditedinsurances: acreditedinsurances)),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Accredited Insurances'),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: acreditedinsurances.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  // Handle card tap
+                  _showSnackBar('Clicked on ${acreditedinsurances[index]}');
+                },
+                child: Container(
+                  width: 180,
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff5B50A0),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.image,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          acreditedinsurances[index],
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+// Affiliated Professionals Section
+  Widget _buildAffiliatedProfessionalsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Affiliated Professionals'),
+        const SizedBox(height: 16),
+        ListTile(
+          title: Text('John Doe'),
+          subtitle: Text('Oncologist'),
+          trailing: Text('john.doe@example.com'),
+        ),
+        ListTile(
+          title: Text('Jane Smith'),
+          subtitle: Text('Oncologist'),
+          trailing: Text('jane.smith@example.com'),
+        ),
+        const SizedBox(height: 25),
+        _buildShowAllButton(
+          'Show all Professionals',
+          () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => AffiliatedProfessional(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10), // Added SizedBox for spacing
+      ],
     );
   }
 
