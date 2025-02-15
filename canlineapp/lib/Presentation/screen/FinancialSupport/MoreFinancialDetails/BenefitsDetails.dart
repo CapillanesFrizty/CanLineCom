@@ -36,7 +36,7 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
     final requirements = await Supabase.instance.client
         .from('financialinstitutionprocess')
         .select()
-        .eq("financialinstitutionbenefitid", widget.fid)
+        .eq("financialinstitutionid", widget.fid)
         .order('ProcessNumber', ascending: true);
 
     return requirements;

@@ -210,5 +210,40 @@ final GoRouter linkrouter = GoRouter(
             ),
           ),
         ]),
+    // Support Groups
+    GoRoute(
+      path: '/Support-Groups',
+      builder: (context, state) {
+        final userId = state.pathParameters['userID'] ?? 'default';
+        return ScaffoldLayoutWidget(
+          userid: userId,
+          bodyWidget: const Supportgroupslistscreen(),
+          leadingWidget: BackButton(
+            color: _primaryColor,
+            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+          ),
+          actionsWidget: [
+            IconButton(
+              icon: Icon(Icons.search, color: _primaryColor),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate:
+                      SupportGroupSearch(Supportgroupslistscreen.supportGroups),
+                );
+              },
+            ),
+          ],
+          titleWidget: Text(
+            'Cancer Support Groups',
+            style: GoogleFonts.poppins(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w500,
+              color: _primaryColor,
+            ),
+          ),
+        );
+      },
+    ),
   ],
 );
