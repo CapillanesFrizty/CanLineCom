@@ -81,26 +81,30 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
         .getPublicUrl("Financial-Institution/$fileName");
   }
 
+  Future<void> _refreshInstitutions() async {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          const SizedBox(height: 30),
-          _buildSearchField(),
-          const SizedBox(height: 30),
-          _buildCategories(),
-          const SizedBox(height: 30),
-          Expanded(
-            child: _buildCurrentCategoryList(),
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: _refreshInstitutions,
+        child: Column(
+          children: [
+            _buildSearchBarWithFilter(),
+            const SizedBox(height: 30),
+            Expanded(
+              child: _buildCurrentCategoryList(),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchBarWithFilter() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: TextField(
@@ -108,6 +112,24 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
         decoration: InputDecoration(
           hintText: 'Search',
           prefixIcon: Icon(Icons.search, color: _primaryColor),
+          suffixIcon: PopupMenuButton<int>(
+            icon: Icon(Icons.filter_list, color: _primaryColor),
+            onSelected: (int index) {
+              setState(() {
+                _currentCategoryIndex = index;
+              });
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+              PopupMenuItem<int>(
+                value: 0,
+                child: Text('Government', style: GoogleFonts.poppins()),
+              ),
+              PopupMenuItem<int>(
+                value: 1,
+                child: Text('Private', style: GoogleFonts.poppins()),
+              ),
+            ],
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: _primaryColor),
@@ -121,54 +143,6 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
             borderSide: BorderSide(color: _primaryColor),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildCategories() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildCategoryButton(
-              Icons.account_balance, "Government", 0, Colors.red),
-          _buildCategoryButton(Icons.business, "Private", 1, Colors.blue),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryButton(
-      IconData icon, String label, int categoryIndex, Color color) {
-    final bool isSelected = _currentCategoryIndex == categoryIndex;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentCategoryIndex = categoryIndex; // Change category on click
-        });
-      },
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 30), // Updated icon without background
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: 2,
-            width: isSelected ? 40 : 0,
-            color: isSelected ? color : Colors.transparent,
-          ),
-        ],
       ),
     );
   }
@@ -202,7 +176,8 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
           itemCount: institutions.length,
           itemBuilder: (context, index) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
               child: _buildInstitutionCard(institutions[index]),
             );
           },
@@ -221,6 +196,8 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
             '/Financial-Institution/${institution['Financial-Institution-ID']}',
           ),
           title: institution['Financial-Institution-Name'] ?? 'Unknown Name',
+          category: institution['Financial-Institution-Type'] ??
+              'Unknown Type', // Add this line
         );
       },
     );

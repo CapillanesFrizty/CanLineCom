@@ -15,10 +15,10 @@ class BlogsScreen extends StatefulWidget {
 class _BlogsScreenState extends State<BlogsScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  String _selectedCategory = 'All';
 
   Future<List<Map<String, dynamic>>> getBlogs() async {
     try {
-      // Fetch blogs
       final response = await Supabase.instance.client.from('Blogs').select();
       if (response.isEmpty) {
         return [];
@@ -26,7 +26,6 @@ class _BlogsScreenState extends State<BlogsScreen> {
 
       final blogs = response as List<dynamic>;
 
-      // Add image URLs
       for (var blog in blogs) {
         final fileName = "${blog['Blogs-Name']}.png";
         final imageUrl = Supabase.instance.client.storage
@@ -35,143 +34,150 @@ class _BlogsScreenState extends State<BlogsScreen> {
         blog['im'] = imageUrl;
       }
 
-      return blogs.cast<Map<String, dynamic>>();
+      // Filter blogs based on search query and category
+      final filteredBlogs = blogs.where((blog) {
+        final matchesQuery = blog['Blogs-Name']
+            .toString()
+            .toLowerCase()
+            .contains(_searchQuery.toLowerCase());
+        final matchesCategory = _selectedCategory == 'All' ||
+            blog['Blogs-Category'] == _selectedCategory;
+        return matchesQuery && matchesCategory;
+      }).toList();
+
+      return filteredBlogs.cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('Error fetching blogs: $e');
       return [];
     }
   }
 
+  Future<void> _refreshBlogs() async {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding:
-            const EdgeInsets.only(bottom: 20.0), // Extra padding for safety
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 30),
-            _buildSearchBar(),
-            const SizedBox(height: 30),
-            _buildSectionTitle('New'),
-            _buildSectionTitle('Other news and blogs'),
-            const SizedBox(height: 16),
-            _buildRecentBlogs(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (query) {
-          setState(() {
-            _searchQuery = query;
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'Search',
-          prefixIcon: Icon(Icons.search, color: BlogsScreen._primaryColor),
-          suffixIcon: Icon(Icons.filter_list, color: BlogsScreen._primaryColor),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: BlogsScreen._primaryColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: BlogsScreen._primaryColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: BlogsScreen._primaryColor),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: TextField(
+          controller: _searchController,
+          onChanged: (query) {
+            setState(() {
+              _searchQuery = query;
+            });
+          },
+          decoration: InputDecoration(
+            hintText: 'Search',
+            prefixIcon: Icon(Icons.search, color: BlogsScreen._primaryColor),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: BlogsScreen._primaryColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: BlogsScreen._primaryColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: BlogsScreen._primaryColor),
+            ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: Text(
-        title,
-        style: GoogleFonts.poppins(
-          color: BlogsScreen._primaryColor,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children:
+                    <String>['All', 'Blog', 'News'].map((String category) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ChoiceChip(
+                      label: Text(category),
+                      selected: _selectedCategory == category,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _selectedCategory = selected ? category : 'All';
+                        });
+                      },
+                      selectedColor: BlogsScreen._primaryColor,
+                      backgroundColor: BlogsScreen._secondaryColor,
+                      labelStyle: TextStyle(
+                        color: _selectedCategory == category
+                            ? Colors.white
+                            : BlogsScreen._primaryColor,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _refreshBlogs,
+              child: FutureBuilder(
+                future: getBlogs(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error fetching data'));
+                  }
+                  final blogsdata = snapshot.data as List<Map<String, dynamic>>;
+                  if (blogsdata.isEmpty) {
+                    return const Center(child: Text('No data available'));
+                  }
+                  return ListView.builder(
+                    itemCount: blogsdata.length,
+                    itemBuilder: (context, index) {
+                      return _buildBlogCard(blogsdata[index]);
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildRecentBlogs() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: FutureBuilder(
-        future: getBlogs(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
-          }
-          final blogsdata = snapshot.data as List<Map<String, dynamic>>;
-          if (blogsdata.isEmpty) {
-            return const Center(child: Text('No data available'));
-          }
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: blogsdata.length,
-            itemBuilder: (context, index) {
-              return _buildRecentBlogCard(blogsdata[index]);
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildRecentBlogCard(Map<String, dynamic> blogsdata) {
+  Widget _buildBlogCard(Map<String, dynamic> blogsdata) {
     return GestureDetector(
       onTap: () {
         context.go('/Blog/${blogsdata['Blog-ID']}');
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.grey[100],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(8),
-                image: blogsdata['im'] != null && blogsdata['im'] != ''
-                    ? DecorationImage(
-                        image: NetworkImage(blogsdata['im']),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+            if (blogsdata['im'] != null && blogsdata['im'] != '')
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+                child: Image.network(
+                  blogsdata['im'],
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: (blogsdata['im'] == null || blogsdata['im'] == '')
-                  ? const Icon(Icons.image, color: Colors.white70, size: 40)
-                  : null,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -182,21 +188,21 @@ class _BlogsScreenState extends State<BlogsScreen> {
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     blogsdata['Blogs-Name'] ?? '',
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                       color: BlogsScreen._primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     blogsdata['Blog-Published'] ?? '',
                     style: GoogleFonts.poppins(
-                      color: BlogsScreen._primaryColor,
-                      fontSize: 10,
+                      color: Colors.grey,
+                      fontSize: 12,
                     ),
                   ),
                 ],

@@ -16,7 +16,7 @@ final GoRouter linkrouter = GoRouter(
     // Registration Screen
     GoRoute(
       path: '/RegisterScreen',
-      builder: (context, state) => const Registerscreen(),
+      builder: (context, state) => const RegisterScreen(),
     ),
     // Home Screen with AppBar Icons
     GoRoute(
@@ -222,18 +222,6 @@ final GoRouter linkrouter = GoRouter(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
           ),
-          actionsWidget: [
-            IconButton(
-              icon: Icon(Icons.search, color: _primaryColor),
-              onPressed: () {
-                showSearch(
-                  context: context,
-                  delegate:
-                      SupportGroupSearch(Supportgroupslistscreen.supportGroups),
-                );
-              },
-            ),
-          ],
           titleWidget: Text(
             'Cancer Support Groups',
             style: GoogleFonts.poppins(
@@ -244,6 +232,19 @@ final GoRouter linkrouter = GoRouter(
           ),
         );
       },
+      routes: [
+        GoRoute(
+          path: ':groupName',
+          builder: (context, state) {
+            final groupName = state.pathParameters['groupName']!;
+            return Supportgroupdetailsscreen(groupName: groupName);
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/terms-and-conditions',
+      builder: (context, state) => const TermsAndConditionsScreen(),
     ),
   ],
 );

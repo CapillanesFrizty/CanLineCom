@@ -91,8 +91,7 @@ class _AffiliatedProfessionalState extends State<AffiliatedProfessional> {
                           .map((specialization) => DropdownMenuItem<String>(
                                 value: specialization,
                                 child: Text(specialization),
-                              ))
-                          .toList(),
+                              )),
                     ],
                     onChanged: (String? value) {
                       setState(() {

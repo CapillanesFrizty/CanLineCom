@@ -125,7 +125,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
 
   Widget _buildDetailsSection(Map<String, dynamic> data) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

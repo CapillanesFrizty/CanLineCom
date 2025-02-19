@@ -3,240 +3,82 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Registerscreen extends StatefulWidget {
-  const Registerscreen({super.key});
-  static const Color _primaryColor = Color(0xFF5B50A0);
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+  static const Color primaryColor = Color(0xFF5B50A0);
 
   @override
-  State<Registerscreen> createState() => _RegisterscreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-// Available options for the radio buttons
-List<String> patientType = ['Outpatient', 'Inpatient'];
-List<String> sex = ['Male', 'Female'];
-
-class _RegisterscreenState extends State<Registerscreen> {
-  // Current Step of stepper
+class _RegisterScreenState extends State<RegisterScreen> {
   int _currentStep = 0;
-
-  // Options for Patient Type and sex
-  String currentPatientTypeOption = patientType[0];
-  String currentSexOption = sex[0];
-
-  // Selected Date
+  String currentPatientTypeOption = 'Outpatient';
+  String currentSexOption = 'Male';
   DateTime? selectedDate;
-
-  // Obscure password variable
   bool _obscurePassword = true;
+  String _selectedCancerType = "none";
+  String _selectedCitizenship = "none";
 
-  // Dropdown initial Values
-  String _selectedCancerType = "none"; // Set to one of the dropdown items
-  String _selectedCitizenship = "none"; // Set to one of the dropdown items
-
-  // Dropdown items for cancer types
   final List<DropdownMenuItem<String>> _dropdownItems = [
-    DropdownMenuItem(
-      value: "none",
-      child: Text("Select an option"),
-    ),
-    DropdownMenuItem(
-      value: "Breast Cancer",
-      child: Text("Breast Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Lung Cancer",
-      child: Text("Lung Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Prostate Cancer",
-      child: Text("Prostate Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Colorectal Cancer",
-      child: Text("Colorectal Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Skin Cancer",
-      child: Text("Skin Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Bladder Cancer",
-      child: Text("Bladder Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Non-Hodgkin Lymphoma",
-      child: Text("Non-Hodgkin Lymphoma"),
-    ),
-    DropdownMenuItem(
-      value: "Kidney Cancer",
-      child: Text("Kidney Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Leukemia",
-      child: Text("Leukemia"),
-    ),
-    DropdownMenuItem(
-      value: "Pancreatic Cancer",
-      child: Text("Pancreatic Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Thyroid Cancer",
-      child: Text("Thyroid Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Liver Cancer",
-      child: Text("Liver Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Endometrial Cancer",
-      child: Text("Endometrial Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Cervical Cancer",
-      child: Text("Cervical Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Esophageal Cancer",
-      child: Text("Esophageal Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Ovarian Cancer",
-      child: Text("Ovarian Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Brain Cancer",
-      child: Text("Brain Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Stomach Cancer",
-      child: Text("Stomach Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Oral Cancer",
-      child: Text("Oral Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Testicular Cancer",
-      child: Text("Testicular Cancer"),
-    ),
-    DropdownMenuItem(
-      value: "Hodgkin Lymphoma",
-      child: Text("Hodgkin Lymphoma"),
-    ),
-    DropdownMenuItem(
-      value: "Multiple Myeloma",
-      child: Text("Multiple Myeloma"),
-    ),
-    DropdownMenuItem(
-      value: "Melanoma",
-      child: Text("Melanoma"),
-    ),
+    DropdownMenuItem(value: "none", child: Text("Select an option")),
+    DropdownMenuItem(value: "Breast Cancer", child: Text("Breast Cancer")),
   ];
 
-  // Dropdown items for citizenship
   final List<DropdownMenuItem<String>> _citizenshipItems = [
-    DropdownMenuItem(
-      value: "none",
-      child: Text("Select an option"),
-    ),
-    DropdownMenuItem(
-      value: "Filipino",
-      child: Text("Filipino"),
-    ),
-    DropdownMenuItem(
-      value: "Foreigner",
-      child: Text("Foreigner"),
-    ),
+    DropdownMenuItem(value: "none", child: Text("Select an option")),
+    DropdownMenuItem(value: "Filipino", child: Text("Filipino")),
+    DropdownMenuItem(value: "Foreigner", child: Text("Foreigner")),
   ];
 
-  // Textfield Controllers and form key
-  final _formKeystep = [
-    GlobalKey<FormState>(),
-    GlobalKey<FormState>(),
-    GlobalKey<FormState>(),
-    GlobalKey<FormState>()
-  ];
-
-  late final TextEditingController _fname;
-  late final TextEditingController _lname;
-  late final TextEditingController _mname;
-  late final TextEditingController _suffix;
-  late final TextEditingController _occupation;
-  late final TextEditingController _currentAddress;
-  late final TextEditingController _city;
-  late final TextEditingController _province;
-  late final TextEditingController _email;
-  late final TextEditingController _password;
-
-  @override
-  void initState() {
-    super.initState();
-    _fname = TextEditingController();
-    _lname = TextEditingController();
-    _mname = TextEditingController();
-    _suffix = TextEditingController();
-    _occupation = TextEditingController();
-    _currentAddress = TextEditingController();
-    _city = TextEditingController();
-    _province = TextEditingController();
-    _email = TextEditingController();
-    _password = TextEditingController();
-  }
-
-  // Init Supabase Client
+  final _formKeys = List.generate(4, (_) => GlobalKey<FormState>());
+  final _controllers = List.generate(10, (_) => TextEditingController());
   final supabase = Supabase.instance.client;
 
-  // Sign Up Function
   Future<void> signup() async {
     try {
-      // Attempt to sign up with validated data
       final response = await supabase.auth.signUp(
-        password: _password.text.trim(),
-        email: _email.text.trim(),
+        password: _controllers[9].text.trim(),
+        email: _controllers[8].text.trim(),
         data: {
-          'firstname': _fname.text.trim(),
-          'lastname': _lname.text.trim(),
-          'middlename': _mname.text.trim(),
-          'suffix': _suffix.text.trim(),
+          'firstname': _controllers[0].text.trim(),
+          'lastname': _controllers[1].text.trim(),
+          'middlename': _controllers[2].text.trim(),
+          'suffix': _controllers[3].text.trim(),
           'sex': currentSexOption,
-          'occupation': _occupation.text.trim(),
+          'occupation': _controllers[4].text.trim(),
           'citizenship': _selectedCitizenship,
-          'current_address': _currentAddress.text.trim(),
-          'city': _city.text.trim(),
-          'province': _province.text.trim(),
+          'current_address': _controllers[5].text.trim(),
+          'city': _controllers[6].text.trim(),
+          'province': _controllers[7].text.trim(),
           'patient_type': currentPatientTypeOption,
           'date_of_birth': selectedDate?.toIso8601String() ?? '',
-          'cancer_type': _selectedCancerType, // Use validated dropdown value
+          'cancer_type': _selectedCancerType,
         },
       );
 
       if (!mounted) return;
 
-      // Check if signup was successful
       if (response.user != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
               content:
-                  Text('Registered successfully! You may proceed to login.'),
-            ),
-          );
-          context.go('/');
-        }
+                  Text('Registered successfully! You may proceed to login.')),
+        );
+        context.go('/');
       } else {
         throw AuthException('Sign-up failed. Please try again.');
       }
     } on AuthException catch (e) {
-      debugPrint('Error: ${e.message}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
+      _showError(e.message);
     } catch (e) {
-      debugPrint('Unexpected Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected Error: $e')),
-      );
+      _showError('Unexpected Error: $e');
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Error: $message')));
   }
 
   @override
@@ -247,20 +89,17 @@ class _RegisterscreenState extends State<Registerscreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.go('/'); // Navigate back to the previous screen
-          },
+          onPressed: () => context.go('/'),
           tooltip: 'Go back',
         ),
         backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         title: Text(
           'Create an Account',
-          textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
-            fontSize: 25,
+            fontSize: 20,
             fontWeight: FontWeight.w500,
-            color: Registerscreen._primaryColor,
+            color: RegisterScreen.primaryColor,
           ),
         ),
       ),
@@ -273,20 +112,60 @@ class _RegisterscreenState extends State<Registerscreen> {
               children: [
                 const SizedBox(height: 20),
                 Stepper(
-                  steps: getSteps(),
+                  steps: _getSteps(),
                   type: StepperType.vertical,
                   currentStep: _currentStep,
                   onStepContinue: _handleStepContinue,
                   onStepCancel: _handleStepCancel,
                   controlsBuilder: (context, details) =>
                       _buildStepperControls(details),
-                  onStepTapped: (value) {
-                    setState(() {
-                      _currentStep = value;
-                    });
+                  onStepTapped: (value) => setState(() => _currentStep = value),
+                  physics: const ClampingScrollPhysics(),
+                  elevation: 0,
+                  margin: EdgeInsets.zero,
+                  stepIconBuilder: (stepIndex, stepState) {
+                    return Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: stepState == StepState.complete ||
+                                stepIndex <= _currentStep
+                            ? RegisterScreen.primaryColor
+                            : Colors.grey[300],
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: stepState == StepState.complete
+                            ? const Icon(Icons.check,
+                                color: Colors.white, size: 16)
+                            : Text(
+                                '${stepIndex + 1}',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    );
                   },
-                  physics:
-                      const ClampingScrollPhysics(), // Smooth scrolling inside the Stepper
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'By creating an account, you agree to our Terms and Conditions and Privacy Policy.',
+                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: () => context.go('/terms-and-conditions'),
+                  child: Text(
+                    'Read Terms and Conditions',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: RegisterScreen.primaryColor,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -296,51 +175,32 @@ class _RegisterscreenState extends State<Registerscreen> {
     );
   }
 
-  // Handle Step Continue and the Form Validation
   void _handleStepContinue() {
-    final isLastStep = _currentStep == getSteps().length - 1;
+    final isLastStep = _currentStep == _getSteps().length - 1;
+    bool isValid = _formKeys[_currentStep].currentState?.validate() ?? false;
 
-    bool isValid = _formKeystep[_currentStep].currentState?.validate() ?? false;
-
-    // Additional validation for Step 4 (Medical Information)
     if (_currentStep == 3) {
-      // Validate Date of Birth
       if (selectedDate == null) {
         isValid = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select your Date of Birth')),
-        );
+        _showError('Please select your Date of Birth');
         return;
       }
-
-      // Validate Dropdown Value
       if (_selectedCancerType == "none") {
         isValid = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select the type of cancer')),
-        );
+        _showError('Please select the type of cancer');
         return;
       }
-
-      // Add more custom validations if needed
     }
 
     if (isValid) {
       if (isLastStep) {
         signup();
       } else {
-        setState(() {
-          _currentStep += 1;
-        });
-        debugPrint('Next Step');
+        setState(() => _currentStep += 1);
       }
-    } else {
-      // If the form is invalid, display a snackbar or handle accordingly
-      return;
     }
   }
 
-  // Handle Step Cancel
   void _handleStepCancel() {
     setState(() {
       if (_currentStep == 0) {
@@ -351,386 +211,152 @@ class _RegisterscreenState extends State<Registerscreen> {
     });
   }
 
-  // Build Stepper Controls
   Widget _buildStepperControls(ControlsDetails details) {
     return Container(
       margin: const EdgeInsets.only(top: 20),
       child: Row(
         children: [
-          if (_currentStep < 3)
-            Expanded(
-              child: ElevatedButton(
-                onPressed: details.onStepContinue,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  backgroundColor: Registerscreen._primaryColor,
+          Expanded(
+            child: ElevatedButton(
+              onPressed: details.onStepContinue,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: Text(
-                  'Next',
-                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                backgroundColor: RegisterScreen.primaryColor,
+                elevation: 2,
+              ),
+              child: Text(
+                _currentStep == 3 ? 'Create Account' : 'Continue',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),
-          if (_currentStep == 3)
-            Expanded(
-              child: ElevatedButton(
-                onPressed: details.onStepContinue,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  backgroundColor: Registerscreen._primaryColor,
-                ),
-                child: Text(
-                  'Finish',
-                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+          ),
+          if (_currentStep > 0) ...[
+            const SizedBox(width: 12),
+            TextButton(
+              onPressed: details.onStepCancel,
+              child: Text(
+                'Back',
+                style: GoogleFonts.poppins(
+                  color: RegisterScreen.primaryColor,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
   }
 
-  List<Step> getSteps() {
+  List<Step> _getSteps() {
     return [
-      // Step 1 of registration process (Basic Personal Information)
       Step(
         isActive: _currentStep >= 0,
         title: const Text('Step 1'),
         subtitle: const Text('Personal Information'),
         content: Form(
-          key: _formKeystep[0],
+          key: _formKeys[0],
           child: Column(
-            children: <Widget>[
+            children: [
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextfield('First Name*', _fname),
-                  ),
+                      child: _buildTextField('First Name*', _controllers[0])),
                   const SizedBox(width: 10),
                   SizedBox(
-                    width: 100,
-                    child:
-                        _buildTextfield('Suffix', _suffix, isRequired: false),
-                  ),
+                      width: 100,
+                      child: _buildTextField('Suffix', _controllers[3],
+                          isRequired: false)),
                 ],
               ),
               const SizedBox(height: 20),
-              _buildTextfield('Middle Name', _mname, isRequired: false),
+              _buildTextField('Middle Name', _controllers[2],
+                  isRequired: false),
               const SizedBox(height: 20),
-              _buildTextfield('Last Name*', _lname),
+              _buildTextField('Last Name*', _controllers[1]),
               const SizedBox(height: 20),
-              _buildTextfield('Occupation*', _occupation),
+              _buildTextField('Occupation*', _controllers[4]),
             ],
           ),
         ),
       ),
-
-      // Step 2 of registration process (Address)
       Step(
         isActive: _currentStep >= 1,
-        label: null,
-        subtitle: const Text('Address'),
         title: const Text('Step 2'),
+        subtitle: const Text('Address'),
         content: Form(
-          key: _formKeystep[1],
+          key: _formKeys[1],
           child: Column(
-            children: <Widget>[
+            children: [
               const SizedBox(height: 20),
-              // Citizenship Dropdown
-              DropdownButtonFormField<String>(
-                value: _selectedCitizenship,
-                icon: const Icon(Icons.arrow_drop_down_outlined),
-                iconEnabledColor: Colors.blue,
-                style: const TextStyle(color: Colors.black, fontSize: 16),
-                items: _citizenshipItems,
-                onChanged: _citizenshipCallback,
-                decoration: InputDecoration(
-                  labelText: "Citizenship*",
-                  labelStyle: GoogleFonts.poppins(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Registerscreen._primaryColor),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                dropdownColor: Colors.white,
-                isExpanded: true,
-              ),
+              _buildDropdown(
+                  'Citizenship*', _selectedCitizenship, _citizenshipItems,
+                  (value) {
+                setState(() => _selectedCitizenship = value!);
+              }),
               const SizedBox(height: 20),
-              _buildTextfield('Current Address*', _currentAddress),
+              _buildTextField('Current Address*', _controllers[5]),
               const SizedBox(height: 20),
-              _buildTextfield('City*', _city),
+              _buildTextField('City*', _controllers[6]),
               const SizedBox(height: 20),
-              _buildTextfield('Province*', _province),
+              _buildTextField('Province*', _controllers[7]),
             ],
           ),
         ),
       ),
-
-      // Step 3 of registration process (Account Information)
       Step(
         isActive: _currentStep >= 2,
-        label: null,
-        subtitle: const Text('Account Information'),
         title: const Text('Step 3'),
+        subtitle: const Text('Account Information'),
         content: Form(
-          key: _formKeystep[2],
+          key: _formKeys[2],
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+            children: [
               const SizedBox(height: 20),
-              _buildTextfield('Email Address*', _email),
+              _buildTextField('Email Address*', _controllers[8]),
               const SizedBox(height: 20),
-              TextFormField(
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'This field is required';
-                  }
-                  if (value.length < 8) {
-                    return 'Password must be at least 8 characters long';
-                  }
-                  if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                    return 'Password must contain at least one uppercase letter';
-                  }
-                  if (!RegExp(r'[a-z]').hasMatch(value)) {
-                    return 'Password must contain at least one lowercase letter';
-                  }
-                  if (!RegExp(r'[0-9]').hasMatch(value)) {
-                    return 'Password must contain at least one number';
-                  }
-                  return null; // Validation passed
-                },
-                controller: _password,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  labelStyle:
-                      GoogleFonts.poppins(color: Registerscreen._primaryColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                  ),
-                ),
-              ),
+              _buildPasswordField('Password', _controllers[9]),
             ],
           ),
         ),
       ),
-
-      // Step 4 of registration process (Medical Information)
       Step(
         isActive: _currentStep >= 3,
-        label: null,
-        subtitle: const Text('Medical Information'),
         title: const Text('Step 4'),
+        subtitle: const Text('Medical Information'),
         content: Form(
-          key: _formKeystep[3],
+          key: _formKeys[3],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
+            children: [
               const SizedBox(height: 20),
-
-              // Patient Type
-              Text(
-                'Patient Type*',
-                style: GoogleFonts.poppins(
-                  fontSize: 16, // Adjusted to 16 for consistency
-                  color: Registerscreen._primaryColor,
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: RadioListTile(
-                      contentPadding: EdgeInsets.zero, // Align with the label
-                      title: Text(
-                        'Outpatient',
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                      value: patientType[0],
-                      groupValue: currentPatientTypeOption,
-                      onChanged: (value) {
-                        setState(() {
-                          currentPatientTypeOption = value!;
-                        });
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile(
-                      contentPadding: EdgeInsets.zero, // Align with the label
-                      title: Text(
-                        'Inpatient',
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                      value: patientType[1],
-                      groupValue: currentPatientTypeOption,
-                      onChanged: (value) {
-                        setState(() {
-                          currentPatientTypeOption = value!;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
+              _buildRadioGroup('Patient Type*', ['Outpatient', 'Inpatient'],
+                  currentPatientTypeOption, (value) {
+                setState(() => currentPatientTypeOption = value!);
+              }),
               const SizedBox(height: 20),
-
-              // Date of Birth
-              Text(
-                'Birthday*',
-                style: GoogleFonts.poppins(
-                  fontSize: 16, // Adjusted to 16 for consistency
-                  color: Registerscreen._primaryColor,
-                ),
-              ),
+              _buildDatePicker('Birthday*', selectedDate, (date) {
+                setState(() => selectedDate = date);
+              }),
               const SizedBox(height: 20),
-
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  side: BorderSide(
-                    color: selectedDate == null
-                        ? Registerscreen._primaryColor
-                        : Registerscreen._primaryColor,
-                  ),
-                  fixedSize: Size(double.infinity, 50), // Make it responsive
-                ),
-                onPressed: () async {
-                  final DateTime? dateTime = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate ?? DateTime(2000),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (dateTime != null) {
-                    setState(() {
-                      selectedDate = dateTime;
-                    });
-                  }
-                },
-                child: Text(
-                  selectedDate == null
-                      ? 'Select Date of Birth*'
-                      : 'Date of Birth: ${selectedDate?.day}/${selectedDate?.month}/${selectedDate?.year}',
-                  style: GoogleFonts.poppins(
-                      color: selectedDate == null
-                          ? Registerscreen._primaryColor
-                          : Registerscreen._primaryColor,
-                      fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.start,
-                ),
-              ),
-              // Display error message if Date of Birth is not selected
-
+              _buildRadioGroup('Sex*', ['Male', 'Female'], currentSexOption,
+                  (value) {
+                setState(() => currentSexOption = value!);
+              }),
               const SizedBox(height: 20),
-              // Sex
-              Text(
-                'Sex*',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Registerscreen._primaryColor,
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: RadioListTile(
-                      contentPadding: EdgeInsets.zero, // Align with the label
-                      title: Text(
-                        'Male',
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                      value: sex[0],
-                      groupValue: currentSexOption,
-                      onChanged: (value) {
-                        setState(() {
-                          currentSexOption = value!;
-                        });
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile(
-                      contentPadding: EdgeInsets.zero, // Align with the label
-                      title: Text(
-                        'Female',
-                        style: GoogleFonts.poppins(fontSize: 16),
-                      ),
-                      value: sex[1],
-                      groupValue: currentSexOption,
-                      onChanged: (value) {
-                        setState(() {
-                          currentSexOption = value!;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Type of Cancer
-              DropdownButtonFormField<String>(
-                value: _selectedCancerType,
-                icon: const Icon(Icons.arrow_drop_down_outlined),
-                iconEnabledColor: Colors.blue,
-                style: const TextStyle(color: Colors.black, fontSize: 16),
-                items: _dropdownItems,
-                onChanged: _dropdownCallback,
-                decoration: InputDecoration(
-                  labelText: "Type of Cancer*",
-                  labelStyle: GoogleFonts.poppins(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Registerscreen._primaryColor),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                dropdownColor: Colors.white,
-                isExpanded: true,
-              ),
+              _buildDropdown(
+                  'Type of Cancer*', _selectedCancerType, _dropdownItems,
+                  (value) {
+                setState(() => _selectedCancerType = value!);
+              }),
             ],
           ),
         ),
@@ -738,63 +364,222 @@ class _RegisterscreenState extends State<Registerscreen> {
     ];
   }
 
-  void _dropdownCallback(String? selectedValue) {
-    if (selectedValue is String) {
-      setState(() {
-        _selectedCancerType = selectedValue;
-        debugPrint('Selected: $_selectedCancerType');
-      });
-    }
-  }
-
-  void _citizenshipCallback(String? selectedValue) {
-    if (selectedValue is String) {
-      setState(() {
-        _selectedCitizenship = selectedValue;
-        debugPrint('Selected: $_selectedCitizenship');
-      });
-    }
-  }
-
-  Widget _buildTextfield(String labelText, TextEditingController controller,
+  Widget _buildTextField(String labelText, TextEditingController controller,
       {bool isRequired = true}) {
-    return TextFormField(
-      validator: (value) {
-        if (isRequired && (value == null || value.trim().isEmpty)) {
-          return 'This Field in Required';
-        }
-        return null; // Valid if not required or if there's a value
-      },
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: labelText,
-        labelStyle: GoogleFonts.poppins(),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Registerscreen._primaryColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.grey[50],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        validator: (value) {
+          if (isRequired && (value == null || value.trim().isEmpty)) {
+            return 'This field is required';
+          }
+          return null;
+        },
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: GoogleFonts.poppins(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+          floatingLabelStyle: GoogleFonts.poppins(
+            color: RegisterScreen.primaryColor,
+            fontWeight: FontWeight.w600,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildPasswordField(
+      String labelText, TextEditingController controller) {
+    return TextFormField(
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'This field is required';
+        }
+        if (value.length < 8) {
+          return 'Password must be at least 8 characters long';
+        }
+        if (!RegExp(r'[A-Z]').hasMatch(value)) {
+          return 'Password must contain at least one uppercase letter';
+        }
+        if (!RegExp(r'[a-z]').hasMatch(value)) {
+          return 'Password must contain at least one lowercase letter';
+        }
+        if (!RegExp(r'[0-9]').hasMatch(value)) {
+          return 'Password must contain at least one number';
+        }
+        return null;
+      },
+      controller: controller,
+      obscureText: _obscurePassword,
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: GoogleFonts.poppins(color: RegisterScreen.primaryColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        suffixIcon: IconButton(
+          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+          icon:
+              Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown(String labelText, String value,
+      List<DropdownMenuItem<String>> items, ValueChanged<String?> onChanged) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.grey[50],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        items: items,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: GoogleFonts.poppins(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
+        ),
+        icon: Icon(Icons.arrow_drop_down, color: RegisterScreen.primaryColor),
+      ),
+    );
+  }
+
+  Widget _buildRadioGroup(String labelText, List<String> options,
+      String groupValue, ValueChanged<String?> onChanged) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.grey[50],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            labelText,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...options.map((option) {
+            return RadioListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                option,
+                style: GoogleFonts.poppins(fontSize: 15),
+              ),
+              value: option,
+              groupValue: groupValue,
+              onChanged: onChanged,
+              activeColor: RegisterScreen.primaryColor,
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(String labelText, DateTime? selectedDate,
+      ValueChanged<DateTime?> onDateSelected) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(labelText,
+            style: GoogleFonts.poppins(
+                fontSize: 16, color: RegisterScreen.primaryColor)),
+        const SizedBox(height: 20),
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            side: BorderSide(color: RegisterScreen.primaryColor),
+            fixedSize: Size(double.infinity, 50),
+          ),
+          onPressed: () async {
+            final dateTime = await showDatePicker(
+              context: context,
+              initialDate: selectedDate ?? DateTime(2000),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
+            onDateSelected(dateTime);
+          },
+          child: Text(
+            selectedDate == null
+                ? 'Select Date of Birth*'
+                : 'Date of Birth: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+            style: GoogleFonts.poppins(
+                color: RegisterScreen.primaryColor,
+                fontWeight: FontWeight.w600),
+            textAlign: TextAlign.start,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
-    _fname.dispose();
-    _lname.dispose();
-    _mname.dispose();
-    _suffix.dispose();
-    _occupation.dispose();
-    _currentAddress.dispose();
-    _city.dispose();
-    _province.dispose();
-    _email.dispose();
-    _password.dispose();
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 }

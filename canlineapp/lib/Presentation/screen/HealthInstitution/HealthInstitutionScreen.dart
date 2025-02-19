@@ -23,8 +23,11 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
   String _selectedFilter = 'All'; // Track selected filter
 
-  // Get the health institutions data
+  Future<void> _refreshData() async {
+    setState(() {});
+  }
 
+  // Get the health institutions data
   Future<List<Map<String, dynamic>>> _getHealthInstitutionData() async {
     var query = Supabase.instance.client.from('Health-Institution').select();
 
@@ -82,19 +85,21 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          const SizedBox(height: 30),
-          _buildCategories(),
-          const SizedBox(height: 30),
-          if (_currentCategoryIndex == 0)
-            _buildFilterButton(), // Add filter button only for hospitals
-          const SizedBox(height: 10),
-          Expanded(
-            child:
-                _buildCurrentCategoryList(), // Dynamic content based on category
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: Column(
+          children: [
+            _buildSearchBarWithFilter(),
+            const SizedBox(height: 30),
+            _buildCategories(),
+            const SizedBox(height: 30),
+            const SizedBox(height: 10),
+            Expanded(
+              child:
+                  _buildCurrentCategoryList(), // Dynamic content based on category
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -150,35 +155,44 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     );
   }
 
-  Widget _buildFilterButton() {
+  Widget _buildSearchBarWithFilter() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Filter by Type:',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          DropdownButton<String>(
-            value: _selectedFilter,
-            items: <String>['All', 'Private Hospital', 'Government Hospital']
-                .map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon: Icon(Icons.search, color: _primaryColor),
+          suffixIcon: PopupMenuButton<String>(
+            icon: Icon(Icons.filter_list, color: _primaryColor),
+            onSelected: (String newValue) {
               setState(() {
-                _selectedFilter = newValue!;
+                _selectedFilter = newValue;
               });
             },
+            itemBuilder: (BuildContext context) {
+              return <String>['All', 'Private Hospital', 'Government Hospital']
+                  .map((String value) {
+                return PopupMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList();
+            },
           ),
-        ],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+        ),
       ),
     );
   }

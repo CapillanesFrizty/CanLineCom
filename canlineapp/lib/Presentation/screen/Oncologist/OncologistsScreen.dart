@@ -13,11 +13,10 @@ class OncologistsScreens extends StatefulWidget {
 }
 
 class _OncologistsScreensState extends State<OncologistsScreens> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _searchController = TextEditingController();
   String _searchInput = '';
-  int _currentCategoryIndex =
-      0; // Track current category (0: All, 1: Specialists)
-  final String _selectedFilter = 'All'; // Track selected filter
+  String _selectedCategory = 'All'; // Track selected category
 
   @override
   void initState() {
@@ -39,11 +38,11 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
     // Build the query
     var query = Supabase.instance.client.from('Doctor').select();
 
-    // if (type != "All") {
-    //   query = query.eq('Specialization', type);
-    // }
+    if (_selectedCategory != "All") {
+      query = query.eq('Specialization', _selectedCategory);
+    }
 
-    if (_searchInput != null && _searchInput.isNotEmpty) {
+    if (_searchInput.isNotEmpty) {
       query = query.ilike("Doctor-Firstname", "%$_searchInput%");
     }
 
@@ -63,16 +62,15 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
       body: Column(
         children: [
           const SizedBox(height: 30),
           _buildSearchField(),
           const SizedBox(height: 30),
-          _buildCategories(),
-          const SizedBox(height: 30),
           Expanded(
-            child: _buildCurrentCategoryList(),
+            child: _buildDoctorSection(),
           ),
         ],
       ),
@@ -82,86 +80,95 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
   Widget _buildSearchField() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: 'Search',
-          prefixIcon:
-              Icon(Icons.search, color: OncologistsScreens._primaryColor),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: OncologistsScreens._primaryColor),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategories() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Stack(
         children: [
-          _buildCategoryButton(Icons.person, "All", 0, Colors.red),
-          _buildCategoryButton(
-              Icons.local_hospital, "Specialists", 1, Colors.blue),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryButton(
-      IconData icon, String label, int categoryIndex, Color color) {
-    final bool isSelected = _currentCategoryIndex == categoryIndex;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentCategoryIndex = categoryIndex; // Change category on click
-        });
-      },
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 30), // Updated icon without background
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w500,
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search',
+              prefixIcon:
+                  Icon(Icons.search, color: OncologistsScreens._primaryColor),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: 2,
-            width: isSelected ? 40 : 0,
-            color: isSelected ? color : Colors.transparent,
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: IconButton(
+              icon: Icon(Icons.filter_list,
+                  color: OncologistsScreens._primaryColor),
+              onPressed: () => _showFilterBottomSheet(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCurrentCategoryList() {
-    if (_currentCategoryIndex == 0) {
-      return _buildDoctorSection("All");
-    } else {
-      return _buildDoctorSection("Specialists");
-    }
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return _buildFilterBottomSheet();
+      },
+    );
   }
 
-  Widget _buildDoctorSection(String type) {
+  Widget _buildFilterBottomSheet() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Filter',
+            style: TextStyle(
+              color: OncologistsScreens._primaryColor,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            title: const Text('All'),
+            onTap: () {
+              setState(() {
+                _selectedCategory = 'All';
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+          ListTile(
+            title: const Text('Specialists'),
+            onTap: () {
+              setState(() {
+                _selectedCategory = 'Specialists';
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDoctorSection() {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _fetchDoctors(),
       builder: (context, snapshot) {
@@ -221,7 +228,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    doctor?['Specialization'],
+                    doctor['Specialization'],
                     style: GoogleFonts.poppins(
                       color: OncologistsScreens._primaryColor,
                       fontSize: 10,

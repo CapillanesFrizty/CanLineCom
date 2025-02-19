@@ -7,12 +7,14 @@ class Carddesign2Carousellist extends StatelessWidget {
   final VoidCallback? goto;
   final String image;
   final String title;
+  final String category; // Add this line
 
   const Carddesign2Carousellist({
     super.key,
     this.goto,
     required this.title,
     required this.image,
+    required this.category, // Add this line
   });
 
   @override
@@ -26,6 +28,7 @@ class Carddesign2Carousellist extends StatelessWidget {
             _buildImage(),
             _buildOverlay(),
             _buildPositionedText(title),
+            _buildCategoryLabel(category), // Add this line
           ],
         ),
       ),
@@ -39,7 +42,6 @@ class Carddesign2Carousellist extends StatelessWidget {
             child: Image.network(
               image,
               fit: BoxFit.cover,
-
               height: 300.0,
               width: 300.0, // Set fixed width for each card
             ),
@@ -81,6 +83,28 @@ class Carddesign2Carousellist extends StatelessWidget {
           fontSize: 18.0,
           fontWeight: FontWeight.bold,
           color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  // Method to build the category label
+  Widget _buildCategoryLabel(String category) {
+    return Positioned(
+      top: 10.0, // Adjust label position
+      left: 10.0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        child: Text(
+          category,
+          style: const TextStyle(
+            fontSize: 14.0,
+            color: Colors.white,
+          ),
         ),
       ),
     );

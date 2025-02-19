@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
+import '../../widgets/BarrelFileWidget..dart';
 
 class Supportgroupslistscreen extends StatefulWidget {
   const Supportgroupslistscreen({super.key});
@@ -48,174 +49,125 @@ class Supportgroupslistscreen extends StatefulWidget {
 }
 
 class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
-  String searchQuery = '';
+  static const Color _primaryColor = Color(0xFF5B50A0);
 
-// View in Browser
-  Future<void> _launchInBrowser(Uri url) async {
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
-      throw Exception('Could not launch $url');
-    }
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedFilter = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text;
+    });
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {});
+  }
+
+  List<Map<String, String>> _getFilteredSupportGroups() {
+    return Supportgroupslistscreen.supportGroups.where((group) {
+      final matchesSearchQuery =
+          group['name']!.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesFilter = _selectedFilter == 'All' ||
+          (_selectedFilter == 'Cancer' &&
+              group['description']!.toLowerCase().contains('cancer')) ||
+          (_selectedFilter == 'Others' &&
+              !group['description']!.toLowerCase().contains('cancer'));
+      return matchesSearchQuery && matchesFilter;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: Supportgroupslistscreen.supportGroups.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.all(10.0),
-            child: ListTile(
-              leading: Icon(Icons.group),
-              title:
-                  Text(Supportgroupslistscreen.supportGroups[index]['name']!),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(Supportgroupslistscreen.supportGroups[index]
-                      ['description']!),
-                  Text(
-                      Supportgroupslistscreen.supportGroups[index]['members']!),
-                ],
-              ),
-              onTap: () async {
-                final url =
-                    Supportgroupslistscreen.supportGroups[index]['url']!;
-                if (!await launchUrl(Uri.parse(url))) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Could not launch $url')),
-                  );
-                }
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class SupportGroupDetailScreen extends StatelessWidget {
-  final Map<String, String> supportGroup;
-
-  const SupportGroupDetailScreen({super.key, required this.supportGroup});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(supportGroup['name']!),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: Colors.white,
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              supportGroup['name']!,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              supportGroup['description']!,
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Members: ${supportGroup['members']}',
-              style: TextStyle(fontSize: 16),
+            _buildSearchBarWithFilter(),
+            const SizedBox(height: 30),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: _buildSupportGroupsList(),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class SupportGroupSearch extends SearchDelegate {
-  final List<Map<String, String>> supportGroups;
-
-  SupportGroupSearch(this.supportGroups);
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final results = supportGroups
-        .where((group) =>
-            group['name']!.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: EdgeInsets.all(10.0),
-          child: ListTile(
-            leading: Icon(Icons.group),
-            title: Text(results[index]['name']!),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(results[index]['description']!),
-                Text(results[index]['members']!),
-              ],
-            ),
-            onTap: () async {
-              final url = results[index]['url']!;
-              if (await canLaunch(url)) {
-                await launch(url);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Could not launch $url')),
+  Widget _buildSearchBarWithFilter() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon: Icon(Icons.search, color: _primaryColor),
+          suffixIcon: PopupMenuButton<String>(
+            icon: Icon(Icons.filter_list, color: _primaryColor),
+            onSelected: (String newValue) {
+              setState(() {
+                _selectedFilter = newValue;
+              });
+            },
+            itemBuilder: (BuildContext context) {
+              return <String>['All', 'Cancer', 'Others'].map((String value) {
+                return PopupMenuItem<String>(
+                  value: value,
+                  child: Text(value),
                 );
-              }
+              }).toList();
             },
           ),
-        );
-      },
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+        ),
+      ),
     );
   }
 
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestions = supportGroups
-        .where((group) =>
-            group['name']!.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
+  Widget _buildSupportGroupsList() {
+    final filteredSupportGroups = _getFilteredSupportGroups();
     return ListView.builder(
-      itemCount: suggestions.length,
+      itemCount: filteredSupportGroups.length,
       itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(suggestions[index]['name']!),
-          onTap: () {
-            query = suggestions[index]['name']!;
-            showResults(context);
+        final supportGroup = filteredSupportGroups[index];
+        return CardDesign1(
+          goto: () {
+            context.push('/Support-Groups/${supportGroup['name']}');
           },
+          image: '', // Add image URL if available
+          title: supportGroup['name']!,
+          subtitle: supportGroup['description']!,
         );
       },
     );
