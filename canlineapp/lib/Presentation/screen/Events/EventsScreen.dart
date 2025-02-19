@@ -28,7 +28,7 @@ class _EventsScreenState extends State<EventsScreen> {
           children: [
             // const SizedBox(height: 30),
             // _buildSearchBar(),
-            const SizedBox(height: 30),
+
             // _buildSectionTitle('Latest Events'),
             // const SizedBox(height: 30),
             // _buildPopularBlogs(),

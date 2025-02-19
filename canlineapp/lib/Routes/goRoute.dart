@@ -1,4 +1,4 @@
-import 'package:cancerline_companion/Presentation/screen/Oncologist/OncologistDetailScreen.dart';
+import 'package:cancerline_companion/Presentation/screen/Oncologist/MedicalScreenDetailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
@@ -18,90 +18,47 @@ final GoRouter linkrouter = GoRouter(
       path: '/RegisterScreen',
       builder: (context, state) => const RegisterScreen(),
     ),
-    // Home Screen with AppBar Icons
-    GoRoute(
-      name: 'userID',
-      path: '/HomeScreen/:userID',
-      builder: (context, state) {
-        final userId = state.pathParameters['userID']!;
-
-        // Scaffold Layout Widget for Home Screen
-        //  with bell Icon, Dark mode Icon, Translation Icon, Settings Icon
+    // Main app shell with bottom navigation
+    ShellRoute(
+      builder: (context, state, child) {
+        final userId = state.pathParameters['userID'];
         return ScaffoldLayoutWidget(
           userid: userId,
-          bodyWidget: const HomeScreen(),
+          bodyWidget: child,
           actionsWidget: [
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined,
-                  color: _primaryColor),
-              onPressed: () {
-                // Notification action
-                debugPrint('Notification icon pressed');
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.dark_mode_outlined, color: _primaryColor),
-              onPressed: () {
-                // Dark mode action
-                debugPrint('Dark mode icon pressed');
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.translate_outlined, color: _primaryColor),
-              onPressed: () {
-                // Translation action
-                debugPrint('Translation icon pressed');
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings_outlined, color: _primaryColor),
-              onPressed: () {
-                // Settings action
-                debugPrint('Settings icon pressed');
-              },
-            ),
+            // Your existing actions widgets
           ],
-          leadingWidget: null, // No back button for Home
         );
       },
       routes: [
+        // Home route
         GoRoute(
-          path: 'journal',
-          builder: (context, state) {
-            return ScaffoldLayoutWidget(
-              leadingWidget: null,
-              bodyWidget: const JournalScreen(),
-              titleWidget: Text(
-                "My Journal",
-                style: GoogleFonts.poppins(
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.w500,
-                  color: _primaryColor,
-                ),
-              ),
-            );
-          },
-        ),
-        GoRoute(
-          path: 'events',
-          builder: (context, state) {
-            final userId = state.pathParameters['userID']!;
-            return ScaffoldLayoutWidget(
-              userid: userId,
-              bodyWidget: const EventsScreen(),
-            );
-          },
-        ),
-        GoRoute(
-          path: 'profile',
-          builder: (context, state) {
-            final userId = state.pathParameters['userID']!;
-            return ProfileScreen(userid: userId);
-          },
+          name: 'userID',
+          path: '/HomeScreen/:userID',
+          builder: (context, state) => const HomeScreen(),
+          routes: [
+            // Journal route
+            GoRoute(
+              path: 'journal',
+              builder: (context, state) => const JournalScreen(),
+            ),
+            // Events route
+            GoRoute(
+              path: 'events',
+              builder: (context, state) => const EventsScreen(),
+            ),
+            // Profile route
+            GoRoute(
+              path: 'profile',
+              builder: (context, state) {
+                final userId = state.pathParameters['userID']!;
+                return ProfileScreen(userid: userId);
+              },
+            ),
+          ],
         ),
       ],
     ),
-
     // Health Institution Screens
     GoRoute(
       path: '/Health-Institution',
@@ -110,6 +67,7 @@ final GoRouter linkrouter = GoRouter(
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: HealthInstitutionScreen(userid: userId),
+          showNavBar: false,
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
@@ -140,6 +98,7 @@ final GoRouter linkrouter = GoRouter(
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: const BlogsScreen(),
+          showNavBar: false,
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
@@ -163,6 +122,7 @@ final GoRouter linkrouter = GoRouter(
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: const FinancialSupportScreen(),
+          showNavBar: false,
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
@@ -189,12 +149,13 @@ final GoRouter linkrouter = GoRouter(
 
     // Doctors Screen
     GoRoute(
-        path: '/Oncologist',
+        path: '/Medical-Specialists',
         builder: (context, state) {
           final userId = state.pathParameters['userID'] ?? 'default';
           return ScaffoldLayoutWidget(
             userid: userId,
-            bodyWidget: const OncologistsScreens(),
+            bodyWidget: const MedicalSpecialistScreens(),
+            showNavBar: false,
             leadingWidget: BackButton(
               color: _primaryColor,
               onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
@@ -205,7 +166,7 @@ final GoRouter linkrouter = GoRouter(
           GoRoute(
             name: ':docid',
             path: ':docid',
-            builder: (context, state) => OncologistDetailScreen(
+            builder: (context, state) => MedicalSpeciaDetailScreens(
               docid: state.pathParameters['docid']!,
             ),
           ),
@@ -218,6 +179,7 @@ final GoRouter linkrouter = GoRouter(
         return ScaffoldLayoutWidget(
           userid: userId,
           bodyWidget: const Supportgroupslistscreen(),
+          showNavBar: false,
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
@@ -246,5 +208,6 @@ final GoRouter linkrouter = GoRouter(
       path: '/terms-and-conditions',
       builder: (context, state) => const TermsAndConditionsScreen(),
     ),
+    GoRoute(path: '/Settings', builder: (context, state) => const Settings()),
   ],
 );

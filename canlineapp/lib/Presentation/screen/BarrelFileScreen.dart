@@ -28,7 +28,7 @@ export 'FinancialSupport/FinancialDetails.dart';
 export 'FinancialSupport/MoreFinancialDetails/BenefitsDetails.dart';
 
 // ! Oncologist\
-export 'Oncologist/OncologistsScreen.dart';
+export 'Oncologist/MedicalSpecialistScreen.dart';
 // ! Clinic
 export 'HealthInstitution/Moreinfo_ClinicsScreen.dart';
 
@@ -44,3 +44,8 @@ export './SupportGroups/Supportgroupdetailscreen/Supportgroupdetailsscreen.dart'
 
 // ! Terms and Conditions
 export 'authentication flow/TermsAndConditionsScreen.dart';
+
+// ! Forgot Password
+
+// ! Settings Screen
+export '../screen/HomeScreen/MoreOption/Settings.dart';

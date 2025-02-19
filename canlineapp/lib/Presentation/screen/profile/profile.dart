@@ -34,55 +34,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     debugPrint('Authenticated User: $_user');
   }
 
-  void _Logout() async {
+  Future<void> _Logout() async {
     await supabase.auth.signOut();
     GoRouter.of(context).go('/');
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldLayoutWidget(
-      bodyWidget: _buildBody(),
-      actionsWidget: [
-        IconButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text("Note"),
-                contentPadding: const EdgeInsets.all(20),
-                content: Text("Are you sure to logout?"),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text("No"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _Logout();
-                    },
-                    child: Text("Yes"),
-                  ),
-                ],
-              ),
-            );
-          },
-          icon: Icon(Icons.logout, color: Colors.red),
-        ),
-      ],
-      titleWidget: Text(
-        "Profile",
-        style: GoogleFonts.poppins(
-          fontSize: 30.0,
-          fontWeight: FontWeight.w500,
-          color: ProfileScreen.primaryColor,
-        ),
-      ),
-      // backgroundColor: Colors.white,
-      // // Uncomment the AppBar if needed
-      // body: _buildBody(),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: _buildBody(),
     );
   }
 
@@ -93,7 +54,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const SizedBox(height: 50),
             _buildProfileImage(),
             const SizedBox(height: 15),
             _buildNameAndLocation(),

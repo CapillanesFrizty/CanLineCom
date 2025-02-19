@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget bodyWidget;
@@ -8,6 +9,7 @@ class ScaffoldLayoutWidget extends StatefulWidget {
   final Widget? titleWidget;
   final double? elevation;
   final String? userid;
+  final bool showNavBar; // Add this parameter
 
   const ScaffoldLayoutWidget({
     super.key,
@@ -17,147 +19,212 @@ class ScaffoldLayoutWidget extends StatefulWidget {
     this.titleWidget,
     this.elevation,
     this.userid,
+    this.showNavBar = true, // Default value is true
   });
 
   @override
   State<ScaffoldLayoutWidget> createState() => _ScaffoldLayoutWidgetState();
 }
 
+class NavigationItem {
+  final String id;
+  final IconData icon;
+  final String label;
+  final String route;
+
+  const NavigationItem({
+    required this.id,
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
+}
+
 class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
-  late int _currentIndex;
-
+  String _currentId = 'home';
   static const Color _primaryColor = Color(0xFF5B50A0);
-  static const double _iconSize = 28.0;
+  static const Color _inactiveColor = Color(0xFFADAFC5);
+  bool _isNavigating = false;
 
-  late final List<String> _routes;
+  late final List<NavigationItem> _navigationItems;
 
   @override
   void initState() {
     super.initState();
-
-    // Define routes based on userID
-    _routes = [
-      '/HomeScreen/${widget.userid}', // Home
-      '/HomeScreen/${widget.userid}/journal', // Journal
-      '/HomeScreen/${widget.userid}/events', // Events
-      '/HomeScreen/${widget.userid}/profile', // Profile
+    _navigationItems = [
+      NavigationItem(
+        id: 'home',
+        icon: Icons.home_rounded,
+        label: "Home",
+        route: '/HomeScreen/${widget.userid}',
+      ),
+      NavigationItem(
+        id: 'journal',
+        icon: Icons.menu_book_rounded,
+        label: "Journal",
+        route: '/HomeScreen/${widget.userid}/journal',
+      ),
+      NavigationItem(
+        id: 'events',
+        icon: Icons.event_rounded,
+        label: "Events",
+        route: '/HomeScreen/${widget.userid}/events',
+      ),
+      NavigationItem(
+        id: 'profile',
+        icon: Icons.person_rounded,
+        label: "Profile",
+        route: '/HomeScreen/${widget.userid}/profile',
+      ),
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateIndexFromRoute();
+      _syncCurrentRoute();
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _updateIndexFromRoute();
+  void _syncCurrentRoute() {
+    if (!mounted) return;
+
+    final location = GoRouterState.of(context).uri.path;
+    String newId;
+
+    if (location.endsWith('/journal')) {
+      newId = 'journal';
+    } else if (location.endsWith('/events')) {
+      newId = 'events';
+    } else if (location.endsWith('/profile')) {
+      newId = 'profile';
+    } else if (location.contains('/HomeScreen/')) {
+      newId = 'home';
+    } else {
+      return;
+    }
+
+    if (_currentId != newId) {
+      setState(() => _currentId = newId);
+    }
   }
 
-  void _updateIndexFromRoute() {
-    final currentRoute =
-        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
+  Future<void> _onItemTapped(NavigationItem item) async {
+    if (!mounted || _currentId == item.id || _isNavigating) return;
 
-    if (currentRoute == null) return; // Exit if route is null
+    try {
+      setState(() => _isNavigating = true);
 
-    for (int i = 0; i < _routes.length; i++) {
-      if (currentRoute == _routes[i] ||
-          currentRoute.startsWith('${_routes[i]}/')) {
-        if (_currentIndex != i) {
-          setState(() {
-            _currentIndex = i;
-          });
-        }
-        return; // Stop once a match is found
+      setState(() => _currentId = item.id);
+
+      // Use go() instead of push() to replace the current route
+      context.go(item.route);
+    } catch (e) {
+      debugPrint('Navigation error: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isNavigating = false);
       }
     }
-
-    // If no match, reset index (non-navigation routes)
-    setState(() {
-      _currentIndex = -1;
-    });
   }
 
-  static const List<({IconData outlined, IconData filled, String label})>
-      _icons = [
-    (outlined: Icons.home_outlined, filled: Icons.home, label: "Home"),
-    (
-      outlined: Icons.menu_book_outlined,
-      filled: Icons.menu_book,
-      label: "Journal"
-    ),
-    (outlined: Icons.event_outlined, filled: Icons.event, label: "Events"),
-    (outlined: Icons.person_outline, filled: Icons.person, label: "Profile"),
-  ];
-
-  void _onTabSelected(int index) {
-    if (index >= 0 && index < _routes.length && _currentIndex != index) {
-      setState(() {
-        _currentIndex = index; // Update index immediately
-      });
-      context.go(_routes[index]); // Navigate to the selected route
-    }
-  }
-
-  Widget buildCustomNavigationBar() {
+  Widget buildBottomBar() {
     return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(1.0),
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(
-          _icons.length,
-          (index) {
-            final isSelected = _currentIndex == index;
-            final iconData = _icons[index];
-
-            return GestureDetector(
-              onTap: () {
-                _onTabSelected(index);
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    isSelected ? iconData.filled : iconData.outlined,
-                    color: isSelected ? Colors.white : Colors.white70,
-                    size: _iconSize,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    iconData.label,
-                    style: TextStyle(
-                      fontSize: isSelected ? 12 : 11,
-                      color: isSelected ? Colors.white : Colors.white70,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: 2,
-                    width: isSelected ? 40 : 0,
-                    color: isSelected ? Colors.white : Colors.transparent,
-                  ),
-                ],
-              ),
-            );
-          },
+      child: SafeArea(
+        child: Container(
+          height: 65,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: _navigationItems.map((item) {
+              final isSelected = _currentId == item.id;
+              return _buildNavItem(item, isSelected);
+            }).toList(),
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildNavItem(NavigationItem item, bool isSelected) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _onItemTapped(item),
+          borderRadius: BorderRadius.circular(16),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: isSelected
+                  ? _primaryColor.withOpacity(0.1)
+                  : Colors.transparent,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedScale(
+                  duration: const Duration(milliseconds: 200),
+                  scale: isSelected ? 1.1 : 1.0,
+                  child: Icon(
+                    item.icon,
+                    color: isSelected ? _primaryColor : _inactiveColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? _primaryColor : _inactiveColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
+      child: IconButton(
+        icon: const Icon(
+          LucideIcons.userCircle,
+          size: 30,
+          color: _primaryColor,
+        ),
+        onPressed: () {
+          final userId = widget.userid;
+          if (userId != null) {
+            context.push('/Settings');
+          }
+        },
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(ScaffoldLayoutWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.userid != oldWidget.userid) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _syncCurrentRoute();
+      });
+    }
   }
 
   @override
@@ -169,17 +236,25 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         title: widget.titleWidget,
-        actions: widget.actionsWidget,
+        actions: [
+          if (widget.actionsWidget != null) ...widget.actionsWidget!,
+          if (_currentId == 'home' ||
+              _currentId == 'journal' ||
+              _currentId == 'profile' ||
+              _currentId == 'events')
+            _buildSettingsButton(),
+        ],
         leadingWidth: widget.leadingWidget != null ? 50 : 10,
         leading: widget.leadingWidget != null
             ? Padding(
                 padding: const EdgeInsets.only(left: 10.0),
                 child: widget.leadingWidget,
               )
-            : Container(), // Suppress the default back button
+            : Container(),
       ),
       body: widget.bodyWidget,
-      bottomNavigationBar: buildCustomNavigationBar(),
+      bottomNavigationBar:
+          widget.showNavBar ? buildBottomBar() : null, // Conditional navbar
     );
   }
 }

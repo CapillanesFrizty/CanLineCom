@@ -3,16 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class OncologistsScreens extends StatefulWidget {
-  const OncologistsScreens({super.key});
+class MedicalSpecialistScreens extends StatefulWidget {
+  const MedicalSpecialistScreens({super.key});
 
   @override
-  State<OncologistsScreens> createState() => _OncologistsScreensState();
+  State<MedicalSpecialistScreens> createState() =>
+      _MedicalSpecialistScreensState();
   static const Color _primaryColor = Color(0xFF5B50A0);
   static const Color _secondaryColor = Color(0xFFF3EBFF);
 }
 
-class _OncologistsScreensState extends State<OncologistsScreens> {
+class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _searchController = TextEditingController();
   String _searchInput = '';
@@ -86,19 +87,22 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search',
-              prefixIcon:
-                  Icon(Icons.search, color: OncologistsScreens._primaryColor),
+              prefixIcon: Icon(Icons.search,
+                  color: MedicalSpecialistScreens._primaryColor),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+                borderSide:
+                    BorderSide(color: MedicalSpecialistScreens._primaryColor),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+                borderSide:
+                    BorderSide(color: MedicalSpecialistScreens._primaryColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: OncologistsScreens._primaryColor),
+                borderSide:
+                    BorderSide(color: MedicalSpecialistScreens._primaryColor),
               ),
             ),
           ),
@@ -108,7 +112,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
             bottom: 0,
             child: IconButton(
               icon: Icon(Icons.filter_list,
-                  color: OncologistsScreens._primaryColor),
+                  color: MedicalSpecialistScreens._primaryColor),
               onPressed: () => _showFilterBottomSheet(),
             ),
           ),
@@ -139,7 +143,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
           Text(
             'Filter',
             style: TextStyle(
-              color: OncologistsScreens._primaryColor,
+              color: MedicalSpecialistScreens._primaryColor,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -201,7 +205,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
   Widget _buildDoctorCard(Map<String, dynamic> doctor) {
     return GestureDetector(
       onTap: () {
-        context.go('/Oncologist/${doctor['id']}');
+        context.go('/Medical-Specialists/${doctor['id']}');
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -230,7 +234,7 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
                   Text(
                     doctor['Specialization'],
                     style: GoogleFonts.poppins(
-                      color: OncologistsScreens._primaryColor,
+                      color: MedicalSpecialistScreens._primaryColor,
                       fontSize: 10,
                     ),
                   ),
@@ -240,14 +244,14 @@ class _OncologistsScreensState extends State<OncologistsScreens> {
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: OncologistsScreens._primaryColor,
+                      color: MedicalSpecialistScreens._primaryColor,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     doctor['Doctor-Email'],
                     style: GoogleFonts.poppins(
-                      color: OncologistsScreens._primaryColor,
+                      color: MedicalSpecialistScreens._primaryColor,
                       fontSize: 12,
                     ),
                   ),
