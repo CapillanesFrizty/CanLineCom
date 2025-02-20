@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../widgets/Card/CardDesign1.dart';
 
 class MedicalSpecialistScreens extends StatefulWidget {
   const MedicalSpecialistScreens({super.key});
@@ -14,10 +15,29 @@ class MedicalSpecialistScreens extends StatefulWidget {
 }
 
 class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // Constants
+  static const double _cardHeight = 200.0;
+
+  // Styles
+  final _titleStyle = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w500,
+      fontSize: 30.0,
+      color: MedicalSpecialistScreens._primaryColor,
+    ),
+  );
+
+  final _sectionTitleStyle = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontSize: 18.0,
+      fontWeight: FontWeight.bold,
+      color: MedicalSpecialistScreens._primaryColor,
+    ),
+  );
+
   final TextEditingController _searchController = TextEditingController();
   String _searchInput = '';
-  String _selectedCategory = 'All'; // Track selected category
+  String _selectedCategory = 'All';
 
   @override
   void initState() {
@@ -36,7 +56,6 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchDoctors() async {
-    // Build the query
     var query = Supabase.instance.client.from('Doctor').select();
 
     if (_selectedCategory != "All") {
@@ -47,33 +66,48 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
       query = query.ilike("Doctor-Firstname", "%$_searchInput%");
     }
 
-    // Execute the query
     final response = await query;
+    List<Map<String, dynamic>> result = [];
 
-    // Check if the response contains an error
-    if (response == null) {
-      throw Exception("Error fetching doctors: Response is null");
+    for (var doctor in response) {
+      if (doctor['Doctor-Firstname'] != null) {
+        final fileName =
+            "${doctor['Doctor-Firstname']}_${doctor['Doctor-Lastname']}.png";
+        final imageUrl = Supabase.instance.client.storage
+            .from('Assets')
+            .getPublicUrl("Doctors/$fileName");
+
+        doctor['Doctor-Image-Url'] = imageUrl;
+        result.add(doctor);
+      }
     }
 
-    debugPrint("Raw Response: $response"); // Debugging step
-
-    return response;
+    return result;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          const SizedBox(height: 30),
-          _buildSearchField(),
-          const SizedBox(height: 30),
-          Expanded(
-            child: _buildDoctorSection(),
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async => setState(() {}),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
+                  _buildSearchField(),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: _buildDoctorSection(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -81,93 +115,33 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   Widget _buildSearchField() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
-      child: Stack(
-        children: [
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search',
-              prefixIcon: Icon(Icons.search,
-                  color: MedicalSpecialistScreens._primaryColor),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: MedicalSpecialistScreens._primaryColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: MedicalSpecialistScreens._primaryColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: MedicalSpecialistScreens._primaryColor),
-              ),
-            ),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon:
+              Icon(Icons.search, color: MedicalSpecialistScreens._primaryColor),
+          suffixIcon: IconButton(
+            icon: Icon(Icons.filter_list,
+                color: MedicalSpecialistScreens._primaryColor),
+            onPressed: () => _showFilterBottomSheet(),
           ),
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: IconButton(
-              icon: Icon(Icons.filter_list,
-                  color: MedicalSpecialistScreens._primaryColor),
-              onPressed: () => _showFilterBottomSheet(),
-            ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide:
+                BorderSide(color: MedicalSpecialistScreens._primaryColor),
           ),
-        ],
-      ),
-    );
-  }
-
-  void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return _buildFilterBottomSheet();
-      },
-    );
-  }
-
-  Widget _buildFilterBottomSheet() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Filter',
-            style: TextStyle(
-              color: MedicalSpecialistScreens._primaryColor,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide:
+                BorderSide(color: MedicalSpecialistScreens._primaryColor),
           ),
-          const SizedBox(height: 16),
-          ListTile(
-            title: const Text('All'),
-            onTap: () {
-              setState(() {
-                _selectedCategory = 'All';
-              });
-              Navigator.of(context).pop();
-            },
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide:
+                BorderSide(color: MedicalSpecialistScreens._primaryColor),
           ),
-          ListTile(
-            title: const Text('Specialists'),
-            onTap: () {
-              setState(() {
-                _selectedCategory = 'Specialists';
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -180,21 +154,51 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('No Internet Connection'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => setState(() {}),
+                  child: const Text('Try Again'),
+                ),
+              ],
+            ),
+          );
         }
 
         final doctors = snapshot.data ?? [];
         if (doctors.isEmpty) {
-          return const Center(child: Text('No doctors found'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('No doctors found'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => setState(() {}),
+                  child: const Text('Refresh'),
+                ),
+              ],
+            ),
+          );
         }
 
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           itemCount: doctors.length,
           itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: _buildDoctorCard(doctors[index]),
+            final doctor = doctors[index];
+            return CardDesign1(
+              goto: () => context.push('/Doctor/${doctor['Doctor-ID']}'),
+              image: doctor['Doctor-Image-Url'] ?? '',
+              title:
+                  '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
+              subtitle: doctor['Specialization'] ?? 'Unknown Specialization',
+              location: doctor['Hospital'] ?? 'No hospital information',
+              address: doctor['Address'] ?? 'No address available',
             );
           },
         );
@@ -202,65 +206,83 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     );
   }
 
-  Widget _buildDoctorCard(Map<String, dynamic> doctor) {
-    return GestureDetector(
-      onTap: () {
-        context.go('/Medical-Specialists/${doctor['id']}');
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.grey[100],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child:
-                  Icon(Icons.person_4_rounded, color: Colors.white70, size: 40),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    doctor['Specialization'],
-                    style: GoogleFonts.poppins(
-                      color: MedicalSpecialistScreens._primaryColor,
-                      fontSize: 10,
-                    ),
+                  Text('Filter',
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: MedicalSpecialistScreens._primaryColor)),
+                  SizedBox(height: 16),
+                  Text('Specialist Type',
+                      style: TextStyle(
+                          color: MedicalSpecialistScreens._primaryColor)),
+                  ToggleButtons(
+                    isSelected: [
+                      _selectedCategory == 'All',
+                      _selectedCategory == 'Oncologist',
+                      _selectedCategory == 'Specialist'
+                    ],
+                    onPressed: (index) {
+                      setState(() {
+                        if (index == 0) _selectedCategory = 'All';
+                        if (index == 1) _selectedCategory = 'Oncologist';
+                        if (index == 2) _selectedCategory = 'Specialist';
+                      });
+                      this.setState(() {});
+                    },
+                    selectedColor: Colors.white,
+                    color: Colors.grey,
+                    fillColor: MedicalSpecialistScreens._primaryColor,
+                    borderRadius: BorderRadius.circular(8),
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('All'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Oncologist'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Specialist'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: MedicalSpecialistScreens._primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    doctor['Doctor-Email'],
-                    style: GoogleFonts.poppins(
-                      color: MedicalSpecialistScreens._primaryColor,
-                      fontSize: 12,
+                  SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: MedicalSpecialistScreens._primaryColor,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('Apply Filters',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

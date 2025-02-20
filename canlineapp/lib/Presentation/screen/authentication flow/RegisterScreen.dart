@@ -527,7 +527,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               onChanged: onChanged,
               activeColor: RegisterScreen.primaryColor,
             );
-          }).toList(),
+          }),
         ],
       ),
     );

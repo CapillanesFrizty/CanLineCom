@@ -36,6 +36,10 @@ class _JournalScreenState extends State<JournalScreen> {
     fetchUserJournalEntries();
   }
 
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
+  }
+
   Future<void> _submitJournalEntry() async {
     if (!_formKey.currentState!.validate()) return;
     if (selectedEmotion == -1) {
@@ -100,21 +104,32 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 
   Future<void> fetchUserJournalEntries() async {
-    final u = supabase.auth.currentSession;
+    try {
+      final u = supabase.auth.currentSession;
 
-    final response = await supabase
-        .from('Journal')
-        .select()
-        .eq('created_by', u!.user.id)
-        .order("created_at", ascending: false);
+      final response = await supabase
+          .from('Journal')
+          .select()
+          .eq('created_by', u!.user.id)
+          .order("created_at", ascending: false);
 
-    debugPrint('Journal Entries: $response');
+      debugPrint('Journal Entries: $response');
 
-    if (mounted) {
-      setState(() {
-        journalEntries = response as List<dynamic>;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          journalEntries = response as List<dynamic>;
+          isLoading = false;
+        });
+      }
+    } catch (error) {
+      debugPrint('Error fetching journal entries: $error');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+
+        Text("No Internet Connection");
+      }
     }
   }
 
@@ -517,27 +532,11 @@ class _JournalScreenState extends State<JournalScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              LucideIcons.book,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            const Text('No Internet Connection'),
             const SizedBox(height: 16),
-            Text(
-              "No journal entries yet",
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Start writing your thoughts!",
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
+            ElevatedButton(
+              onPressed: _refreshContent,
+              child: const Text('Try Again'),
             ),
           ],
         ),

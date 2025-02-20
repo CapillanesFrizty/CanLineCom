@@ -66,8 +66,8 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
       ),
       NavigationItem(
         id: 'events',
-        icon: Icons.event_rounded,
-        label: "Events",
+        icon: Icons.source_rounded,
+        label: "Resources",
         route: '/HomeScreen/${widget.userid}/events',
       ),
       NavigationItem(

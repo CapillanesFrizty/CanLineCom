@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../widgets/BarrelFileWidget..dart';
 
 class Supportgroupslistscreen extends StatefulWidget {
@@ -10,6 +11,7 @@ class Supportgroupslistscreen extends StatefulWidget {
       'name': 'Philippine Cancer Society',
       'description':
           'The Philippine Cancer Society provides support and resources for cancer patients, including educational materials, counseling, and financial assistance.',
+      'category': 'General Cancer Support',
       'members': '100 members',
       'url': 'https://www.philcancer.org.ph/'
     },
@@ -17,6 +19,7 @@ class Supportgroupslistscreen extends StatefulWidget {
       'name': 'Cancer Warriors Foundation',
       'description':
           'Cancer Warriors Foundation supports children with cancer and their families through medical assistance, emotional support, and advocacy programs.',
+      'category': 'Pediatric Cancer Support',
       'members': '50 members',
       'url': 'https://www.c-warriors.org/'
     },
@@ -24,6 +27,7 @@ class Supportgroupslistscreen extends StatefulWidget {
       'name': 'ICanServe Foundation',
       'description':
           'ICanServe Foundation focuses on breast cancer awareness and support, offering early detection programs, patient navigation, and community-based support groups.',
+      'category': 'Breast Cancer Support',
       'members': '75 members',
       'url': 'https://www.icanservefoundation.org/'
     },
@@ -31,6 +35,7 @@ class Supportgroupslistscreen extends StatefulWidget {
       'name': 'Carewell Community',
       'description':
           'Carewell Community provides comprehensive support and resources for cancer patients and their families, including counseling, support groups, and wellness programs.',
+      'category': 'Family Support & Wellness',
       'members': '60 members',
       'url': 'https://www.carewellcommunity.org/'
     },
@@ -38,6 +43,7 @@ class Supportgroupslistscreen extends StatefulWidget {
       'name': 'Project: Brave Kids',
       'description':
           'Project: Brave Kids supports children with cancer and their families by providing medical assistance, emotional support, and educational resources.',
+      'category': 'Pediatric Cancer Support',
       'members': '40 members',
       'url': 'https://www.projectbravekids.org/'
     },
@@ -49,7 +55,26 @@ class Supportgroupslistscreen extends StatefulWidget {
 }
 
 class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
+  // Constants
   static const Color _primaryColor = Color(0xFF5B50A0);
+  static const Color _secondaryColor = Color(0xFFF3EBFF);
+
+  // Styles
+  final _titleStyle = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontWeight: FontWeight.w500,
+      fontSize: 30.0,
+      color: _primaryColor,
+    ),
+  );
+
+  final _sectionTitleStyle = GoogleFonts.poppins(
+    textStyle: const TextStyle(
+      fontSize: 18.0,
+      fontWeight: FontWeight.bold,
+      color: _primaryColor,
+    ),
+  );
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -75,7 +100,12 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
   }
 
   Future<void> _refreshData() async {
-    setState(() {});
+    setState(() {
+      // Reset search and filter if needed
+      _searchQuery = '';
+      _searchController.clear();
+      _selectedFilter = 'All';
+    });
   }
 
   List<Map<String, String>> _getFilteredSupportGroups() {
@@ -97,15 +127,20 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
       backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: _refreshData,
-        child: Column(
-          children: [
-            _buildSearchBarWithFilter(),
-            const SizedBox(height: 30),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: _buildSupportGroupsList(),
+        child: CustomScrollView(
+          physics:
+              const AlwaysScrollableScrollPhysics(), // Enables refresh even when empty
+          slivers: [
+            SliverFillRemaining(
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
+                  _buildSearchBar(),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: _buildSupportGroupsList(),
+                  ),
+                ],
               ),
             ),
           ],
@@ -114,7 +149,7 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
     );
   }
 
-  Widget _buildSearchBarWithFilter() {
+  Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: TextField(
@@ -122,20 +157,10 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
         decoration: InputDecoration(
           hintText: 'Search',
           prefixIcon: Icon(Icons.search, color: _primaryColor),
-          suffixIcon: PopupMenuButton<String>(
+          suffixIcon: IconButton(
             icon: Icon(Icons.filter_list, color: _primaryColor),
-            onSelected: (String newValue) {
-              setState(() {
-                _selectedFilter = newValue;
-              });
-            },
-            itemBuilder: (BuildContext context) {
-              return <String>['All', 'Cancer', 'Others'].map((String value) {
-                return PopupMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList();
+            onPressed: () {
+              _showFilterBottomSheet(context);
             },
           ),
           border: OutlineInputBorder(
@@ -157,17 +182,114 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
 
   Widget _buildSupportGroupsList() {
     final filteredSupportGroups = _getFilteredSupportGroups();
+
+    if (filteredSupportGroups.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('No support groups available'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _refreshData,
+              child: const Text('Refresh'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
       itemCount: filteredSupportGroups.length,
       itemBuilder: (context, index) {
         final supportGroup = filteredSupportGroups[index];
         return CardDesign1(
-          goto: () {
-            context.push('/Support-Groups/${supportGroup['name']}');
-          },
+          goto: () => context.push('/Support-Groups/${supportGroup['name']}'),
           image: '', // Add image URL if available
           title: supportGroup['name']!,
-          subtitle: supportGroup['description']!,
+          subtitle: supportGroup['category'] ?? 'No category',
+          location: '', // Add if you have location data
+          address: '', // Add if you have address data
+        );
+      },
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Filter',
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: _primaryColor)),
+                  SizedBox(height: 16),
+                  Text('Support Group Type',
+                      style: TextStyle(color: _primaryColor)),
+                  ToggleButtons(
+                    isSelected: [
+                      _selectedFilter == 'All',
+                      _selectedFilter == 'Cancer',
+                      _selectedFilter == 'Others'
+                    ],
+                    onPressed: (index) {
+                      setState(() {
+                        if (index == 0) _selectedFilter = 'All';
+                        if (index == 1) _selectedFilter = 'Cancer';
+                        if (index == 2) _selectedFilter = 'Others';
+                      });
+                      this.setState(() {});
+                    },
+                    selectedColor: Colors.white,
+                    color: Colors.grey,
+                    fillColor: _primaryColor,
+                    borderRadius: BorderRadius.circular(8),
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('All'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Cancer'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Others'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('Apply Filters',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

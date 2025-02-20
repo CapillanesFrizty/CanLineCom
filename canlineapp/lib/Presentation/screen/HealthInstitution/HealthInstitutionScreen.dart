@@ -23,8 +23,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
   String _selectedFilter = 'All'; // Track selected filter
 
-  Future<void> _refreshData() async {
-    setState(() {});
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
   }
 
   // Get the health institutions data
@@ -86,18 +86,19 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: RefreshIndicator(
-        onRefresh: _refreshData,
+        onRefresh: _refreshContent,
         child: Column(
           children: [
+            const SizedBox(height: 30),
             _buildSearchBarWithFilter(),
             const SizedBox(height: 30),
             _buildCategories(),
             const SizedBox(height: 30),
-            const SizedBox(height: 10),
             Expanded(
               child:
                   _buildCurrentCategoryList(), // Dynamic content based on category
             ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -163,21 +164,10 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
         decoration: InputDecoration(
           hintText: 'Search',
           prefixIcon: Icon(Icons.search, color: _primaryColor),
-          suffixIcon: PopupMenuButton<String>(
+          suffixIcon: IconButton(
             icon: Icon(Icons.filter_list, color: _primaryColor),
-            onSelected: (String newValue) {
-              setState(() {
-                _selectedFilter = newValue;
-              });
-            },
-            itemBuilder: (BuildContext context) {
-              return <String>['All', 'Private Hospital', 'Government Hospital']
-                  .map((String value) {
-                return PopupMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList();
+            onPressed: () {
+              _showFilterBottomSheet(context);
             },
           ),
           border: OutlineInputBorder(
@@ -194,6 +184,85 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _applyFilters() {
+    setState(() {});
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Filter',
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: _primaryColor)),
+                  SizedBox(height: 16),
+                  Text('Institution Type',
+                      style: TextStyle(color: _primaryColor)),
+                  ToggleButtons(
+                    isSelected: [
+                      _selectedFilter == 'All',
+                      _selectedFilter == 'Private Hospital',
+                      _selectedFilter == 'Government Hospital'
+                    ],
+                    onPressed: (index) {
+                      setState(() {
+                        if (index == 0) _selectedFilter = 'All';
+                        if (index == 1) _selectedFilter = 'Private Hospital';
+                        if (index == 2) _selectedFilter = 'Government Hospital';
+                      });
+                    },
+                    selectedColor: Colors.white,
+                    color: Colors.grey,
+                    fillColor: _primaryColor,
+                    borderRadius: BorderRadius.circular(8),
+                    children: [
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('All')),
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('Private')),
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('Government')),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor),
+                      onPressed: () {
+                        _applyFilters();
+                        Navigator.pop(context);
+                      },
+                      child: Text('Apply Filters',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -241,7 +310,19 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
         }
 
         if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching data'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('No Internet Connection'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _refreshContent,
+                  child: const Text('Try Again'),
+                ),
+              ],
+            ),
+          );
         }
 
         final healthInst = snapshot.data ?? [];

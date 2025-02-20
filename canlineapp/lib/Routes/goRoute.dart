@@ -45,7 +45,15 @@ final GoRouter linkrouter = GoRouter(
             // Events route
             GoRoute(
               path: 'events',
-              builder: (context, state) => const EventsScreen(),
+              builder: (context, state) => const ResourcesScreen(),
+              routes: [
+                GoRoute(
+                  name: 'blogid',
+                  path: ':blogid',
+                  builder: (context, state) =>
+                      MoreinfoBlogsscreen(id: state.pathParameters['blogid']!),
+                )
+              ],
             ),
             // Profile route
             GoRoute(
@@ -90,30 +98,23 @@ final GoRouter linkrouter = GoRouter(
       ],
     ),
 
-    // Blogs Screen
-    GoRoute(
-      path: '/Blog',
-      builder: (context, state) {
-        final userId = state.pathParameters['userID'] ?? 'default';
-        return ScaffoldLayoutWidget(
-          userid: userId,
-          bodyWidget: const BlogsScreen(),
-          showNavBar: false,
-          leadingWidget: BackButton(
-            color: _primaryColor,
-            onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
-          ),
-        );
-      },
-      routes: [
-        GoRoute(
-          name: 'blogid',
-          path: ':blogid',
-          builder: (context, state) =>
-              MoreinfoBlogsscreen(id: state.pathParameters['blogid']!),
-        )
-      ],
-    ),
+    // // Blogs Screen
+    // GoRoute(
+    //   path: '/Blog',
+    //   builder: (context, state) {
+    //     final userId = state.pathParameters['userID'] ?? 'default';
+    //     return ScaffoldLayoutWidget(
+    //       userid: userId,
+    //       bodyWidget: const BlogsScreen(),
+    //       showNavBar: false,
+    //       leadingWidget: BackButton(
+    //         color: _primaryColor,
+    //         onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
+    //       ),
+    //     );
+    //   },
+
+    // ),
     // Financial Support Screen
     GoRoute(
       path: '/Financial-Institution',
@@ -183,14 +184,6 @@ final GoRouter linkrouter = GoRouter(
           leadingWidget: BackButton(
             color: _primaryColor,
             onPressed: () => GoRouter.of(context).go('/HomeScreen/$userId'),
-          ),
-          titleWidget: Text(
-            'Cancer Support Groups',
-            style: GoogleFonts.poppins(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w500,
-              color: _primaryColor,
-            ),
           ),
         );
       },
