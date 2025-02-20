@@ -529,7 +529,57 @@ class _JournalScreenState extends State<JournalScreen> {
 
     if (journalEntries.isEmpty) {
       return Center(
-        child: Text("No Journal FOund"),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Book icon with shadow
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Icon(
+                LucideIcons.book,
+                size: 48,
+                color: primaryColor,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+            // Title
+            Text(
+              'No Journal Entries Yet',
+              style: TextStyle(
+                color: primaryColor,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Subtitle
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Text(
+                'Start writing your thoughts and feelings in your personal journal',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
       );
     }
 
