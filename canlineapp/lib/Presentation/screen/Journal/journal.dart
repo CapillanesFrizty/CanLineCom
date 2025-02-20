@@ -529,17 +529,7 @@ class _JournalScreenState extends State<JournalScreen> {
 
     if (journalEntries.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('No Internet Connection'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _refreshContent,
-              child: const Text('Try Again'),
-            ),
-          ],
-        ),
+        child: Text("No Journal FOund"),
       );
     }
 

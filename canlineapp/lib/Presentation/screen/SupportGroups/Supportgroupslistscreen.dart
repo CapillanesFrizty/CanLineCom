@@ -1,3 +1,4 @@
+import 'package:cancerline_companion/Presentation/screen/BarrelFileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -140,6 +141,7 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
                   Expanded(
                     child: _buildSupportGroupsList(),
                   ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -205,7 +207,10 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
       itemBuilder: (context, index) {
         final supportGroup = filteredSupportGroups[index];
         return CardDesign1(
-          goto: () => context.push('/Support-Groups/${supportGroup['name']}'),
+          goto: () {
+            final encodedName = Uri.encodeComponent(supportGroup['name']!);
+            context.go('/Support-Groups/$encodedName');
+          },
           image: '', // Add image URL if available
           title: supportGroup['name']!,
           subtitle: supportGroup['category'] ?? 'No category',

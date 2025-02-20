@@ -22,10 +22,31 @@ class _SettingsState extends State<Settings> {
   }
 
   Future<void> _getUserData() async {
-    final response = await supabase.auth.getUser();
-    setState(() {
-      _user = response.user;
-    });
+    try {
+      final response = await supabase.auth.getUser();
+
+      setState(() {
+        _user = response.user;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      String errorMessage = 'Failed to fetch user data';
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('ConnectionException')) {
+        errorMessage = 'No internet connection';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage,
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override

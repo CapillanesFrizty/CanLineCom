@@ -204,14 +204,14 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
             final institution = institutions[index];
             return CardDesign1(
               goto: () => context.push(
-                  '/Financial/${institution['Financial-Institution-ID']}'),
+                  '/Financial-Institution/${institution['Financial-Institution-ID']}'),
               image: institution['Financial-Institution-Image-Url'] ?? '',
               title: institution['Financial-Institution-Name'] ??
                   'Unknown Institution',
               subtitle:
                   institution['Financial-Institution-Type'] ?? 'Unknown Type',
-              location: institution['Location'] ?? 'No location available',
-              address: institution['Address'] ?? 'No address available',
+              location: institution['Financial-Institution-Address'] ??
+                  'No location available',
             );
           },
         );

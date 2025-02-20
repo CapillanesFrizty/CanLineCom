@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,6 +23,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _getUserData();
   }
+
+  // Future _CheckConnection() async {
+  //   try {
+  //     // Check if there's an active session
+  //     final session = supabase.auth.currentSession;
+  //     if (session == null) {
+  //       debugPrint('No active session');
+  //       GoRouter.of(context).go('/');
+  //       return;
+  //     }
+  //   } catch (e) {
+  //     if (e is SocketException) {
+  //       debugPrint('No internet connection');
+  //     } else if (e is AuthException) {
+  //       debugPrint('Authentication error: $e');
+  //     } else {
+  //       debugPrint('Connection failed: $e');
+  //     }
+  //     GoRouter.of(context).go('/');
+  //   }
+  // }
 
   Future _getUserData() async {
     final u = await supabase.auth.getUser();

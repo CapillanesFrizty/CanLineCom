@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/Card/CardDesign1.dart';
 
 class ResourcesScreen extends StatefulWidget {
-  const ResourcesScreen({super.key});
+  final String userid;
+  const ResourcesScreen({super.key, required this.userid});
 
   @override
   State<ResourcesScreen> createState() => _ResourcesScreenState();
@@ -75,27 +75,28 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: RefreshIndicator(
-        onRefresh: _refreshContent,
-        child: CustomScrollView(
-          physics:
-              const AlwaysScrollableScrollPhysics(), // Enables refresh even when empty
-          slivers: [
-            SliverFillRemaining(
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  _buildSearchBar(),
-                  const SizedBox(height: 20),
-                  _buildTypeFilter(),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: _buildContentList(),
-                  ),
-                ],
+      body: SafeArea(
+        // Added SafeArea
+        child: RefreshIndicator(
+          onRefresh: _refreshContent,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                child: Column(
+                  children: [
+                    _buildSearchBar(),
+                    const SizedBox(height: 20),
+                    _buildTypeFilter(),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: _buildContentList(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -234,7 +235,8 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
 
   Widget _buildEventCard(Map<String, dynamic> eventData) {
     return CardDesign1(
-      goto: () => context.go('/Event/${eventData['Event_ID']}'),
+      goto: () =>
+          context.go('/${widget.userid}/event/${eventData['Event_ID']}'),
       image: '',
       title: eventData['Event_name'] ?? 'Unknown Event',
       subtitle: 'Event', // Changed to display "Event" as category
@@ -245,7 +247,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
 
   Widget _buildBlogCard(Map<String, dynamic> blogData) {
     return CardDesign1(
-      goto: () => context.go('/Blog/${blogData['Blog-ID']}'),
+      goto: () => context.go('/${widget.userid}/blog/${blogData['Blog-ID']}'),
       image: blogData['im'] ?? '',
       title: blogData['Blogs-Name'] ?? 'Unknown Title',
       subtitle: 'Blog', // Changed to display "Blog" as category

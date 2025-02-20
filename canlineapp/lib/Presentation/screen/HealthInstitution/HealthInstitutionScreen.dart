@@ -276,18 +276,6 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
-            child: Text(
-              "Clinics",
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-                fontSize: 24,
-                color: _primaryColor,
-              ),
-            ),
-          ),
           Expanded(child: _buildClinicList()),
         ],
       );
@@ -342,6 +330,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             title:
                 healthInst[index]['Health-Institution-Name'] ?? 'Unknown Name',
             subtitle: healthInst[index]['Health-Institution-Type'] ?? '',
+            location: healthInst[index]['Health-Institution-Address'] ?? '',
           ),
         );
       },
@@ -425,6 +414,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                 image: clinicData['Clinic-Image-Url'] ?? '',
                 title: clinicData['Clinic-Name'] ?? 'Unknown Clinic',
                 subtitle: clinicData['Clinic-Type'] ?? 'Unknown Type',
+                location: clinicData['Clinic-External-Address'] ?? '',
               );
             },
           );

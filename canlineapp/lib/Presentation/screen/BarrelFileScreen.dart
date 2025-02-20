@@ -9,6 +9,8 @@ export 'Journal/journal.dart';
 
 // ! Events Screen
 export 'Resources/ResourcesScreen.dart';
+export 'Blogs/MoreInfo_BlogsScreen.dart';
+export './Resources/EventsInfoScreen.dart';
 
 // ! Health Institution Screens
 export 'HealthInstitution/HealthInstitutionScreen.dart';
@@ -19,7 +21,6 @@ export 'HealthInstitution/HealthInstitutionDetails/ServicesOffered.dart';
 export 'HealthInstitution/HealthInstitutionDetails/AccreditedInsurances.dart';
 
 // ! Blogs Screen
-export 'Blogs/MoreInfo_BlogsScreen.dart';
 
 // ! Financial Support Screen
 export 'FinancialSupport/FinancialSupportScreen.dart';

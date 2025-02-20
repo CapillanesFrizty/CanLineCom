@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../Layouts/BarrelFileLayouts.dart';
 
 class MoreinfoBlogsscreen extends StatefulWidget {
   final String id;
-  const MoreinfoBlogsscreen({super.key, required this.id});
+  final String userid;
+  const MoreinfoBlogsscreen(
+      {super.key, required this.id, required this.userid});
 
   @override
   State<MoreinfoBlogsscreen> createState() => _MoreinfoBlogsscreenState();
@@ -51,22 +54,50 @@ class _MoreinfoBlogsscreenState extends State<MoreinfoBlogsscreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        surfaceTintColor: Colors.white,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        leading: BackButton(
+          color: const Color(0xFF5B50A0),
+          onPressed: () => context.go(
+              '/HomeScreen/${widget.userid}/resources'), // Simplified navigation
+        ),
       ),
       body: SingleChildScrollView(
         child: FutureBuilder<Map<String, dynamic>>(
           future: _blogData,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF5B50A0), // Added consistent color
+                ),
+              );
             }
             if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Error: ${snapshot.error}',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _blogData = _fetchBlogData();
+                        });
+                      },
+                      child: const Text('Try Again'),
+                    ),
+                  ],
+                ),
+              );
             }
-            final data = snapshot.data!;
 
-            // Access the first item in 'Blogs-RefLink' if it exists
+            final data = snapshot.data!;
             final blogRefLink = data['Blogs-RefLink'] as List<dynamic>?;
             final blogLink = (blogRefLink != null && blogRefLink.isNotEmpty)
                 ? blogRefLink[0]['Blogs-Link'] ?? 'No Link Available'

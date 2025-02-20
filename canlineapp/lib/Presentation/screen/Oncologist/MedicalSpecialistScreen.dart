@@ -103,6 +103,7 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
                   Expanded(
                     child: _buildDoctorSection(),
                   ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),

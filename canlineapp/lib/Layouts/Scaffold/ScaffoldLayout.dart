@@ -65,10 +65,10 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
         route: '/HomeScreen/${widget.userid}/journal',
       ),
       NavigationItem(
-        id: 'events',
+        id: 'resources',
         icon: Icons.source_rounded,
         label: "Resources",
-        route: '/HomeScreen/${widget.userid}/events',
+        route: '/HomeScreen/${widget.userid}/resources',
       ),
       NavigationItem(
         id: 'profile',
@@ -91,8 +91,8 @@ class _ScaffoldLayoutWidgetState extends State<ScaffoldLayoutWidget> {
 
     if (location.endsWith('/journal')) {
       newId = 'journal';
-    } else if (location.endsWith('/events')) {
-      newId = 'events';
+    } else if (location.endsWith('/resources')) {
+      newId = 'resources';
     } else if (location.endsWith('/profile')) {
       newId = 'profile';
     } else if (location.contains('/HomeScreen/')) {

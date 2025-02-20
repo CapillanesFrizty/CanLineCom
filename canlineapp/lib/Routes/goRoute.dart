@@ -42,18 +42,14 @@ final GoRouter linkrouter = GoRouter(
               path: 'journal',
               builder: (context, state) => const JournalScreen(),
             ),
-            // Events route
+            // Resources route
             GoRoute(
-              path: 'events',
-              builder: (context, state) => const ResourcesScreen(),
-              routes: [
-                GoRoute(
-                  name: 'blogid',
-                  path: ':blogid',
-                  builder: (context, state) =>
-                      MoreinfoBlogsscreen(id: state.pathParameters['blogid']!),
-                )
-              ],
+              path: 'resources',
+              builder: (context, state) {
+                final userId = state.pathParameters['userID']!;
+                return ResourcesScreen(
+                    userid: userId); // Removed ScaffoldLayoutWidget wrapper
+              },
             ),
             // Profile route
             GoRoute(
@@ -67,6 +63,25 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
+
+    GoRoute(
+      name: 'blogid',
+      path: '/:userID/blog/:blogid',
+      builder: (context, state) => MoreinfoBlogsscreen(
+        id: state.pathParameters['blogid']!,
+        userid: state.pathParameters[
+            'userID']!, // Changed to match the parameter name in path
+      ),
+    ),
+    GoRoute(
+      name: 'eventid',
+      path: '/:userID/event/:eventid',
+      builder: (context, state) => MoreinfoEventsscreen(
+        id: state.pathParameters['eventid']!,
+        userid: state.pathParameters['userID']!,
+      ),
+    ),
+
     // Health Institution Screens
     GoRoute(
       path: '/Health-Institution',
@@ -189,10 +204,21 @@ final GoRouter linkrouter = GoRouter(
       },
       routes: [
         GoRoute(
-          path: ':groupName',
+          path: ':groupId', // Changed from groupName to groupId
           builder: (context, state) {
-            final groupName = state.pathParameters['groupName']!;
-            return Supportgroupdetailsscreen(groupName: groupName);
+            final groupId = state.pathParameters['groupId']!;
+            final group = Supportgroupslistscreen.supportGroups.firstWhere(
+              (g) => g['name'] == groupId,
+              orElse: () => Supportgroupslistscreen.supportGroups.first,
+            );
+
+            return Supportgroupdetailsscreen(
+              groupName: group['name']!,
+              description: group['description']!,
+              category: group['category']!,
+              members: group['members']!,
+              url: group['url']!,
+            );
           },
         ),
       ],

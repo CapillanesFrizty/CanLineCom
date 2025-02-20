@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Supportgroupdetailsscreen extends StatefulWidget {
   final String groupName;
+  final String description;
+  final String category;
+  final String members;
+  final String url;
 
-  const Supportgroupdetailsscreen({super.key, required this.groupName});
+  const Supportgroupdetailsscreen({
+    super.key,
+    required this.groupName,
+    required this.description,
+    required this.category,
+    required this.members,
+    required this.url,
+  });
 
   @override
   State<Supportgroupdetailsscreen> createState() =>
@@ -21,7 +34,7 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,
-          () => Navigator.of(context).pop(),
+          () => context.go('/Support-Groups'),
         ),
       ),
       extendBodyBehindAppBar: true,
@@ -31,6 +44,107 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
           _buildBackgroundImage(''), // Add image URL if available
           _buildDetailsSection(),
         ],
+      ),
+      bottomNavigationBar: _buildBottomNavBar(), // Add this line
+    );
+  }
+
+  Future<void> _launchInBrowserView(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  Widget _buildBottomNavBar() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 34),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xff6A5ACD), Color(0xff5B50A0)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xff6A5ACD).withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () async {
+              try {
+                final url = Uri.parse(widget.url);
+                await _launchInBrowserView(url);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: Colors.white),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Could not open website',
+                              style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.all(16),
+                    ),
+                  );
+                }
+              }
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.language_rounded,
+                    size: 22,
+                    color: Colors.white.withOpacity(0.95),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Visit Website',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.95),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -105,22 +219,21 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
   Widget _buildAboutSection() {
     return _buildSection(
       title: 'About Us',
-      content:
-          'Description about the support group goes here. This section can include the mission, vision, and goals of the group.',
+      content: widget.description,
     );
   }
 
   Widget _buildMembersSection() {
     return _buildSection(
       title: 'Members',
-      content: '100 members', // Replace with actual data
+      content: widget.members,
     );
   }
 
   Widget _buildContactSection() {
     return _buildSection(
       title: 'Contact Us',
-      content: 'https://www.example.com', // Replace with actual URL
+      content: widget.url,
       isLink: true,
     );
   }
