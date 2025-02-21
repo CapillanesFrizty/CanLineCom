@@ -356,11 +356,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
   Widget _buildBenefitsSection(Map<String, dynamic> data) {
     return _buildSectionWithList(
       title: 'Benefits & Requirements for Cancer Patients',
-      items: const [
-        'Inpatient Benefits',
-        'Outpatient Benefits',
-        'Z Benefits for Catastrophic Illnesses'
-      ],
+      items: data['Financial-Institution-Benefits-Details'] ?? [],
       buttonText: 'View More',
       onButtonPressed: () => GoRouter.of(context).goNamed(
         "benefits",

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Presentation/screen/BarrelFileScreen.dart';
 import '../Layouts/BarrelFileLayouts.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 const Color _primaryColor = Color(0xFF5B50A0);
 final GoRouter linkrouter = GoRouter(

@@ -54,11 +54,6 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     return result; // Return all institutions with image URLs
   }
 
-  final _futureprivate = Supabase.instance.client
-      .from('Health-Institution')
-      .select()
-      .eq("Health-Institution-Type", "Private Hospital");
-
   // Get the clinics data
   Future<List<Map<String, dynamic>>> _getClinics() async {
     final responses =

@@ -160,10 +160,14 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
         });
       },
       backgroundColor:
-          isSelected ? ResourcesScreen._primaryColor : Colors.grey[200],
+          isSelected ? ResourcesScreen._secondaryColor : Colors.grey[200],
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : ResourcesScreen._primaryColor,
+        color: isSelected
+            ? ResourcesScreen._secondaryColor
+            : ResourcesScreen._primaryColor,
       ),
+      selectedColor: ResourcesScreen._primaryColor,
+      checkmarkColor: ResourcesScreen._secondaryColor, // Added checkmark color
     );
   }
 
@@ -236,7 +240,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
   Widget _buildEventCard(Map<String, dynamic> eventData) {
     return CardDesign1(
       goto: () =>
-          context.go('/${widget.userid}/event/${eventData['Event_ID']}'),
+          context.go('/${widget.userid}/event/${eventData['Event_id']}'),
       image: '',
       title: eventData['Event_name'] ?? 'Unknown Event',
       subtitle: 'Event', // Changed to display "Event" as category

@@ -37,7 +37,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   // Controllers
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  int _currentCategoryIndex = 0;
+  final int _currentCategoryIndex = 0;
 
   // Add this variable to track the filter state
   String _selectedFilter = 'All';
@@ -48,14 +48,14 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     _searchController.addListener(_onSearchChanged);
   }
 
-  void _onSearchChanged() {
-    setState(() => _searchQuery = _searchController.text);
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() => _searchQuery = _searchController.text);
   }
 
   // Data Fetching
@@ -254,8 +254,9 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
                       setState(() {
                         if (index == 0) _selectedFilter = 'All';
                         if (index == 1) _selectedFilter = 'Private Institution';
-                        if (index == 2)
+                        if (index == 2) {
                           _selectedFilter = 'Government Institution';
+                        }
                       });
                       this.setState(() {}); // Update parent state
                     },

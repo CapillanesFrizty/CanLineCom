@@ -9,7 +9,7 @@ export 'Journal/journal.dart';
 
 // ! Events Screen
 export 'Resources/ResourcesScreen.dart';
-export 'Blogs/MoreInfo_BlogsScreen.dart';
+export 'Resources/MoreInfo_BlogsScreen.dart';
 export './Resources/EventsInfoScreen.dart';
 
 // ! Health Institution Screens

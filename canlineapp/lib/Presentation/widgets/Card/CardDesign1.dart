@@ -123,8 +123,9 @@ class _CardDesign1State extends State<CardDesign1>
                                               _buildPlaceholder(imageHeight),
                                       loadingBuilder:
                                           (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
+                                        if (loadingProgress == null) {
                                           return child;
+                                        }
                                         return _buildLoadingIndicator(
                                             imageHeight);
                                       },
