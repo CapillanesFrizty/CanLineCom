@@ -125,7 +125,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
 
   Widget _buildDetailsSection(Map<String, dynamic> data) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -136,26 +136,25 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
           _buildLocationSection(data),
-          _buildDividerWithSpacing(),
-          _buildServicesOffers(
-            (data['Health-Institution-Services'] as List)
-                .map((service) =>
-                    service['Health-Institution-Service-Name'] as String)
-                .toList(),
-          ),
-          _buildDividerWithSpacing(),
-          _buildAccreditedInsurance(
-            (data['Health-Institution-Acredited-Insurance'] as List? ?? [])
-                .map((service) =>
-                    service['healthinstitutionacreditedinsurancename']
-                        as String)
-                .toList(),
-          ),
-          _buildDividerWithSpacing(),
+          (data['Health-Institution-Services'] as List).isNotEmpty
+              ? _buildServicesOffers(
+                  (data['Health-Institution-Services'] as List)
+                      .map((service) =>
+                          service['Health-Institution-Service-Name'] as String)
+                      .toList(),
+                )
+              : const SizedBox(),
+          (data['Health-Institution-Acredited-Insurance'] as List).isNotEmpty
+              ? _buildAccreditedInsurance(
+                  (data['Health-Institution-Acredited-Insurance'] as List)
+                      .map((service) =>
+                          service['healthinstitutionacreditedinsurancename']
+                              as String)
+                      .toList(),
+                )
+              : const SizedBox(),
           _buildAffiliatedProfessionalsSection(), // Add this line
-          _buildDividerWithSpacing(),
           _buildContactSection(data),
-          _buildDividerWithSpacing(),
           _buildReportSection(),
           const SizedBox(height: 32),
         ],
@@ -352,9 +351,10 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   Widget _buildServicesOffers(List<String> servicename) {
     return Column(
       children: [
+        _buildDividerWithSpacing(),
         _buildSectionWithList(
           title: 'Services & Guidelines',
-          items: const ['CT Scan', 'Biopsy'],
+          items: servicename,
           buttonText: 'Show all Services',
           onButtonPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
@@ -373,6 +373,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildDividerWithSpacing(),
         _buildSectionTitle('Accredited Insurances'),
         const SizedBox(height: 16),
         SizedBox(
@@ -439,6 +440,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildDividerWithSpacing(),
         _buildSectionTitle('Affiliated Professionals'),
         const SizedBox(height: 16),
         ListTile(
@@ -497,6 +499,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildDividerWithSpacing(),
         _buildSectionTitle('Contact Us'),
         const SizedBox(height: 16),
         _buildContactInfo(contactNumber),
@@ -509,6 +512,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildDividerWithSpacing(),
         InkWell(
           onTap: () => _showSnackBar('This feature is not available right now'),
           child: _buildReportHeader(),

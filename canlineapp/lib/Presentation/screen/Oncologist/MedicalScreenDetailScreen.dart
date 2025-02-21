@@ -3,15 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class OncologistDetailScreen extends StatefulWidget {
+class MedicalSpeciaDetailScreens extends StatefulWidget {
   final String docid;
-  const OncologistDetailScreen({super.key, required this.docid});
+  const MedicalSpeciaDetailScreens({super.key, required this.docid});
 
   @override
-  State<OncologistDetailScreen> createState() => _OncologistDetailScreenState();
+  State<MedicalSpeciaDetailScreens> createState() =>
+      _MedicalSpeciaDetailScreensState();
 }
 
-class _OncologistDetailScreenState extends State<OncologistDetailScreen> {
+class _MedicalSpeciaDetailScreensState
+    extends State<MedicalSpeciaDetailScreens> {
   late Future<Map<String, dynamic>> _future;
 
   @override
@@ -50,7 +52,7 @@ class _OncologistDetailScreenState extends State<OncologistDetailScreen> {
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,
-          () => context.go('/Oncologist'),
+          () => context.go('/MedicalSpecialistScreens'),
         ),
       ),
       extendBodyBehindAppBar: true,

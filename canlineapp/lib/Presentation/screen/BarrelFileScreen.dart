@@ -8,7 +8,9 @@ export 'profile/profile.dart';
 export 'Journal/journal.dart';
 
 // ! Events Screen
-export 'Events/EventsScreen.dart';
+export 'Resources/ResourcesScreen.dart';
+export 'Resources/MoreInfo_BlogsScreen.dart';
+export './Resources/EventsInfoScreen.dart';
 
 // ! Health Institution Screens
 export 'HealthInstitution/HealthInstitutionScreen.dart';
@@ -19,8 +21,6 @@ export 'HealthInstitution/HealthInstitutionDetails/ServicesOffered.dart';
 export 'HealthInstitution/HealthInstitutionDetails/AccreditedInsurances.dart';
 
 // ! Blogs Screen
-export 'Blogs/BlogsScreen.dart';
-export 'Blogs/MoreInfo_BlogsScreen.dart';
 
 // ! Financial Support Screen
 export 'FinancialSupport/FinancialSupportScreen.dart';
@@ -28,7 +28,7 @@ export 'FinancialSupport/FinancialDetails.dart';
 export 'FinancialSupport/MoreFinancialDetails/BenefitsDetails.dart';
 
 // ! Oncologist\
-export 'Oncologist/OncologistsScreen.dart';
+export 'Oncologist/MedicalSpecialistScreen.dart';
 // ! Clinic
 export 'HealthInstitution/Moreinfo_ClinicsScreen.dart';
 
@@ -40,3 +40,12 @@ export 'authentication flow/RegisterScreen.dart';
 
 // ! Support Groups
 export 'SupportGroups/Supportgroupslistscreen.dart';
+export './SupportGroups/Supportgroupdetailscreen/Supportgroupdetailsscreen.dart';
+
+// ! Terms and Conditions
+export 'authentication flow/TermsAndConditionsScreen.dart';
+
+// ! Forgot Password
+
+// ! Settings Screen
+export '../screen/HomeScreen/MoreOption/Settings.dart';

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../widgets/Card/CardDesign1.dart';
 
-class FinancialSupportScreen extends StatefulWidget {
-  const FinancialSupportScreen({super.key});
+class MedicalSpecialistScreens extends StatefulWidget {
+  const MedicalSpecialistScreens({super.key});
 
   @override
-  State<FinancialSupportScreen> createState() => _FinancialSupportScreenState();
+  State<MedicalSpecialistScreens> createState() =>
+      _MedicalSpecialistScreensState();
+  static const Color _primaryColor = Color(0xFF5B50A0);
+  static const Color _secondaryColor = Color(0xFFF3EBFF);
 }
 
-class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
+class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   // Constants
-  static const _primaryColor = Color(0xFF5B50A0);
-  static const _secondaryColor = Color(0xFFF3EBFF);
   static const double _cardHeight = 200.0;
 
   // Styles
@@ -22,30 +23,30 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     textStyle: const TextStyle(
       fontWeight: FontWeight.w500,
       fontSize: 30.0,
-      color: _primaryColor,
+      color: MedicalSpecialistScreens._primaryColor,
     ),
   );
 
   final _sectionTitleStyle = GoogleFonts.poppins(
     textStyle: const TextStyle(
-      fontSize: 18.0, // Match font size to BlogsScreen
+      fontSize: 18.0,
       fontWeight: FontWeight.bold,
-      color: _primaryColor,
+      color: MedicalSpecialistScreens._primaryColor,
     ),
   );
 
-  // Controllers
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  final int _currentCategoryIndex = 0;
-
-  // Add this variable to track the filter state
-  String _selectedFilter = 'All';
+  String _searchInput = '';
+  String _selectedCategory = 'All';
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    setState(() => _searchInput = _searchController.text);
   }
 
   @override
@@ -54,49 +55,34 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    setState(() => _searchQuery = _searchController.text);
-  }
+  Future<List<Map<String, dynamic>>> _fetchDoctors() async {
+    var query = Supabase.instance.client.from('Doctor').select();
 
-  // Data Fetching
-  Future<List<Map<String, dynamic>>> _fetchInstitutions() async {
-    var query = Supabase.instance.client.from('Financial-Institution').select();
+    if (_selectedCategory != "All") {
+      query = query.eq('Specialization', _selectedCategory);
+    }
 
-    // Apply filter if not 'All'
-    if (_selectedFilter != 'All') {
-      query = query.eq('Financial-Institution-Type', _selectedFilter);
+    if (_searchInput.isNotEmpty) {
+      query = query.ilike("Doctor-Firstname", "%$_searchInput%");
     }
 
     final response = await query;
     List<Map<String, dynamic>> result = [];
 
-    for (var institution in response) {
-      if (institution['Financial-Institution-Name'] != null) {
-        final fileName = "${institution['Financial-Institution-Name']}.png";
+    for (var doctor in response) {
+      if (doctor['Doctor-Firstname'] != null) {
+        final fileName =
+            "${doctor['Doctor-Firstname']}_${doctor['Doctor-Lastname']}.png";
         final imageUrl = Supabase.instance.client.storage
             .from('Assets')
-            .getPublicUrl("Financial-Institution/$fileName");
+            .getPublicUrl("Doctors/$fileName");
 
-        institution['Financial-Institution-Image-Url'] = imageUrl;
-        result.add(institution);
+        doctor['Doctor-Image-Url'] = imageUrl;
+        result.add(doctor);
       }
     }
 
-    // Apply search filter if query exists
-    if (_searchQuery.isNotEmpty) {
-      result = result.where((institution) {
-        return institution['Financial-Institution-Name']
-            .toString()
-            .toLowerCase()
-            .contains(_searchQuery.toLowerCase());
-      }).toList();
-    }
-
     return result;
-  }
-
-  Future<void> _refreshInstitutions() async {
-    setState(() {});
   }
 
   @override
@@ -104,7 +90,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: RefreshIndicator(
-        onRefresh: _refreshInstitutions,
+        onRefresh: () async => setState(() {}),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -112,11 +98,12 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 30),
-                  _buildSearchBar(),
+                  _buildSearchField(),
                   const SizedBox(height: 20),
                   Expanded(
-                    child: _buildInstitutionsList(),
+                    child: _buildDoctorSection(),
                   ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -126,40 +113,43 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchField() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
           hintText: 'Search',
-          prefixIcon: Icon(Icons.search, color: _primaryColor),
+          prefixIcon:
+              Icon(Icons.search, color: MedicalSpecialistScreens._primaryColor),
           suffixIcon: IconButton(
-            icon: Icon(Icons.filter_list, color: _primaryColor),
-            onPressed: () {
-              _showFilterBottomSheet(context);
-            },
+            icon: Icon(Icons.filter_list,
+                color: MedicalSpecialistScreens._primaryColor),
+            onPressed: () => _showFilterBottomSheet(),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _primaryColor),
+            borderSide:
+                BorderSide(color: MedicalSpecialistScreens._primaryColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _primaryColor),
+            borderSide:
+                BorderSide(color: MedicalSpecialistScreens._primaryColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _primaryColor),
+            borderSide:
+                BorderSide(color: MedicalSpecialistScreens._primaryColor),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildInstitutionsList() {
+  Widget _buildDoctorSection() {
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _fetchInstitutions(),
+      future: _fetchDoctors(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -172,7 +162,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
                 const Text('No Internet Connection'),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: _refreshInstitutions,
+                  onPressed: () => setState(() {}),
                   child: const Text('Try Again'),
                 ),
               ],
@@ -180,16 +170,16 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
           );
         }
 
-        final institutions = snapshot.data ?? [];
-        if (institutions.isEmpty) {
+        final doctors = snapshot.data ?? [];
+        if (doctors.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('No institutions found'),
+                const Text('No doctors found'),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: _refreshInstitutions,
+                  onPressed: () => setState(() {}),
                   child: const Text('Refresh'),
                 ),
               ],
@@ -199,19 +189,17 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
 
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          itemCount: institutions.length,
+          itemCount: doctors.length,
           itemBuilder: (context, index) {
-            final institution = institutions[index];
+            final doctor = doctors[index];
             return CardDesign1(
-              goto: () => context.push(
-                  '/Financial-Institution/${institution['Financial-Institution-ID']}'),
-              image: institution['Financial-Institution-Image-Url'] ?? '',
-              title: institution['Financial-Institution-Name'] ??
-                  'Unknown Institution',
-              subtitle:
-                  institution['Financial-Institution-Type'] ?? 'Unknown Type',
-              location: institution['Financial-Institution-Address'] ??
-                  'No location available',
+              goto: () => context.push('/Doctor/${doctor['Doctor-ID']}'),
+              image: doctor['Doctor-Image-Url'] ?? '',
+              title:
+                  '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
+              subtitle: doctor['Specialization'] ?? 'Unknown Specialization',
+              location: doctor['Hospital'] ?? 'No hospital information',
+              address: doctor['Address'] ?? 'No address available',
             );
           },
         );
@@ -219,8 +207,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     );
   }
 
-  // Add the filter bottom sheet method
-  void _showFilterBottomSheet(BuildContext context) {
+  void _showFilterBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -240,29 +227,28 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
                       style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: _primaryColor)),
+                          color: MedicalSpecialistScreens._primaryColor)),
                   SizedBox(height: 16),
-                  Text('Institution Type',
-                      style: TextStyle(color: _primaryColor)),
+                  Text('Specialist Type',
+                      style: TextStyle(
+                          color: MedicalSpecialistScreens._primaryColor)),
                   ToggleButtons(
                     isSelected: [
-                      _selectedFilter == 'All',
-                      _selectedFilter == 'Private Institution',
-                      _selectedFilter == 'Government Institution'
+                      _selectedCategory == 'All',
+                      _selectedCategory == 'Oncologist',
+                      _selectedCategory == 'Specialist'
                     ],
                     onPressed: (index) {
                       setState(() {
-                        if (index == 0) _selectedFilter = 'All';
-                        if (index == 1) _selectedFilter = 'Private Institution';
-                        if (index == 2) {
-                          _selectedFilter = 'Government Institution';
-                        }
+                        if (index == 0) _selectedCategory = 'All';
+                        if (index == 1) _selectedCategory = 'Oncologist';
+                        if (index == 2) _selectedCategory = 'Specialist';
                       });
-                      this.setState(() {}); // Update parent state
+                      this.setState(() {});
                     },
                     selectedColor: Colors.white,
                     color: Colors.grey,
-                    fillColor: _primaryColor,
+                    fillColor: MedicalSpecialistScreens._primaryColor,
                     borderRadius: BorderRadius.circular(8),
                     children: [
                       Padding(
@@ -271,11 +257,11 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
                       ),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Private'),
+                        child: Text('Oncologist'),
                       ),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Government'),
+                        child: Text('Specialist'),
                       ),
                     ],
                   ),
@@ -283,7 +269,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _primaryColor,
+                        backgroundColor: MedicalSpecialistScreens._primaryColor,
                       ),
                       onPressed: () {
                         Navigator.pop(context);

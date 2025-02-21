@@ -168,6 +168,8 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           _buildDividerWithSpacing(),
           _buildBenefitsSection(data),
           _buildDividerWithSpacing(),
+          _buildFAQSection(),
+          _buildDividerWithSpacing(),
           _buildContactSection(data),
           _buildDividerWithSpacing(),
           _buildReportSection(),
@@ -254,6 +256,22 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           ),
         ),
         const SizedBox(height: 16),
+        Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.red),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Disclaimer: The schedule may differ depending on the number of people arriving. It is best to arrive early.',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.orange,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -338,11 +356,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
   Widget _buildBenefitsSection(Map<String, dynamic> data) {
     return _buildSectionWithList(
       title: 'Benefits & Requirements for Cancer Patients',
-      items: const [
-        'Inpatient Benefits',
-        'Outpatient Benefits',
-        'Z Benefits for Catastrophic Illnesses'
-      ],
+      items: data['Financial-Institution-Benefits-Details'] ?? [],
       buttonText: 'View More',
       onButtonPressed: () => GoRouter.of(context).goNamed(
         "benefits",
@@ -457,7 +471,63 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             ),
           ],
         ),
+        const SizedBox(height: 10),
       ],
+    );
+  }
+
+  Widget _buildFAQSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Frequently Asked Questions',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xff5B50A0),
+            )),
+        const SizedBox(height: 16),
+        _buildFAQItem(
+          question: 'What are the operating hours?',
+          answer: 'We are open 24 hours a day, 7 days a week.',
+        ),
+        _buildFAQItem(
+          question: 'How can I contact you?',
+          answer: 'You can contact us at the phone number provided above.',
+        ),
+        _buildFAQItem(
+          question: 'What benefits do you offer?',
+          answer:
+              'We offer inpatient, outpatient, and Z benefits for catastrophic illnesses.',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFAQItem({required String question, required String answer}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            question,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            answer,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

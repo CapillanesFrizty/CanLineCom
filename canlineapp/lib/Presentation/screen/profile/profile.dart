@@ -1,7 +1,5 @@
-import '../../../Layouts/Scaffold/ScaffoldLayout.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -24,65 +22,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _getUserData();
   }
 
+  // Future _CheckConnection() async {
+  //   try {
+  //     // Check if there's an active session
+  //     final session = supabase.auth.currentSession;
+  //     if (session == null) {
+  //       debugPrint('No active session');
+  //       GoRouter.of(context).go('/');
+  //       return;
+  //     }
+  //   } catch (e) {
+  //     if (e is SocketException) {
+  //       debugPrint('No internet connection');
+  //     } else if (e is AuthException) {
+  //       debugPrint('Authentication error: $e');
+  //     } else {
+  //       debugPrint('Connection failed: $e');
+  //     }
+  //     GoRouter.of(context).go('/');
+  //   }
+  // }
+
   Future _getUserData() async {
     final u = await supabase.auth.getUser();
-
     setState(() {
       _user = u.user;
     });
-
     debugPrint('Authenticated User: $_user');
   }
 
-  void _Logout() async {
+  Future<void> _Logout() async {
     await supabase.auth.signOut();
     GoRouter.of(context).go('/');
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldLayoutWidget(
-      bodyWidget: _buildBody(),
-      actionsWidget: [
-        IconButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text("Note"),
-                contentPadding: const EdgeInsets.all(20),
-                content: Text("Are you sure to logout?"),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text("No"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _Logout();
-                    },
-                    child: Text("Yes"),
-                  ),
-                ],
-              ),
-            );
-          },
-          icon: Icon(Icons.logout, color: Colors.red),
-        ),
-      ],
-      titleWidget: Text(
-        "Profile",
-        style: GoogleFonts.poppins(
-          fontSize: 30.0,
-          fontWeight: FontWeight.w500,
-          color: ProfileScreen.primaryColor,
-        ),
-      ),
-      // backgroundColor: Colors.white,
-      // // Uncomment the AppBar if needed
-      // body: _buildBody(),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: _buildBody(),
     );
   }
 
@@ -93,7 +71,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const SizedBox(height: 50),
             _buildProfileImage(),
             const SizedBox(height: 15),
             _buildNameAndLocation(),

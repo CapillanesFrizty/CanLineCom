@@ -23,8 +23,11 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
   String _selectedFilter = 'All'; // Track selected filter
 
-  // Get the health institutions data
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
+  }
 
+  // Get the health institutions data
   Future<List<Map<String, dynamic>>> _getHealthInstitutionData() async {
     var query = Supabase.instance.client.from('Health-Institution').select();
 
@@ -50,11 +53,6 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
 
     return result; // Return all institutions with image URLs
   }
-
-  final _futureprivate = Supabase.instance.client
-      .from('Health-Institution')
-      .select()
-      .eq("Health-Institution-Type", "Private Hospital");
 
   // Get the clinics data
   Future<List<Map<String, dynamic>>> _getClinics() async {
@@ -82,19 +80,22 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          const SizedBox(height: 30),
-          _buildCategories(),
-          const SizedBox(height: 30),
-          if (_currentCategoryIndex == 0)
-            _buildFilterButton(), // Add filter button only for hospitals
-          const SizedBox(height: 10),
-          Expanded(
-            child:
-                _buildCurrentCategoryList(), // Dynamic content based on category
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: _refreshContent,
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            _buildSearchBarWithFilter(),
+            const SizedBox(height: 30),
+            _buildCategories(),
+            const SizedBox(height: 30),
+            Expanded(
+              child:
+                  _buildCurrentCategoryList(), // Dynamic content based on category
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
     );
   }
@@ -150,36 +151,113 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     );
   }
 
-  Widget _buildFilterButton() {
+  Widget _buildSearchBarWithFilter() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Filter by Type:',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          DropdownButton<String>(
-            value: _selectedFilter,
-            items: <String>['All', 'Private Hospital', 'Government Hospital']
-                .map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedFilter = newValue!;
-              });
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon: Icon(Icons.search, color: _primaryColor),
+          suffixIcon: IconButton(
+            icon: Icon(Icons.filter_list, color: _primaryColor),
+            onPressed: () {
+              _showFilterBottomSheet(context);
             },
           ),
-        ],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _primaryColor),
+          ),
+        ),
       ),
+    );
+  }
+
+  void _applyFilters() {
+    setState(() {});
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Filter',
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: _primaryColor)),
+                  SizedBox(height: 16),
+                  Text('Institution Type',
+                      style: TextStyle(color: _primaryColor)),
+                  ToggleButtons(
+                    isSelected: [
+                      _selectedFilter == 'All',
+                      _selectedFilter == 'Private Hospital',
+                      _selectedFilter == 'Government Hospital'
+                    ],
+                    onPressed: (index) {
+                      setState(() {
+                        if (index == 0) _selectedFilter = 'All';
+                        if (index == 1) _selectedFilter = 'Private Hospital';
+                        if (index == 2) _selectedFilter = 'Government Hospital';
+                      });
+                    },
+                    selectedColor: Colors.white,
+                    color: Colors.grey,
+                    fillColor: _primaryColor,
+                    borderRadius: BorderRadius.circular(8),
+                    children: [
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('All')),
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('Private')),
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('Government')),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor),
+                      onPressed: () {
+                        _applyFilters();
+                        Navigator.pop(context);
+                      },
+                      child: Text('Apply Filters',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -193,18 +271,6 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
-            child: Text(
-              "Clinics",
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-                fontSize: 24,
-                color: _primaryColor,
-              ),
-            ),
-          ),
           Expanded(child: _buildClinicList()),
         ],
       );
@@ -227,7 +293,19 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
         }
 
         if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching data'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('No Internet Connection'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _refreshContent,
+                  child: const Text('Try Again'),
+                ),
+              ],
+            ),
+          );
         }
 
         final healthInst = snapshot.data ?? [];
@@ -247,6 +325,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             title:
                 healthInst[index]['Health-Institution-Name'] ?? 'Unknown Name',
             subtitle: healthInst[index]['Health-Institution-Type'] ?? '',
+            location: healthInst[index]['Health-Institution-Address'] ?? '',
           ),
         );
       },
@@ -330,6 +409,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                 image: clinicData['Clinic-Image-Url'] ?? '',
                 title: clinicData['Clinic-Name'] ?? 'Unknown Clinic',
                 subtitle: clinicData['Clinic-Type'] ?? 'Unknown Type',
+                location: clinicData['Clinic-External-Address'] ?? '',
               );
             },
           );

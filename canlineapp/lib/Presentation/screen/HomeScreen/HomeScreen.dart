@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? userid;
@@ -57,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen>
     return ListView(
       padding: const EdgeInsets.symmetric(
         horizontal: 30.0,
-      ),
+      ).copyWith(bottom: 30.0), // Added bottom margin
       physics: const AlwaysScrollableScrollPhysics(),
       shrinkWrap: true,
       children: [
@@ -88,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen>
       crossAxisCount: 2,
       crossAxisSpacing: 20,
       mainAxisSpacing: 20,
-      childAspectRatio: 1 / 1.2,
+      childAspectRatio: 1 / 1.2, // Adjusted the aspect ratio
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: _gridItems(),
@@ -119,41 +118,38 @@ class _HomeScreenState extends State<HomeScreen>
         fadeAnimation: _fadeAnimation,
         scaleAnimation: _scaleAnimation,
       ),
+      // _AnimatedGridItem(
+      //   label: "Blogs/News",
+      //   iconAsset: 'lib/assets/icons/Blogs.svg',
+      //   textColor: 0xffFFA133,
+      //   bgColor: 0xffFFEAD1,
+      //   iconColor: 0xffFFA133,
+      //   route: '/Blog',
+      //   controller: _controller,
+      //   fadeAnimation: _fadeAnimation,
+      //   scaleAnimation: _scaleAnimation,
+      // ),
       _AnimatedGridItem(
-        label: "Blogs/News",
-        iconAsset: 'lib/assets/icons/Blogs.svg',
-        textColor: 0xffFFA133,
-        bgColor: 0xffFFEAD1,
-        iconColor: 0xffFFA133,
-        route: '/Blog',
-        controller: _controller,
-        fadeAnimation: _fadeAnimation,
-        scaleAnimation: _scaleAnimation,
-      ),
-      _AnimatedGridItem(
-        label: "Oncologists",
+        label: "Medical\nSpecialists",
         iconAsset: 'lib/assets/icons/Oncologists.svg',
         textColor: 0xff139E9E,
         bgColor: 0xffD1FFFF,
         iconColor: 0xff139E9E,
-        route: '/Oncologist',
+        route: '/Medical-Specialists',
         controller: _controller,
         fadeAnimation: _fadeAnimation,
         scaleAnimation: _scaleAnimation,
       ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: 20.0),
-        child: _AnimatedGridItem(
-          label: "Support Groups",
-          iconAsset: 'lib/assets/icons/Supportgroups.svg',
-          textColor: 0xffFF3C84,
-          bgColor: 0xffF6E0E9,
-          iconColor: 0xffFF3C84,
-          route: '/Support-Groups',
-          controller: _controller,
-          fadeAnimation: _fadeAnimation,
-          scaleAnimation: _scaleAnimation,
-        ),
+      _AnimatedGridItem(
+        label: "Support Groups",
+        iconAsset: 'lib/assets/icons/Supportgroups.svg',
+        textColor: 0xffFFA133,
+        bgColor: 0xffFFEAD1,
+        iconColor: 0xffFFA133,
+        route: '/Support-Groups',
+        controller: _controller,
+        fadeAnimation: _fadeAnimation,
+        scaleAnimation: _scaleAnimation,
       ),
     ];
   }
