@@ -14,38 +14,24 @@ class Benefitsdetails extends StatefulWidget {
 
 class _BenefitsdetailsState extends State<Benefitsdetails> {
   List<bool> _isExpanded = [];
+  Map<String, List<dynamic>> _inclusionsCache = {};
 
-  Future<Map<String, dynamic>> _fetchBenefitsWithInclusions() async {
+  Future<PostgrestList> _fetchBenefit() async {
     // Fetch all benefits for the given institution
     final benefits = await supabase
         .from('Financial-Institution-Benefit')
         .select()
         .eq('Financial-Institution-ID', widget.fid);
+    return benefits;
+  }
 
-    if (benefits.isEmpty) {
-      return {}; // Return an empty map if no benefits found
-    }
-
-    // Create a Map to store benefits with their corresponding inclusions
-    Map<String, dynamic> benefitsMap = {};
-
-    for (var benefit in benefits) {
-      final benefitId = benefit['Financial-Institution-Benefits-ID'];
-
-      // Fetch inclusions (benefit details) for the current benefit
-      final inclusions = await supabase
-          .from('Benefit-Details-Financial-Institution')
-          .select()
-          .eq("Financial_Benefit", benefitId);
-
-      // Store benefit and its inclusions inside the map
-      benefitsMap[benefitId.toString()] = {
-        "benefit": benefit,
-        "inclusions": inclusions, // Store inclusions properly
-      };
-    }
-
-    return benefitsMap;
+  Future<PostgrestList> _fetchBenefitsInclusions(String benefitsID) async {
+    // Fetch all benefits for the given institution
+    final benefits = await supabase
+        .from('Benefit-Details-Financial-Institution')
+        .select()
+        .eq('Financial_Benefit', benefitsID);
+    return benefits;
   }
 
   Future<PostgrestList> _requirementsDetails() async {
@@ -97,42 +83,95 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                   ),
                   textAlign: TextAlign.justify,
                   'Cancer patients admitted to this accredited hospitals can access the following benefits:'),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
               // TODO Add the Benefits
               FutureBuilder(
-                future: _fetchBenefitsWithInclusions(),
+                future: _fetchBenefit(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
                   if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData ||
+                      (snapshot.data as List).isEmpty) {
+                    return const Center(child: Text('No Benefits found.'));
+                  } else {
+                    final data = snapshot.data as List<dynamic>;
+
+                    // Initialize _isExpanded with the correct length
+                    if (_isExpanded.length != data.length) {
+                      _isExpanded = List.filled(data.length, false);
+                    }
+
+                    return ExpansionPanelList(
+                      elevation: 1,
+                      expandedHeaderPadding: EdgeInsets.zero,
+                      expansionCallback: (int index, bool isExpanded) {
+                        setState(() {
+                          _isExpanded[index] = !_isExpanded[index];
+                        });
+                      },
+                      children:
+                          data.asMap().entries.map<ExpansionPanel>((entry) {
+                        int index = entry.key;
+                        var item = entry.value;
+
+                        return ExpansionPanel(
+                          headerBuilder:
+                              (BuildContext context, bool isExpanded) {
+                            return ListTile(
+                              title: Text(
+                                item['Financial-Institution-Benefits-Name']
+                                    .toString(),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            );
+                          },
+                          body: FutureBuilder(
+                            future: _fetchBenefitsInclusions(
+                                item['Financial-Institution-Benefits-ID']
+                                    .toString()),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return Center(
+                                    child: Text('Error: ${snapshot.error}'));
+                              } else if (!snapshot.hasData ||
+                                  (snapshot.data as List).isEmpty) {
+                                return const Center(
+                                    child: Text('No Inclusions found.'));
+                              } else {
+                                final inclusions =
+                                    snapshot.data as List<dynamic>;
+                                return Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children:
+                                        inclusions.map<Widget>((inclusion) {
+                                      return Text(
+                                        "${inclusion['Benefit_name'].toString()}: ${inclusion['Benefit_desccription'].toString()}",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          isExpanded: _isExpanded[index],
+                        );
+                      }).toList(),
+                    );
                   }
-
-                  if (!snapshot.hasData || (snapshot.data as Map).isEmpty) {
-                    return const Center(child: Text('No benefits found.'));
-                  }
-
-                  final data = snapshot.data as Map<String, dynamic>;
-
-                  return ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
-                      final item = data.values.elementAt(index);
-                      final benefit = item['benefit'];
-                      final inclusions = item['inclusions'];
-
-                      debugPrint('Number of benefits: ${benefit.length}');
-                    },
-                  );
                 },
               ),
-
+              const SizedBox(height: 20),
               // TODO Add the Requirements
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,9 +179,7 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                   FutureBuilder(
                     future: _requirementsDetails(),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
+                      if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else if (!snapshot.hasData ||
                           (snapshot.data as List).isEmpty) {
@@ -229,9 +266,7 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                   FutureBuilder(
                     future: _ProcessDetails(),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
+                      if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else if (!snapshot.hasData ||
                           (snapshot.data as List).isEmpty) {

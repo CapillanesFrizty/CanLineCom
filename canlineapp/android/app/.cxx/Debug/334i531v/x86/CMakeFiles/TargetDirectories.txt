@@ -1,0 +1,2 @@
+C:/Users/GMels/Desktop/CanLineCom/canlineapp/android/app/.cxx/Debug/334i531v/x86/CMakeFiles/edit_cache.dir
+C:/Users/GMels/Desktop/CanLineCom/canlineapp/android/app/.cxx/Debug/334i531v/x86/CMakeFiles/rebuild_cache.dir

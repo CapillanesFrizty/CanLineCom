@@ -23,24 +23,39 @@ class _MedicalSpeciaDetailScreensState
   }
 
   Future<Map<String, dynamic>> _fetchDoctorDetails() async {
-    final response = await Supabase.instance.client
-        .from('Doctor')
-        .select()
-        .eq('id', int.parse(widget.docid))
-        .maybeSingle();
-
-    if (response == null) {
-      throw Exception('No data found');
+    if (widget.docid == null || widget.docid.isEmpty) {
+      throw Exception('Invalid doctor ID');
     }
+    print('Received doctor ID: ${widget.docid}');
+    try {
+      // Simplified ID handling - no need to parse twice
+      final doctorId = int.tryParse(widget.docid);
+      if (doctorId == null) {
+        throw Exception('Invalid doctor ID format');
+      }
 
-    final fileName =
-        "${response['Doctor-Firstname']}_${response['Doctor-Lastname']}.png";
-    final imageUrl = Supabase.instance.client.storage
-        .from('Assets')
-        .getPublicUrl("Doctor/$fileName");
+      final response = await Supabase.instance.client
+          .from('Doctor')
+          .select()
+          .eq('id', doctorId) // Use the parsed integer directly
+          .single();
 
-    response['Doctor-Image-Url'] = imageUrl;
-    return response;
+      if (response == null) {
+        throw Exception('No data found');
+      }
+
+      // Rest of the code remains the same
+      // final fileName =
+      //     "${response['Doctor-Firstname']}_${response['Doctor-Lastname']}.png";
+      // final imageUrl = Supabase.instance.client.storage
+      //     .from('Assets')
+      //     .getPublicUrl("Doctor/$fileName");
+
+      // response['Doctor-Image-Url'] = imageUrl;
+      return response;
+    } catch (e) {
+      throw Exception('Failed to fetch doctor details: $e');
+    }
   }
 
   @override
@@ -52,7 +67,7 @@ class _MedicalSpeciaDetailScreensState
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,
-          () => context.go('/MedicalSpecialistScreens'),
+          () => context.go('/Medical-Specialists'),
         ),
       ),
       extendBodyBehindAppBar: true,
@@ -111,8 +126,8 @@ class _MedicalSpeciaDetailScreensState
           _buildDividerWithSpacing(),
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
-          _buildContactSection(data),
-          const SizedBox(height: 32),
+          // _buildContactSection(data),
+          // const SizedBox(height: 32),
         ],
       ),
     );
@@ -179,35 +194,36 @@ class _MedicalSpeciaDetailScreensState
         ),
         const SizedBox(height: 20),
         Text(
-          data['Doctor-Desc'] ?? 'No description available',
+          data['Medical Background'] ?? 'No description available',
           style: GoogleFonts.poppins(fontSize: 15),
         ),
       ],
     );
   }
 
-  Widget _buildContactSection(Map<String, dynamic> data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Contact',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xff5B50A0),
-            )),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            const Icon(Icons.phone_outlined, color: Colors.black, size: 25),
-            const SizedBox(width: 10),
-            Text(
-              data['Doctor-ContactNumber'] ?? 'No contact available',
-              style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+//   Widget _buildContactSection(Map<String, dynamic> data) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text('Contact',
+//             style: GoogleFonts.poppins(
+//               fontSize: 20,
+//               fontWeight: FontWeight.w600,
+//               color: const Color(0xff5B50A0),
+//             )),
+//         const SizedBox(height: 16),
+//         Row(
+//           children: [
+//             const Icon(Icons.phone_outlined, color: Colors.black, size: 25),
+//             const SizedBox(width: 10),
+//             Text(
+//               data['Doctor-ContactNumber'] ?? 'No contact available',
+//               style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
+//             ),
+//           ],
+//         ),
+//       ],
+//     );
+//   }
+// }
 }

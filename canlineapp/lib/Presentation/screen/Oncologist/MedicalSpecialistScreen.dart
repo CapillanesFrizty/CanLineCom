@@ -71,16 +71,13 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
 
     for (var doctor in response) {
       if (doctor['Doctor-Firstname'] != null) {
-        final fileName =
-            "${doctor['Doctor-Firstname']}_${doctor['Doctor-Lastname']}.png";
-        final imageUrl = Supabase.instance.client.storage
-            .from('Assets')
-            .getPublicUrl("Doctors/$fileName");
-
-        doctor['Doctor-Image-Url'] = imageUrl;
         result.add(doctor);
       }
     }
+
+    // Sort the result list by Doctor-Firstname
+    result.sort((a, b) => (a['Doctor-Firstname'] as String)
+        .compareTo(b['Doctor-Firstname'] as String));
 
     return result;
   }
@@ -193,8 +190,8 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
           itemBuilder: (context, index) {
             final doctor = doctors[index];
             return CardDesign1(
-              goto: () => context.push('/Doctor/${doctor['Doctor-ID']}'),
-              image: doctor['Doctor-Image-Url'] ?? '',
+              goto: () => context.push('/Medical-Specialists/${doctor['id']}'),
+              image: doctor['Doctor-Image-Url'] ?? "",
               title:
                   '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
               subtitle: doctor['Specialization'] ?? 'Unknown Specialization',

@@ -40,13 +40,21 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     final services = await Supabase.instance.client
         .from('Health-Institution-Service')
         .select()
-        .eq('Health-Institution-ID', widget.id);
+        .eq('Health-Institution-ID', widget.id)
+        .limit(2);
 
     // Get the acredited insurance of the insitution
     final acreditedInsurance = await Supabase.instance.client
         .from('healthinstitutionacreditedinsurance')
         .select()
         .eq('healthinstitutionid', widget.id);
+
+    // Get the affiliated Doctors of the insitution (limited to 2)
+    final affiliatedDoctors = await Supabase.instance.client
+        .from('Doctor')
+        .select()
+        .eq('Affailated_at', widget.id)
+        .limit(2);
 
     // Get the image url of the insitution
     final fileName = "${response['Health-Institution-Name']}.png";
@@ -58,6 +66,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     response['Health-Institution-Image-Url'] = imageUrl;
     response['Health-Institution-Services'] = services;
     response['Health-Institution-Acredited-Insurance'] = acreditedInsurance;
+    response['Health-Institution-Affiliated-Doctors'] = affiliatedDoctors;
     return response;
   }
 
@@ -153,7 +162,19 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                       .toList(),
                 )
               : const SizedBox(),
-          _buildAffiliatedProfessionalsSection(), // Add this line
+          (data['Health-Institution-Affiliated-Doctors'] as List).isNotEmpty
+              ? _buildAffiliatedProfessionalsSection(
+                  (data['Health-Institution-Affiliated-Doctors'] as List)
+                      .map((doctor) => <String, String>{
+                            'name':
+                                '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
+                            'email': doctor['Doctor-Email'].toString(),
+                            'Specialization':
+                                doctor['Specialization'].toString(),
+                          })
+                      .toList())
+              : const SizedBox(),
+          // Add this line
           _buildContactSection(data),
           _buildReportSection(),
           const SizedBox(height: 32),
@@ -436,33 +457,38 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
 // Affiliated Professionals Section
-  Widget _buildAffiliatedProfessionalsSection() {
+  Widget _buildAffiliatedProfessionalsSection(
+      List<Map<String, String>> affiliatedDoctors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDividerWithSpacing(),
         _buildSectionTitle('Affiliated Professionals'),
         const SizedBox(height: 16),
-        ListTile(
-          title: Text('John Doe'),
-          subtitle: Text('Oncologist'),
-          trailing: Text('john.doe@example.com'),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: affiliatedDoctors.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(affiliatedDoctors[index]["name"] as String),
+              subtitle:
+                  Text(affiliatedDoctors[index]["Specialization"] as String),
+              trailing: Text(affiliatedDoctors[index]["email"] as String),
+            );
+          },
         ),
-        ListTile(
-          title: Text('Jane Smith'),
-          subtitle: Text('Oncologist'),
-          trailing: Text('jane.smith@example.com'),
-        ),
-        const SizedBox(height: 25),
         _buildShowAllButton(
           'Show all Professionals',
           () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => AffiliatedProfessional(),
+              builder: (context) => AffiliatedProfessional(
+                healthInstitutionid: widget.id,
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 10), // Added SizedBox for spacing
+        const SizedBox(height: 10),
       ],
     );
   }

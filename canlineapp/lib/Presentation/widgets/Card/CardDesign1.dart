@@ -11,6 +11,7 @@ class CardDesign1 extends StatefulWidget {
   final String distance; // Add distance information
   final String time;
   final String date;
+  final String gender;
 
   const CardDesign1({
     super.key,
@@ -23,6 +24,7 @@ class CardDesign1 extends StatefulWidget {
     this.distance = '', // Optional with default value
     this.time = '', // Optional with default value
     this.date = '', // Optional with default value
+    this.gender = '', // Optional with default value
   });
 
   @override

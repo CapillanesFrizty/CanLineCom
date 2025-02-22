@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Supportgroupdetailsscreen extends StatefulWidget {
-  final String groupName;
-  final String description;
-  final String category;
-  final String members;
-  final String url;
+  final String groupId; // Add this line
 
   const Supportgroupdetailsscreen({
     super.key,
-    required this.groupName,
-    required this.description,
-    required this.category,
-    required this.members,
-    required this.url,
+    required this.groupId, // Add this line
   });
 
   @override
@@ -25,6 +18,47 @@ class Supportgroupdetailsscreen extends StatefulWidget {
 }
 
 class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
+  late Future<Map<String, dynamic>> _supportGroupFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _supportGroupFuture = _fetchSupportGroup();
+  }
+
+  // Modify return type to Map<String, dynamic>
+  Future<Map<String, dynamic>> _fetchSupportGroup() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('Support_Groups')
+          .select()
+          .eq("id", widget.groupId)
+          .single();
+
+      // Get the image URL from storage bucket
+      if (response != null && response['Group_name'] != null) {
+        // Sanitize the filename
+        final fileName =
+            '${response['Group_name']}.png'; // Remove special characters
+
+        final String imageUrl = Supabase.instance.client.storage
+            .from('Assets') // Your bucket name
+            .getPublicUrl(
+                "Support-Groups/$fileName"); // Direct filename without extra folders
+
+        // Add the image URL to the response
+        return {
+          ...response,
+          'image_url': imageUrl,
+        };
+      }
+      return response;
+    } catch (e) {
+      debugPrint('Error fetching support group: $e');
+      throw Exception('Failed to fetch support group details');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,14 +72,47 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
         ),
       ),
       extendBodyBehindAppBar: true,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-        children: [
-          _buildBackgroundImage(''), // Add image URL if available
-          _buildDetailsSection(),
-        ],
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _supportGroupFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: GoogleFonts.poppins(color: Colors.red),
+              ),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return Center(
+              child: Text(
+                'No data found',
+                style: GoogleFonts.poppins(),
+              ),
+            );
+          }
+
+          final groupData = snapshot.data!;
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            children: [
+              _buildBackgroundImage(groupData['image_url'] ?? ''),
+              _buildDetailsSection(
+                category: groupData['Group_category'] ?? '',
+                groupName: groupData['Group_name'] ?? '',
+                description: groupData['Group_description'] ?? '',
+                events: groupData['events'] ?? 'No upcoming events',
+              ),
+            ],
+          );
+        },
       ),
-      bottomNavigationBar: _buildBottomNavBar(), // Add this line
+      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
@@ -56,96 +123,111 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
   }
 
   Widget _buildBottomNavBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 34),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _supportGroupFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+
+        final websiteUrl = snapshot.data!['url'] ?? '';
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 34),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xff6A5ACD), Color(0xff5B50A0)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xff6A5ACD).withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xff6A5ACD), Color(0xff5B50A0)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xff6A5ACD).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () async {
-              try {
-                final url = Uri.parse(widget.url);
-                await _launchInBrowserView(url);
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.white),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Could not open website',
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w500),
-                            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () async {
+                  debugPrint('Opening website: $websiteUrl');
+                  try {
+                    if (websiteUrl.isNotEmpty) {
+                      final url = Uri.parse(websiteUrl);
+                      await _launchInBrowserView(url);
+                    } else {
+                      throw Exception('Website URL is empty');
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.error_outline,
+                                  color: Colors.white),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Could not open website',
+                                  style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: const EdgeInsets.all(16),
+                        ),
+                      );
+                    }
+                  }
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.language_rounded,
+                        size: 22,
+                        color: Colors.white.withOpacity(0.95),
                       ),
-                      backgroundColor: Colors.redAccent,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Visit Website',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.95),
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                      margin: const EdgeInsets.all(16),
-                    ),
-                  );
-                }
-              }
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.language_rounded,
-                    size: 22,
-                    color: Colors.white.withOpacity(0.95),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Visit Website',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.95),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -174,34 +256,34 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
     );
   }
 
-  Widget _buildDetailsSection() {
+  Widget _buildDetailsSection({
+    required String groupName,
+    required String description,
+    required String category,
+    required String events,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeaderSection(),
+        _buildHeaderSection(groupName: groupName, category: category),
         _buildDividerWithSpacing(),
-        _buildAboutSection(),
+        _buildAboutSection(description: description),
         _buildDividerWithSpacing(),
-        _buildMembersSection(),
-        _buildDividerWithSpacing(),
-        _buildContactSection(),
-        _buildDividerWithSpacing(),
-        _buildEventsSection(),
-        _buildDividerWithSpacing(),
-        _buildResourcesSection(),
+        _buildEventsSection(events: events),
         const SizedBox(height: 32),
       ],
     );
   }
 
-  Widget _buildHeaderSection() {
+  Widget _buildHeaderSection(
+      {required String groupName, required String category}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        _buildTitle(widget.groupName),
+        _buildTitle(groupName),
         const SizedBox(height: 10),
-        _buildSubtitle('Support Group'),
+        _buildSubtitle(category),
         const SizedBox(height: 32),
       ],
     );
@@ -216,39 +298,17 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
     );
   }
 
-  Widget _buildAboutSection() {
+  Widget _buildAboutSection({required String description}) {
     return _buildSection(
       title: 'About Us',
-      content: widget.description,
+      content: description,
     );
   }
 
-  Widget _buildMembersSection() {
-    return _buildSection(
-      title: 'Members',
-      content: widget.members,
-    );
-  }
-
-  Widget _buildContactSection() {
-    return _buildSection(
-      title: 'Contact Us',
-      content: widget.url,
-      isLink: true,
-    );
-  }
-
-  Widget _buildEventsSection() {
+  Widget _buildEventsSection({required String events}) {
     return _buildSection(
       title: 'Upcoming Events',
-      content: 'Details about upcoming events go here.',
-    );
-  }
-
-  Widget _buildResourcesSection() {
-    return _buildSection(
-      title: 'Resources',
-      content: 'Links to resources and helpful materials go here.',
+      content: events,
     );
   }
 

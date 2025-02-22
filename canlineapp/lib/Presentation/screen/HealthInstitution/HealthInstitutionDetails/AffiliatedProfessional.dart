@@ -1,55 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AffiliatedProfessional extends StatefulWidget {
-  const AffiliatedProfessional({super.key});
+  final String healthInstitutionid;
+  const AffiliatedProfessional({super.key, required this.healthInstitutionid});
 
   @override
   State<AffiliatedProfessional> createState() => _AffiliatedProfessionalState();
 }
 
 class _AffiliatedProfessionalState extends State<AffiliatedProfessional> {
-  final List<Map<String, dynamic>> affiliatedProf = [
-    {
-      'Doctor-Firstname': 'John',
-      'Doctor-Lastname': 'Doe',
-      'Specialization': 'Oncologist',
-      'Doctor-Email': 'john.doe@example.com',
-      'Visiting': true
-    },
-    {
-      'Doctor-Firstname': 'Jane',
-      'Doctor-Lastname': 'Smith',
-      'Specialization': 'Oncologist',
-      'Doctor-Email': 'jane.smith@example.com',
-      'Visiting': false
-    },
-    {
-      'Doctor-Firstname': 'Alice',
-      'Doctor-Lastname': 'Johnson',
-      'Specialization': 'Hematologist',
-      'Doctor-Email': 'alice.johnson@example.com',
-      'Visiting': true
-    },
-    {
-      'Doctor-Firstname': 'Bob',
-      'Doctor-Lastname': 'Brown',
-      'Specialization': 'Radiation Oncologist',
-      'Doctor-Email': 'bob.brown@example.com',
-      'Visiting': false
-    },
-    {
-      'Doctor-Firstname': 'Carol',
-      'Doctor-Lastname': 'Davis',
-      'Specialization': 'Surgical Oncologist',
-      'Doctor-Email': 'carol.davis@example.com',
-      'Visiting': true
-    },
-  ];
+  Future<Map<String, dynamic>> _getAffiliatedProfessional() async {
+    // Get the affiliated Doctors of the insitution
+    final response = await Supabase.instance.client
+        .from('Doctor')
+        .select()
+        .eq('Affailated_at', widget.healthInstitutionid);
+    return {'data': response};
+  }
 
   String? selectedSpecialization;
   bool? visitingDoctor;
   final Color brandColor = Color(0xff5B50A0);
-
   void _applyFilters() {
     setState(() {});
   }
@@ -70,65 +42,50 @@ class _AffiliatedProfessionalState extends State<AffiliatedProfessional> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Filter',
+                  Text('Filters',
                       style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: brandColor)),
-                  SizedBox(height: 16),
-                  Text('Specialization', style: TextStyle(color: brandColor)),
-                  DropdownButton<String>(
-                    value: selectedSpecialization,
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem<String>(
-                        value: null,
-                        child: Text('All'),
-                      ),
-                      ...affiliatedProf
-                          .map((e) => e['Specialization'])
+                          color: Colors.black)),
+                  SizedBox(height: 8),
+                  Text('Select filters to narrow down your search',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                  SizedBox(height: 24),
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _getAffiliatedProfessional(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return CircularProgressIndicator();
+                      }
+
+                      final specializations = (snapshot.data?['data'] as List)
+                          .map((e) => e['Specialization'].toString())
                           .toSet()
-                          .map((specialization) => DropdownMenuItem<String>(
-                                value: specialization,
-                                child: Text(specialization),
-                              )),
-                    ],
-                    onChanged: (String? value) {
-                      setState(() {
-                        selectedSpecialization = value;
-                      });
+                          .toList();
+
+                      return DropdownButton<String>(
+                        value: selectedSpecialization,
+                        isExpanded: true,
+                        hint: Text('Select Specialization'),
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('All'),
+                          ),
+                          ...specializations.map((String specialization) {
+                            return DropdownMenuItem<String>(
+                              value: specialization,
+                              child: Text(specialization),
+                            );
+                          }),
+                        ],
+                        onChanged: (String? value) {
+                          setState(() {
+                            selectedSpecialization = value;
+                          });
+                        },
+                      );
                     },
-                  ),
-                  SizedBox(height: 16),
-                  Text('Visiting Doctor', style: TextStyle(color: brandColor)),
-                  ToggleButtons(
-                    isSelected: [
-                      visitingDoctor == null,
-                      visitingDoctor == true,
-                      visitingDoctor == false
-                    ],
-                    onPressed: (index) {
-                      setState(() {
-                        if (index == 0) visitingDoctor = null;
-                        if (index == 1) visitingDoctor = true;
-                        if (index == 2) visitingDoctor = false;
-                      });
-                    },
-                    selectedColor: Colors.white,
-                    color: Colors.grey,
-                    fillColor: brandColor,
-                    borderRadius: BorderRadius.circular(8),
-                    children: [
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('All')),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('Visiting')),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('Non-Visiting')),
-                    ],
                   ),
                   SizedBox(height: 16),
                   Center(
@@ -172,61 +129,67 @@ class _AffiliatedProfessionalState extends State<AffiliatedProfessional> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: affiliatedProf.length,
-        itemBuilder: (context, index) {
-          final doctor = affiliatedProf[index];
-          if ((selectedSpecialization == null ||
-                  doctor['Specialization'] == selectedSpecialization) &&
-              (visitingDoctor == null ||
-                  doctor['Visiting'] == visitingDoctor)) {
-            return Card(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              elevation: 4,
-              child: ListTile(
-                contentPadding: EdgeInsets.all(16),
-                leading: CircleAvatar(
-                  radius: 28,
-                  backgroundImage: AssetImage('assets/placeholder.png'),
-                ),
-                title: Text(
-                  '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: brandColor),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(doctor['Specialization'],
-                        style:
-                            TextStyle(fontSize: 14, color: Colors.grey[700])),
-                    SizedBox(height: 4),
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: doctor['Visiting'] ? Colors.green : Colors.red,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        doctor['Visiting']
-                            ? 'Visiting Doctor'
-                            : 'Non-Visiting Doctor',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Container();
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _getAffiliatedProfessional(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
           }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No affiliated professionals found'));
+          }
+
+          final affiliatedProf = snapshot.data!['data'] as List;
+
+          return ListView.builder(
+            itemCount: affiliatedProf.length,
+            itemBuilder: (context, index) {
+              final doctor = affiliatedProf[index];
+              if ((selectedSpecialization == null ||
+                      doctor['Specialization'] == selectedSpecialization) &&
+                  (visitingDoctor == null ||
+                      doctor['Visiting'] == visitingDoctor)) {
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  elevation: 4,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(16),
+                    leading: CircleAvatar(
+                      radius: 28,
+                      backgroundImage: AssetImage('assets/placeholder.png'),
+                    ),
+                    title: Text(
+                      '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: brandColor),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(doctor['Specialization'],
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.grey[700])),
+                        SizedBox(height: 4),
+                        SizedBox(height: 4),
+                      ],
+                    ),
+                  ),
+                );
+              } else {
+                return Container();
+              }
+            },
+          );
         },
       ),
     );

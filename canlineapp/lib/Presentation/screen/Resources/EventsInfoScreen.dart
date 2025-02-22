@@ -129,9 +129,9 @@ class _MoreinfoEventsscreenState extends State<MoreinfoEventsscreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        _buildTitle(data['Event-Name'] ?? 'Untitled Event'),
+        _buildTitle(data['Event_name'] ?? 'Untitled Event'),
         const SizedBox(height: 10),
-        _buildSubtitle(data['Event-Type'] ?? 'Event Type Not Specified'),
+        _buildSubtitle(data['Event_Type'] ?? 'Event Type Not Specified'),
         const SizedBox(height: 32),
       ],
     );
@@ -185,7 +185,7 @@ class _MoreinfoEventsscreenState extends State<MoreinfoEventsscreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          data['Event-Description'] ?? 'No description available',
+          data['Event_Description'] ?? 'No description available',
           style: GoogleFonts.poppins(fontSize: 15),
         ),
         const SizedBox(height: 20),
@@ -194,7 +194,7 @@ class _MoreinfoEventsscreenState extends State<MoreinfoEventsscreen> {
             const Icon(Icons.calendar_today, color: Colors.black, size: 20),
             const SizedBox(width: 10),
             Text(
-              data['Event-Date'] ?? 'Date not specified',
+              data['Event_Date'] ?? 'Date not specified',
               style: GoogleFonts.poppins(fontSize: 15),
             ),
           ],
@@ -205,7 +205,7 @@ class _MoreinfoEventsscreenState extends State<MoreinfoEventsscreen> {
             const Icon(Icons.access_time, color: Colors.black, size: 20),
             const SizedBox(width: 10),
             Text(
-              data['Event-Time'] ?? 'Time not specified',
+              data['Event_Time'] ?? 'Time not specified',
               style: GoogleFonts.poppins(fontSize: 15),
             ),
           ],
@@ -234,7 +234,7 @@ class _MoreinfoEventsscreenState extends State<MoreinfoEventsscreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                data['Event-Location'] ?? 'Location not specified',
+                data['Event_Location'] ?? 'Location not specified',
                 style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
               ),
             ),

@@ -203,22 +203,11 @@ final GoRouter linkrouter = GoRouter(
       },
       routes: [
         GoRoute(
-          path: ':groupId', // Changed from groupName to groupId
-          builder: (context, state) {
-            final groupId = state.pathParameters['groupId']!;
-            final group = Supportgroupslistscreen.supportGroups.firstWhere(
-              (g) => g['name'] == groupId,
-              orElse: () => Supportgroupslistscreen.supportGroups.first,
-            );
-
-            return Supportgroupdetailsscreen(
-              groupName: group['name']!,
-              description: group['description']!,
-              category: group['category']!,
-              members: group['members']!,
-              url: group['url']!,
-            );
-          },
+          path: ':groupid',
+          name: 'groupid',
+          builder: (context, state) => Supportgroupdetailsscreen(
+            groupId: state.pathParameters['groupid']!,
+          ),
         ),
       ],
     ),
