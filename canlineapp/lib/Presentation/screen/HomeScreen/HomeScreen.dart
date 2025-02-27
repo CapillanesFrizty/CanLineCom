@@ -97,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen>
   List<Widget> _gridItems() {
     return [
       _AnimatedGridItem(
+        userid: widget.userid,
         label: "Health\nInstitution",
         iconAsset: 'lib/assets/icons/Hospital.svg',
         textColor: 0xffFF5267,
@@ -108,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen>
         scaleAnimation: _scaleAnimation,
       ),
       _AnimatedGridItem(
+        userid: widget.userid,
         label: "Financial\nSupport",
         iconAsset: 'lib/assets/icons/Financial.svg',
         textColor: 0xff3CC34F,
@@ -130,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen>
       //   scaleAnimation: _scaleAnimation,
       // ),
       _AnimatedGridItem(
+        userid: widget.userid,
         label: "Medical\nSpecialists",
         iconAsset: 'lib/assets/icons/Oncologists.svg',
         textColor: 0xff139E9E,
@@ -141,6 +144,7 @@ class _HomeScreenState extends State<HomeScreen>
         scaleAnimation: _scaleAnimation,
       ),
       _AnimatedGridItem(
+        userid: widget.userid,
         label: "Support Groups",
         iconAsset: 'lib/assets/icons/Supportgroups.svg',
         textColor: 0xffFFA133,
@@ -165,9 +169,11 @@ class _AnimatedGridItem extends StatelessWidget {
   final Animation<double> scaleAnimation;
   final Animation<double> fadeAnimation;
   final AnimationController controller;
+  final userid;
 
   const _AnimatedGridItem({
     required this.label,
+    required this.userid,
     required this.iconAsset,
     required this.textColor,
     required this.bgColor,
@@ -188,7 +194,106 @@ class _AnimatedGridItem extends StatelessWidget {
           child: Opacity(
             opacity: fadeAnimation.value,
             child: InkWell(
-              onTap: () => context.go(route),
+              onTap: () {
+                if (route == '/Health-Institution') {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 0,
+                        backgroundColor: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                spreadRadius: 5,
+                                blurRadius: 15,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(15),
+                                decoration: BoxDecoration(
+                                  color: Color(bgColor).withOpacity(0.3),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.warning,
+                                  color: Color(textColor),
+                                  size: 40,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                'Notice to Public',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(textColor),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              Text(
+                                'The Information provided here is for educational purposes only. Please consult your doctor for medical advice.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(height: 25),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(dialogContext).pop();
+                                      GoRouter.of(context).go(
+                                          '/Health-Institution',
+                                          extra: {'userid': userid});
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Color(0xFF5B50A0),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 30, vertical: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Proceed',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  // For other routes, pass the userid as extra data
+                  GoRouter.of(context).go(route, extra: {'userid': userid});
+                }
+              },
               child: Container(
                 decoration: BoxDecoration(
                   color: Color(bgColor),

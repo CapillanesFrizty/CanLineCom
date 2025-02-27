@@ -68,7 +68,8 @@ class FinancialDetails extends StatefulWidget {
 
 class _FinancialDetailsState extends State<FinancialDetails> {
   late Future<Map<String, dynamic>> _future;
-  late GoogleMapController mapController;
+  GoogleMapController? mapController; // Make controller nullable
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -88,6 +89,12 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         .from('Assets')
         .getPublicUrl("Financial-Institution/$fileName");
 
+    final benefits = await Supabase.instance.client
+        .from('Financial-Institution-Benefit')
+        .select()
+        .eq('Financial-Institution-ID', widget.id);
+
+    response['Financial-Institution-Benefits-Details'] = benefits;
     response['Financial-Institution-Image-Url'] = imageUrl;
     return response;
   }
@@ -160,7 +167,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         children: [
           _buildHeaderSection(data),
           _buildDividerWithSpacing(),
-          _buildSchedule(),
+          _buildSchedule(data),
           _buildDividerWithSpacing(),
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
@@ -168,8 +175,8 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           _buildDividerWithSpacing(),
           _buildBenefitsSection(data),
           _buildDividerWithSpacing(),
-          _buildFAQSection(),
-          _buildDividerWithSpacing(),
+          // _buildFAQSection(),
+          // _buildDividerWithSpacing(),
           _buildContactSection(data),
           _buildDividerWithSpacing(),
           _buildReportSection(),
@@ -226,7 +233,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     );
   }
 
-  Widget _buildSchedule() {
+  Widget _buildSchedule(Map<String, dynamic> data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -242,15 +249,15 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         RichText(
           text: TextSpan(
             style: GoogleFonts.poppins(fontSize: 15),
-            children: const [
-              TextSpan(
+            children: [
+              const TextSpan(
                 text: 'Open for ',
                 style: TextStyle(color: Color(0xff5B50A0)),
               ),
               TextSpan(
-                text: '24Hours',
-                style:
-                    TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                text: data['opening_hours'] ?? 'Unknown',
+                style: const TextStyle(
+                    color: Colors.green, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -289,9 +296,32 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          data['Financial-Institution-Desc'] ?? 'No description available',
-          style: GoogleFonts.poppins(fontSize: 15),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              data['Financial-Institution-Desc'] ?? 'No description available',
+              style: GoogleFonts.poppins(fontSize: 15),
+              maxLines: _isExpanded ? null : 3,
+              overflow:
+                  _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isExpanded = !_isExpanded;
+                });
+              },
+              child: Text(
+                _isExpanded ? 'Show Less' : 'Show More',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: const Color(0xff5B50A0),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -354,14 +384,21 @@ class _FinancialDetailsState extends State<FinancialDetails> {
   }
 
   Widget _buildBenefitsSection(Map<String, dynamic> data) {
+    final benefits = data['Financial-Institution-Benefits-Details'];
+    final benefitsList = benefits != null && benefits is List
+        ? List<String>.from(benefits.map((benefit) =>
+            benefit['Financial-Institution-Benefits-Name']?.toString() ??
+            'Unnamed Benefit'))
+        : <String>['No benefits available'];
+
     return _buildSectionWithList(
       title: 'Benefits & Requirements for Cancer Patients',
-      items: data['Financial-Institution-Benefits-Details'] ?? [],
+      items: benefitsList,
       buttonText: 'View More',
       onButtonPressed: () => GoRouter.of(context).goNamed(
         "benefits",
         pathParameters: {
-          'fid': data['Financial-Institution-ID'].toString(),
+          'fid': data['Financial-Institution-ID']?.toString() ?? '',
         },
       ),
     );
@@ -412,11 +449,13 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             ),
           ),
           const SizedBox(width: 10),
-          Text(
-            text,
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              color: Colors.black,
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                color: Colors.black,
+              ),
             ),
           ),
         ],
@@ -476,60 +515,60 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     );
   }
 
-  Widget _buildFAQSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Frequently Asked Questions',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xff5B50A0),
-            )),
-        const SizedBox(height: 16),
-        _buildFAQItem(
-          question: 'What are the operating hours?',
-          answer: 'We are open 24 hours a day, 7 days a week.',
-        ),
-        _buildFAQItem(
-          question: 'How can I contact you?',
-          answer: 'You can contact us at the phone number provided above.',
-        ),
-        _buildFAQItem(
-          question: 'What benefits do you offer?',
-          answer:
-              'We offer inpatient, outpatient, and Z benefits for catastrophic illnesses.',
-        ),
-      ],
-    );
-  }
+  // Widget _buildFAQSection() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text('Frequently Asked Questions',
+  //           style: GoogleFonts.poppins(
+  //             fontSize: 20,
+  //             fontWeight: FontWeight.w600,
+  //             color: const Color(0xff5B50A0),
+  //           )),
+  //       const SizedBox(height: 16),
+  //       _buildFAQItem(
+  //         question: 'What are the operating hours?',
+  //         answer: 'We are open 24 hours a day, 7 days a week.',
+  //       ),
+  //       _buildFAQItem(
+  //         question: 'How can I contact you?',
+  //         answer: 'You can contact us at the phone number provided above.',
+  //       ),
+  //       _buildFAQItem(
+  //         question: 'What benefits do you offer?',
+  //         answer:
+  //             'We offer inpatient, outpatient, and Z benefits for catastrophic illnesses.',
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildFAQItem({required String question, required String answer}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            question,
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            answer,
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              color: Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildFAQItem({required String question, required String answer}) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 16.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           question,
+  //           style: GoogleFonts.poppins(
+  //             fontSize: 15,
+  //             fontWeight: FontWeight.w600,
+  //             color: Colors.black,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 8),
+  //         Text(
+  //           answer,
+  //           style: GoogleFonts.poppins(
+  //             fontSize: 15,
+  //             color: Colors.grey,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildReportSection() {
     return Column(
@@ -573,7 +612,8 @@ class _FinancialDetailsState extends State<FinancialDetails> {
 
   @override
   void dispose() {
-    mapController.dispose();
+    // Add null check before disposing
+    mapController?.dispose();
     super.dispose();
   }
 }

@@ -67,24 +67,6 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xff5B50A0),
-                ),
-                'What Benefits Offer for Cancer Patients?',
-              ),
-              const SizedBox(height: 20),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.justify,
-                  'Cancer patients admitted to this accredited hospitals can access the following benefits:'),
-              const SizedBox(height: 20),
-
               // TODO Add the Benefits
               FutureBuilder(
                 future: _fetchBenefit(),
@@ -102,149 +84,174 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                       _isExpanded = List.filled(data.length, false);
                     }
 
-                    return ExpansionPanelList(
-                      elevation: 1,
-                      expandedHeaderPadding: EdgeInsets.zero,
-                      expansionCallback: (int index, bool isExpanded) {
-                        setState(() {
-                          _isExpanded[index] = !_isExpanded[index];
-                        });
-                      },
-                      children:
-                          data.asMap().entries.map<ExpansionPanel>((entry) {
-                        int index = entry.key;
-                        var item = entry.value;
-
-                        return ExpansionPanel(
-                          headerBuilder:
-                              (BuildContext context, bool isExpanded) {
-                            return ListTile(
-                              title: Text(
-                                item['Financial-Institution-Benefits-Name']
-                                    .toString(),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            );
+                    return Column(
+                      children: [
+                        Text(
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xff5B50A0),
+                          ),
+                          'What Benefits Offer for Cancer Patients?',
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.justify,
+                            'Cancer patients admitted to this accredited hospitals can access the following benefits:'),
+                        const SizedBox(height: 20),
+                        ExpansionPanelList(
+                          elevation: 1,
+                          expandedHeaderPadding: EdgeInsets.zero,
+                          expansionCallback: (int index, bool isExpanded) {
+                            setState(() {
+                              _isExpanded[index] = !_isExpanded[index];
+                            });
                           },
-                          body: FutureBuilder(
-                            future: _fetchBenefitsInclusions(
-                                item['Financial-Institution-Benefits-ID']
-                                    .toString()),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return Center(
-                                    child: Text('Error: ${snapshot.error}'));
-                              } else if (!snapshot.hasData ||
-                                  (snapshot.data as List).isEmpty) {
-                                return const Center(
-                                    child: Text('No Inclusions found.'));
-                              } else {
-                                final inclusions =
-                                    snapshot.data as List<dynamic>;
-                                return Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children:
-                                        inclusions.map<Widget>((inclusion) {
-                                      return Text(
-                                        "${inclusion['Benefit_name'].toString()}: ${inclusion['Benefit_desccription'].toString()}",
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                        ),
-                                      );
-                                    }).toList(),
+                          children:
+                              data.asMap().entries.map<ExpansionPanel>((entry) {
+                            int index = entry.key;
+                            var item = entry.value;
+
+                            return ExpansionPanel(
+                              backgroundColor: Colors.white,
+                              headerBuilder:
+                                  (BuildContext context, bool isExpanded) {
+                                return ListTile(
+                                  title: Text(
+                                    item['Financial-Institution-Benefits-Name']
+                                        .toString(),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 );
-                              }
-                            },
-                          ),
-                          isExpanded: _isExpanded[index],
-                        );
-                      }).toList(),
+                              },
+                              body: FutureBuilder(
+                                future: _fetchBenefitsInclusions(
+                                    item['Financial-Institution-Benefits-ID']
+                                        .toString()),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasError) {
+                                    return Center(
+                                        child:
+                                            Text('Error: ${snapshot.error}'));
+                                  } else if (!snapshot.hasData ||
+                                      (snapshot.data as List).isEmpty) {
+                                    return const Center(
+                                        child: Text('No Inclusions found.'));
+                                  } else {
+                                    final inclusions =
+                                        snapshot.data as List<dynamic>;
+                                    return Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children:
+                                            inclusions.map<Widget>((inclusion) {
+                                          return Container(
+                                            width: double.infinity,
+                                            padding: EdgeInsets.only(bottom: 8),
+                                            child: Text(
+                                              "\u2022 ${inclusion['Benefit_desccription'] == null || inclusion['Benefit_desccription'].toString().toLowerCase() == 'none' ? inclusion['Benefit_name'].toString() : "${inclusion['Benefit_name'].toString()}: ${inclusion['Benefit_desccription'].toString()} \n"}",
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                              ),
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              isExpanded: _isExpanded[index],
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     );
                   }
                 },
               ),
               const SizedBox(height: 20),
               // TODO Add the Requirements
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FutureBuilder(
-                    future: _requirementsDetails(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (!snapshot.hasData ||
-                          (snapshot.data as List).isEmpty) {
-                        return const Center(child: Text(''));
-                      } else {
-                        final data = snapshot.data as List<dynamic>;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                textAlign: TextAlign.start,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xff5B50A0),
-                                ),
-                                'Requirements to Avail of Benefits'),
-                            Text(
+
+              FutureBuilder(
+                future: _requirementsDetails(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData ||
+                      (snapshot.data as List).isEmpty) {
+                    return const Center(child: Text(''));
+                  } else {
+                    final data = snapshot.data as List<dynamic>;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            textAlign: TextAlign.start,
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xff5B50A0),
+                            ),
+                            'Requirements to Avail of Benefits'),
+                        Text(
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                            'To avail of these benefits, cancer patients must meet certain requirements:'),
+                        const SizedBox(height: 20),
+                        Text(
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xff5B50A0),
+                            ),
+                            'General Requirements:'),
+                        const SizedBox(height: 20),
+                        ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true, // Important to use inside Column
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: data.length,
+                          itemBuilder: (context, index) {
+                            final item = data[index];
+                            return ListTile(
+                              title: Text(
+                                "${index + 1}.) ${item['Financial-Institution-Requirements-Name'].toString()}",
                                 style: GoogleFonts.poppins(
                                   fontSize: 18,
                                   color: Colors.black,
                                 ),
-                                'To avail of these benefits, cancer patients must meet certain requirements:'),
-                            const SizedBox(height: 20),
-                            Text(
+                              ),
+                              subtitle: Text(
+                                item['Financial-Institution-Requirements-Desc']
+                                    .toString(),
                                 style: GoogleFonts.poppins(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xff5B50A0),
+                                  fontSize: 16,
+                                  color: Colors.black,
                                 ),
-                                'General Requirements:'),
-                            const SizedBox(height: 20),
-                            ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap:
-                                  true, // Important to use inside Column
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: data.length,
-                              itemBuilder: (context, index) {
-                                final item = data[index];
-                                return ListTile(
-                                  title: Text(
-                                    "${index + 1}.) ${item['Financial-Institution-Requirements-Name'].toString()}",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 18,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    item['Financial-Institution-Requirements-Desc']
-                                        .toString(),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      }
-                    },
-                  ),
-                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
 
               const SizedBox(height: 20),
@@ -284,7 +291,7 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                               title: Text(
                                 "Step ${index + 1}",
                                 style: GoogleFonts.poppins(
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   color: Colors.black,
                                 ),
                               ),
@@ -304,34 +311,34 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Divider(height: 10),
-              Text(
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xff5B50A0),
-                  ),
-                  "Notes and Reminders"),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
+              // Divider(height: 10),
+              // Text(
+              //     style: GoogleFonts.poppins(
+              //       fontSize: 20,
+              //       fontWeight: FontWeight.w600,
+              //       color: const Color(0xff5B50A0),
+              //     ),
+              //     "Notes and Reminders"),
+              // const SizedBox(height: 20),
 
-              // TODO Make this Dynamic
-              Column(
-                children: [
-                  Text(
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                      "1. Accredited Facilities: Ensure treatments are received in PhilHealth-accredited hospitals and clinics to qualify for benefits."),
-                  Text(
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                      "2. Active Membership: Contributions must be updated to avail of benefits. Members under the Indigent or Senior Citizen categories are automatically covered."),
-                ],
-              ),
+              // // TODO Make this Dynamic
+              // // Column(
+              //   children: [
+              //     Text(
+              //         style: GoogleFonts.poppins(
+              //           fontSize: 18,
+              //           color: Colors.black,
+              //         ),
+              //         "1. Accredited Facilities: Ensure treatments are received in PhilHealth-accredited hospitals and clinics to qualify for benefits."),
+              //     Text(
+              //         style: GoogleFonts.poppins(
+              //           fontSize: 18,
+              //           color: Colors.black,
+              //         ),
+              //         "2. Active Membership: Contributions must be updated to avail of benefits. Members under the Indigent or Senior Citizen categories are automatically covered."),
+              //   ],
+              // ),
             ],
           ),
         ),

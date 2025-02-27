@@ -11,5 +11,4 @@ class App extends StatelessWidget {
       routerConfig: linkrouter,
     );
   }
-  
 }
