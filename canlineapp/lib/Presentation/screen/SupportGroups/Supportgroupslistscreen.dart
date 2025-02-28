@@ -197,8 +197,8 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
             return CardDesign1(
               goto: () {
                 if (supportGroup['id'] != null) {
-                  context
-                      .go('/Support-Groups/${supportGroup['id'].toString()}');
+                  GoRouter.of(context)
+                      .push('/Support-Groups/${supportGroup['id'].toString()}');
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

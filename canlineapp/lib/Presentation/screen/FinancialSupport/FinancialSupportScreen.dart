@@ -203,7 +203,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
           itemBuilder: (context, index) {
             final institution = institutions[index];
             return CardDesign1(
-              goto: () => context.push(
+              goto: () => GoRouter.of(context).push(
                   '/Financial-Institution/${institution['Financial-Institution-ID']}'),
               image: institution['Financial-Institution-Image-Url'] ?? '',
               title: institution['Financial-Institution-Name'] ??

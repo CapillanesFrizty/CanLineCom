@@ -260,7 +260,7 @@ class _AnimatedGridItem extends StatelessWidget {
                                   ElevatedButton(
                                     onPressed: () {
                                       Navigator.of(dialogContext).pop();
-                                      GoRouter.of(context).go(
+                                      GoRouter.of(context).push(
                                           '/Health-Institution',
                                           extra: {'userid': userid});
                                     },
@@ -291,7 +291,7 @@ class _AnimatedGridItem extends StatelessWidget {
                   );
                 } else {
                   // For other routes, pass the userid as extra data
-                  GoRouter.of(context).go(route, extra: {'userid': userid});
+                  GoRouter.of(context).push(route, extra: {'userid': userid});
                 }
               },
               child: Container(

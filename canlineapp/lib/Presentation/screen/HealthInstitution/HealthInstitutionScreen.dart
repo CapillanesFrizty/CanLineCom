@@ -319,7 +319,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           itemBuilder: (context, index) => CardDesign1(
             goto: () {
               final id = healthInst[index]['Health-Institution-ID'];
-              context.go('/Health-Institution/$id');
+              GoRouter.of(context).push('/Health-Institution/$id');
             },
             image: healthInst[index]['Health-Institution-Image-Url'] ?? '',
             title:

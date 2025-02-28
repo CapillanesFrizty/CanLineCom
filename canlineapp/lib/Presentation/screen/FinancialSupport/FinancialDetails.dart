@@ -109,7 +109,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         elevation: 0,
         leading: _buildIconButton(
           Icons.arrow_back,
-          () => context.go('/Financial-Institution'),
+          () => GoRouter.of(context).pop('/Financial-Institution'),
         ),
       ),
       extendBodyBehindAppBar: true,
