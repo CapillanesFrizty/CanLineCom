@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:buttons_tabbar/buttons_tabbar.dart';
 
 class MedicalSpeciaDetailScreens extends StatefulWidget {
   final String docid;
@@ -84,13 +85,76 @@ class _MedicalSpeciaDetailScreensState
             return ListView(
               children: [
                 _buildBackgroundImage(),
-                _buildDetailsSection(data),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header in the screen include name and specialization
+                      _buildHeaderSection(data),
+                      // Tab in the screen
+                      _buildTabbar(data)
+                    ],
+                  ),
+                ),
               ],
             );
           } else {
             return const Center(child: Text('No data found'));
           }
         },
+      ),
+    );
+  }
+
+  // Building the tabbar
+  Widget _buildTabbar(Map<String, dynamic> data) {
+    return DefaultTabController(
+      length: 2,
+      child: SizedBox(
+        height: 300,
+        child: Column(
+          children: [
+            ButtonsTabBar(
+              contentCenter: true,
+              width: 170,
+              backgroundColor: const Color.fromARGB(255, 225, 97, 166),
+              splashColor: Colors.transparent,
+              unselectedBackgroundColor: Colors.transparent,
+              unselectedLabelStyle: TextStyle(color: Colors.black),
+              labelStyle:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              tabs: [
+                Tab(text: 'Information'),
+                Tab(text: 'Cilnic Details'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  // Personal Information
+                  SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildDetailsSection(data),
+                      ],
+                    ),
+                  ),
+
+                  // Clinic Details
+                  SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [Text('CLinic name')],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -123,8 +187,6 @@ class _MedicalSpeciaDetailScreensState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeaderSection(data),
-          _buildDividerWithSpacing(),
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
           _buildContactSection(data),
@@ -140,7 +202,6 @@ class _MedicalSpeciaDetailScreensState
       children: [
         const SizedBox(height: 32),
         _buildTitle('${data['Doctor-Firstname']} ${data['Doctor-Lastname']}'),
-        const SizedBox(height: 10),
         _buildSubtitle(data['Specialization'] ?? 'Unknown Specialization'),
         const SizedBox(height: 32),
       ],

@@ -329,7 +329,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         const SizedBox(height: 20),
         Center(
           child: Text(
-            'Where are we?',
+            'Where are we?',  
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -374,7 +374,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
       children: [
         _buildDividerWithSpacing(),
         _buildSectionWithList(
-          title: 'Services & Guidelines',
+          title: 'Other Services Offered & Guidelines',
           items: servicename,
           buttonText: 'Show all Services',
           onButtonPressed: () => Navigator.of(context).push(

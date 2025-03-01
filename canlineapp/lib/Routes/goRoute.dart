@@ -6,11 +6,12 @@ import '../Layouts/BarrelFileLayouts.dart';
 
 const Color _primaryColor = Color(0xFF5B50A0);
 final GoRouter linkrouter = GoRouter(
+  initialLocation: '/',
   routes: [
     // Login Screen
     GoRoute(
       path: '/',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => LoginScreen(),
     ),
     // Registration Screen
     GoRoute(

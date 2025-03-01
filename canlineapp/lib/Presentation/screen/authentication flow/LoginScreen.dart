@@ -223,7 +223,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildCreateAccountButton() {
     return OutlinedButton(
-      onPressed: () => context.go('/RegisterScreen'),
+      onPressed: () {
+        GoRouter.of(context).go('/RegisterScreen');
+      },
       style: OutlinedButton.styleFrom(
         foregroundColor: LoginScreen._primaryColor,
         padding: const EdgeInsets.symmetric(vertical: 16.0),
