@@ -40,7 +40,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     final services = await Supabase.instance.client
         .from('Health-Institution-Service')
         .select()
-        .eq('Health-Institution-ID', widget.id)
+        .eq('Health-Institution', widget.id)
         .limit(2);
 
     // Get the acredited insurance of the insitution

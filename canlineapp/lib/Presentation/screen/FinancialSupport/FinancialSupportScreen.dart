@@ -92,6 +92,9 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
       }).toList();
     }
 
+    result.sort((a, b) => (a['Financial-Institution-Name'] as String)
+        .compareTo(b['Financial-Institution-Name'] as String));
+
     return result;
   }
 

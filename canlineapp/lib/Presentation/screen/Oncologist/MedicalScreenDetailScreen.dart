@@ -63,6 +63,7 @@ class _MedicalSpeciaDetailScreensState
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: _buildIconButton(
@@ -126,8 +127,8 @@ class _MedicalSpeciaDetailScreensState
           _buildDividerWithSpacing(),
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
-          // _buildContactSection(data),
-          // const SizedBox(height: 32),
+          _buildContactSection(data),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -201,29 +202,24 @@ class _MedicalSpeciaDetailScreensState
     );
   }
 
-//   Widget _buildContactSection(Map<String, dynamic> data) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text('Contact',
-//             style: GoogleFonts.poppins(
-//               fontSize: 20,
-//               fontWeight: FontWeight.w600,
-//               color: const Color(0xff5B50A0),
-//             )),
-//         const SizedBox(height: 16),
-//         Row(
-//           children: [
-//             const Icon(Icons.phone_outlined, color: Colors.black, size: 25),
-//             const SizedBox(width: 10),
-//             Text(
-//               data['Doctor-ContactNumber'] ?? 'No contact available',
-//               style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
-//             ),
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-// }
+  Widget _buildContactSection(Map<String, dynamic> data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Contact Number',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xff5B50A0),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          data['Doctor-Contact-Number'] ?? 'no COntact Number available',
+          style: GoogleFonts.poppins(fontSize: 15),
+        ),
+      ],
+    );
+  }
 }

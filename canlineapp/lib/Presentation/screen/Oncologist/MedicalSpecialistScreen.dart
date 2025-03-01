@@ -56,7 +56,9 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchDoctors() async {
-    var query = Supabase.instance.client.from('Doctor').select();
+    var query = Supabase.instance.client
+        .from('Doctor')
+        .select('*, Health-Institution!inner(Health-Institution-Name)');
 
     if (_selectedCategory != "All") {
       query = query.eq('Specialization', _selectedCategory);
@@ -76,9 +78,9 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     }
 
     // Sort the result list by Doctor-Firstname
-    result.sort((a, b) => (a['Doctor-Firstname'] as String)
-        .compareTo(b['Doctor-Firstname'] as String));
-
+    result.sort((a, b) => (a['Doctor-Lastname'] as String)
+        .compareTo(b['Doctor-Lastname'] as String));
+    debugPrint('Results: $result.toString()');
     return result;
   }
 
@@ -195,7 +197,9 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
               title:
                   '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
               subtitle: doctor['Specialization'] ?? 'Unknown Specialization',
-              location: doctor['Hospital'] ?? 'No hospital information',
+              location: doctor['Health-Institution']
+                      ['Health-Institution-Name'] ??
+                  'No hospital information',
               address: doctor['Address'] ?? 'No address available',
             );
           },

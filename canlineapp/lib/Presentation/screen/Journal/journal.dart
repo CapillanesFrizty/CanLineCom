@@ -480,18 +480,18 @@ class _JournalScreenState extends State<JournalScreen> {
               child: const Icon(LucideIcons.filter, color: Colors.white),
             ),
             SizedBox(height: 16),
-            FloatingActionButton(
-              heroTag: "analytics",
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const AnalyticsJournal()),
-                );
-              },
-              backgroundColor: primaryColor,
-              child: const Icon(LucideIcons.lineChart, color: Colors.white),
-            ),
-            SizedBox(height: 16),
+            // FloatingActionButton(
+            //   heroTag: "analytics",
+            //   onPressed: () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //           builder: (context) => const AnalyticsJournal()),
+            //     );
+            //   },
+            //   backgroundColor: primaryColor,
+            //   child: const Icon(LucideIcons.lineChart, color: Colors.white),
+            // ),
+            // SizedBox(height: 16),
             FloatingActionButton(
               heroTag: "add",
               onPressed: _buildBottomSheet,

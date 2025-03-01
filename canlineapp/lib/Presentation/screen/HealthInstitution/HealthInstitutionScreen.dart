@@ -47,11 +47,15 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             .getPublicUrl("Health-Institution/$fileName");
 
         institution['Health-Institution-Image-Url'] = imageUrl;
-        result.add(institution); // Add the institution to the result list
+        result.add(institution);
       }
     }
 
-    return result; // Return all institutions with image URLs
+    // Sort the result list alphabetically by institution name
+    result.sort((a, b) => (a['Health-Institution-Name'] as String)
+        .compareTo(b['Health-Institution-Name'] as String));
+
+    return result;
   }
 
   // Get the clinics data

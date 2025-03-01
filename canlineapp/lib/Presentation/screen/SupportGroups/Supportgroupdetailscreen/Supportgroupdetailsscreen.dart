@@ -64,6 +64,7 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: _buildIconButton(
