@@ -329,24 +329,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  'By creating an account, you agree to our Terms and Conditions and Privacy Policy.',
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => context.go('/terms-and-conditions'),
-                  child: Text(
-                    'Read Terms and Conditions',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: RegisterScreen.primaryColor,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

@@ -42,10 +42,5 @@ export 'authentication flow/RegisterScreen.dart';
 export 'SupportGroups/Supportgroupslistscreen.dart';
 export './SupportGroups/Supportgroupdetailscreen/Supportgroupdetailsscreen.dart';
 
-// ! Terms and Conditions
-export 'authentication flow/TermsAndConditionsScreen.dart';
-
-// ! Forgot Password
-
 // ! Settings Screen
 export '../screen/HomeScreen/MoreOption/Settings.dart';

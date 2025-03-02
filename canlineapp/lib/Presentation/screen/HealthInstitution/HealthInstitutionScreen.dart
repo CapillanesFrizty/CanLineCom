@@ -21,7 +21,29 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   final String _searchQuery = '';
   int _currentCategoryIndex =
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
-  String _selectedFilter = 'All'; // Track selected filter
+  String _selectedFilter = 'All';
+  String _selectedSpecialty = 'All';
+  bool _is24Hours = false;
+  bool _hasEmergencyServices = false;
+  List<String> _selectedInsurance = [];
+
+  // Add specialty options
+  final List<String> specialties = [
+    'All',
+    'Cancer Care',
+    'Cardiology',
+    'Pediatrics',
+    'General Medicine',
+    'Surgery',
+    'Obstetrics & Gynecology',
+  ];
+
+  // Add insurance options
+  final List<String> insuranceProviders = [
+    'PhilHealth',
+    'HMO',
+    'Private Insurance',
+  ];
 
   Future<void> _refreshContent() async {
     setState(() {}); // This triggers a rebuild of the widget
@@ -31,8 +53,31 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   Future<List<Map<String, dynamic>>> _getHealthInstitutionData() async {
     var query = Supabase.instance.client.from('Health-Institution').select();
 
-    if (_selectedFilter != 'All') {
-      query = query.eq('Health-Institution-Type', _selectedFilter);
+    // Service Type is now handled by category selection
+    if (_currentCategoryIndex == 1) {
+      query = query.eq('Service-Type', 'Outpatient');
+    } else if (_currentCategoryIndex == 2) {
+      query = query.eq('Service-Type', 'Admission');
+    }
+
+    // Apply Specialty filter
+    if (_selectedSpecialty != 'All') {
+      query = query.eq('Specialty', _selectedSpecialty);
+    }
+
+    // Apply 24/7 Service filter
+    if (_is24Hours) {
+      query = query.eq('Is24Hours', true);
+    }
+
+    // Apply Emergency Services filter
+    if (_hasEmergencyServices) {
+      query = query.eq('HasEmergencyServices', true);
+    }
+
+    // Apply Insurance filter
+    if (_selectedInsurance.isNotEmpty) {
+      query = query.contains('AcceptedInsurance', _selectedInsurance);
     }
 
     final response = await query;
@@ -108,14 +153,13 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildCategoryButton(
-              LucideIcons.hospital, "Hospitals", 0, Colors.red),
+              LucideIcons.hospital, "All", 0, const Color(0xff5B50A0)),
           _buildCategoryButton(
-              LucideIcons.squareActivity, "Clinics", 1, Colors.blue),
-          _buildCategoryButton(
-              LucideIcons.housePlus, "Brgy. HS", 2, Colors.orange),
+              LucideIcons.stethoscope, "Outpatient", 1, Colors.green),
+          _buildCategoryButton(LucideIcons.bed, "Admission", 2, Colors.red),
         ],
       ),
     );
@@ -194,70 +238,132 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Filter',
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: _primaryColor)),
-                  SizedBox(height: 16),
-                  Text('Institution Type',
-                      style: TextStyle(color: _primaryColor)),
-                  ToggleButtons(
-                    isSelected: [
-                      _selectedFilter == 'All',
-                      _selectedFilter == 'Private Hospital',
-                      _selectedFilter == 'Government Hospital'
-                    ],
-                    onPressed: (index) {
-                      setState(() {
-                        if (index == 0) _selectedFilter = 'All';
-                        if (index == 1) _selectedFilter = 'Private Hospital';
-                        if (index == 2) _selectedFilter = 'Government Hospital';
-                      });
-                    },
-                    selectedColor: Colors.white,
-                    color: Colors.grey,
-                    fillColor: _primaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                    children: [
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('All')),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('Private')),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('Government')),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: _primaryColor),
-                      onPressed: () {
-                        _applyFilters();
-                        Navigator.pop(context);
-                      },
-                      child: Text('Apply Filters',
-                          style: TextStyle(color: Colors.white)),
+            return DraggableScrollableSheet(
+              initialChildSize: 0.8,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Filters',
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: _primaryColor)),
+                        const SizedBox(height: 20),
+
+                        // Specialty Filter
+                        Text('Specialty',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: _primaryColor)),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedSpecialty,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          items: specialties
+                              .map((specialty) => DropdownMenuItem(
+                                    value: specialty,
+                                    child: Text(specialty),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedSpecialty = value!;
+                            });
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Additional Services
+                        Text('Additional Services',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: _primaryColor)),
+                        CheckboxListTile(
+                          title: const Text('24/7 Service'),
+                          value: _is24Hours,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _is24Hours = value!;
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          title: const Text('Emergency Services'),
+                          value: _hasEmergencyServices,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _hasEmergencyServices = value!;
+                            });
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Insurance Acceptance
+                        Text('Accepted Insurance',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: _primaryColor)),
+                        ...insuranceProviders.map((insurance) {
+                          return CheckboxListTile(
+                            title: Text(insurance),
+                            value: _selectedInsurance.contains(insurance),
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value!) {
+                                  _selectedInsurance.add(insurance);
+                                } else {
+                                  _selectedInsurance.remove(insurance);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+
+                        const SizedBox(height: 20),
+
+                        // Apply Button
+                        Center(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _primaryColor,
+                              minimumSize: const Size(200, 45),
+                            ),
+                            onPressed: () {
+                              _applyFilters();
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Apply Filters',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -266,26 +372,16 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   }
 
   Widget _buildCurrentCategoryList() {
-    if (_currentCategoryIndex == 0) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        child: _buildHealthInstitutionsList(),
-      );
-    } else if (_currentCategoryIndex == 1) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: _buildClinicList()),
-        ],
-      );
-    } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: _buildBrgyHealthStationsList()),
-        ],
-      );
-    }
+    _selectedFilter = _currentCategoryIndex == 0
+        ? 'All'
+        : _currentCategoryIndex == 1
+            ? 'Outpatient'
+            : 'Admission';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: _buildHealthInstitutionsList(),
+    );
   }
 
   Widget _buildHealthInstitutionsList() {
