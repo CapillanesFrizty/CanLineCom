@@ -212,10 +212,5 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(
-      path: '/terms-and-conditions',
-      builder: (context, state) => const TermsAndConditionsScreen(),
-    ),
-    GoRoute(path: '/Settings', builder: (context, state) => const Settings()),
   ],
 );

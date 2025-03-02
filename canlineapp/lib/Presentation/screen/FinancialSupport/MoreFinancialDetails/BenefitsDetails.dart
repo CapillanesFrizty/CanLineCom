@@ -14,7 +14,7 @@ class Benefitsdetails extends StatefulWidget {
 
 class _BenefitsdetailsState extends State<Benefitsdetails> {
   List<bool> _isExpanded = [];
-  Map<String, List<dynamic>> _inclusionsCache = {};
+  final Map<String, List<dynamic>> _inclusionsCache = {};
 
   Future<PostgrestList> _fetchBenefit() async {
     // Fetch all benefits for the given institution

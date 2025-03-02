@@ -21,6 +21,9 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   late Future<Map<String, dynamic>> _future;
   late GoogleMapController mapController;
 
+  bool _isExpandedAbout = false;
+  final int _maxLength = 227;
+
   @override
   void initState() {
     super.initState();
@@ -297,6 +300,11 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
   Widget _buildAboutUsSection(String description) {
+    final bool needsShowMore = description.length > _maxLength;
+    final String displayText = !_isExpandedAbout && needsShowMore
+        ? '${description.substring(0, _maxLength)}...'
+        : description;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -310,9 +318,24 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          description,
+          displayText,
           style: GoogleFonts.poppins(fontSize: 15),
         ),
+        if (needsShowMore)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _isExpandedAbout = !_isExpandedAbout;
+              });
+            },
+            child: Text(
+              _isExpandedAbout ? 'Show Less' : 'Show More',
+              style: GoogleFonts.poppins(
+                color: const Color(0xff5B50A0),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -329,7 +352,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         const SizedBox(height: 20),
         Center(
           child: Text(
-            'Where are we?',  
+            'Where are we?',
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w600,
