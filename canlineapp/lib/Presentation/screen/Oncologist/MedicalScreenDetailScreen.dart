@@ -15,6 +15,9 @@ class MedicalSpeciaDetailScreens extends StatefulWidget {
 class _MedicalSpeciaDetailScreensState
     extends State<MedicalSpeciaDetailScreens> {
   late Future<Map<String, dynamic>> _future;
+  String _selectedFilter = 'all';
+  List<Map<String, dynamic>> _filteredClinics = [];
+  final ValueNotifier<String> _filterNotifier = ValueNotifier<String>('all');
 
   @override
   void initState() {
@@ -138,7 +141,6 @@ class _MedicalSpeciaDetailScreensState
         const SizedBox(height: 32),
         _buildTitle('${data['Doctor-Firstname']} ${data['Doctor-Lastname']}'),
         _buildSubtitle(data['Specialization'] ?? 'Unknown Specialization'),
-        const SizedBox(height: 32),
       ],
     );
   }
@@ -211,7 +213,6 @@ class _MedicalSpeciaDetailScreensState
         },
         'contact': '(02) 8723-0101',
         'status': 'Primary',
-        'consultation_fee': '₱1,500',
       },
       {
         'name': 'Private Clinic',
@@ -222,7 +223,6 @@ class _MedicalSpeciaDetailScreensState
         },
         'contact': '(02) 8888-9999',
         'status': 'By Appointment',
-        'consultation_fee': '₱2,000',
       },
       {
         'name': 'Asian Hospital and Medical Center',
@@ -235,7 +235,6 @@ class _MedicalSpeciaDetailScreensState
         },
         'contact': '(02) 8771-9000',
         'status': 'Secondary',
-        'consultation_fee': '₱1,800',
       },
       {
         'name': 'Telemedicine Consultation',
@@ -248,7 +247,6 @@ class _MedicalSpeciaDetailScreensState
         },
         'contact': 'Book through App',
         'status': 'Available',
-        'consultation_fee': '₱1,200',
       }
     ];
 
@@ -266,155 +264,301 @@ class _MedicalSpeciaDetailScreensState
                 color: const Color(0xff5B50A0),
               ),
             ),
-            // Add filter option
             PopupMenuButton<String>(
               icon: const Icon(Icons.filter_list, color: Color(0xff5B50A0)),
               onSelected: (value) {
-                // Implement filtering logic
+                _filterNotifier.value = value;
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'all', child: Text('All Locations')),
                 const PopupMenuItem(
-                    value: 'hospital', child: Text('Hospitals')),
+                  value: 'all',
+                  child: Row(
+                    children: [
+                      Icon(Icons.all_inbox, size: 20),
+                      SizedBox(width: 8),
+                      Text('All Locations'),
+                    ],
+                  ),
+                ),
                 const PopupMenuItem(
-                    value: 'private', child: Text('Private Clinics')),
+                  value: 'hospital',
+                  child: Row(
+                    children: [
+                      Icon(Icons.local_hospital, size: 20),
+                      SizedBox(width: 8),
+                      Text('Hospitals'),
+                    ],
+                  ),
+                ),
                 const PopupMenuItem(
-                    value: 'virtual', child: Text('Telemedicine')),
+                  value: 'private',
+                  child: Row(
+                    children: [
+                      Icon(Icons.medical_services, size: 20),
+                      SizedBox(width: 8),
+                      Text('Private Clinics'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'virtual',
+                  child: Row(
+                    children: [
+                      Icon(Icons.videocam, size: 20),
+                      SizedBox(width: 8),
+                      Text('Telemedicine'),
+                    ],
+                  ),
+                ),
               ],
             ),
           ],
         ),
         const SizedBox(height: 20),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: clinics.length,
-          itemBuilder: (context, index) => _buildClinicCard(clinics[index]),
+        ValueListenableBuilder<String>(
+          valueListenable: _filterNotifier,
+          builder: (context, filterValue, child) {
+            final filteredClinics = _filterClinics(clinics, filterValue);
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredClinics.length,
+              itemBuilder: (context, index) =>
+                  _buildClinicCard(filteredClinics[index]),
+            );
+          },
         ),
       ],
     );
   }
 
+  List<Map<String, dynamic>> _filterClinics(
+      List<Map<String, dynamic>> clinics, String filter) {
+    if (filter == 'all') {
+      return clinics;
+    }
+
+    return clinics.where((clinic) {
+      switch (filter) {
+        case 'hospital':
+          return clinic['type'] == 'Hospital';
+        case 'private':
+          return clinic['type'] == 'Private Practice';
+        case 'virtual':
+          return clinic['type'] == 'Virtual';
+        default:
+          return false;
+      }
+    }).toList();
+  }
+
   Widget _buildClinicCard(Map<String, dynamic> clinic) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () => _showClinicDetails(clinic),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildClinicHeader(clinic),
-              const SizedBox(height: 12),
-              _buildClinicInfo(clinic),
-              if (clinic['type'] != 'Virtual') ...[
-                const Divider(height: 24),
-                _buildAvailabilitySection(clinic),
-              ],
-            ],
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-        ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Clinic Header with colored background
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xff5B50A0).withOpacity(0.05),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(15)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _getClinicIcon(clinic['type']),
+                    color: const Color(0xff5B50A0),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        clinic['name'],
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xff5B50A0),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(clinic['status'])
+                              .withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _getStatusColor(clinic['status'])
+                                .withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          clinic['status'],
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: _getStatusColor(clinic['status']),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Clinic Details
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Address and Contact with improved layout
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildInfoRow(
+                        Icons.location_on,
+                        clinic['address'],
+                        Colors.grey.shade700,
+                      ),
+                      if (clinic['type'] != 'Virtual') ...[
+                        const Divider(height: 16),
+                        _buildInfoRow(
+                          Icons.phone,
+                          clinic['contact'],
+                          Colors.grey.shade700,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                // Schedule Section
+                if (clinic['type'] != 'Virtual') ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 18,
+                              color: const Color(0xff5B50A0),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Schedule',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xff5B50A0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ...(clinic['schedule'] as Map<String, String>)
+                            .entries
+                            .map(
+                              (e) => Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 90,
+                                      child: Text(
+                                        e.key,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          color: Colors.grey.shade800,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        e.value,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildClinicHeader(Map<String, dynamic> clinic) {
+  Widget _buildInfoRow(IconData icon, String text, Color textColor) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0xff5B50A0).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            _getClinicIcon(clinic['type']),
-            color: const Color(0xff5B50A0),
-            size: 24,
-          ),
+        Icon(
+          icon,
+          size: 18,
+          color: const Color(0xff5B50A0),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                clinic['name'],
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(clinic['status']).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      clinic['status'],
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: _getStatusColor(clinic['status']),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    clinic['consultation_fee'],
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: textColor,
+            ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildClinicInfo(Map<String, dynamic> clinic) {
-    return Column(
-      children: [
-        _buildClinicInfoRow(Icons.location_on, clinic['address']),
-        const SizedBox(height: 8),
-        _buildClinicInfoRow(Icons.phone, clinic['contact']),
-      ],
-    );
-  }
-
-  Widget _buildAvailabilitySection(Map<String, dynamic> clinic) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.access_time, size: 16, color: Color(0xff5B50A0)),
-            const SizedBox(width: 8),
-            Text(
-              'Available Hours',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ..._buildScheduleRows(clinic['schedule']),
       ],
     );
   }
