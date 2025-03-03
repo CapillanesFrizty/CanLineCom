@@ -25,7 +25,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   String _selectedSpecialty = 'All';
   bool _is24Hours = false;
   bool _hasEmergencyServices = false;
-  List<String> _selectedInsurance = [];
+  final List<String> _selectedInsurance = [];
 
   // Add specialty options
   final List<String> specialties = [
@@ -340,7 +340,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                               });
                             },
                           );
-                        }).toList(),
+                        }),
 
                         const SizedBox(height: 20),
 
