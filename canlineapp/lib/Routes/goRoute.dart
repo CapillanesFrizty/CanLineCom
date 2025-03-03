@@ -212,5 +212,6 @@ final GoRouter linkrouter = GoRouter(
         ),
       ],
     ),
+    GoRoute(path: '/Settings', builder: (context, state) => const Settings()),
   ],
 );

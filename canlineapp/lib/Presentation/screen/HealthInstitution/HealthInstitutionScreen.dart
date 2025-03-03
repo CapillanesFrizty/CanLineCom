@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -47,6 +49,16 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
 
   Future<void> _refreshContent() async {
     setState(() {}); // This triggers a rebuild of the widget
+  }
+
+  // Check Internet Connection using dart:io
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
   }
 
   // Get the health institutions data
@@ -385,51 +397,76 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   }
 
   Widget _buildHealthInstitutionsList() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _getHealthInstitutionData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return FutureBuilder(
+        future: _checkInternetConnection(),
+        builder: (context, connectionSnapshot) {
+          if (connectionSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (connectionSnapshot.error is SocketException) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('No Internet Connection'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _refreshContent,
+                    child: const Text('Try Again'),
+                  ),
+                ],
+              ),
+            );
+          }
+          return FutureBuilder<List<Map<String, dynamic>>>(
+            future: _getHealthInstitutionData(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('No Internet Connection'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _refreshContent,
-                  child: const Text('Try Again'),
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('No Internet Connection'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _refreshContent,
+                        child: const Text('Try Again'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final healthInst = snapshot.data ?? [];
+
+              if (healthInst.isEmpty) {
+                return const Center(child: Text('No data available'));
+              }
+
+              return ListView.builder(
+                itemCount: healthInst.length,
+                itemBuilder: (context, index) => CardDesign1(
+                  goto: () {
+                    final id = healthInst[index]['Health-Institution-ID'];
+                    GoRouter.of(context).push('/Health-Institution/$id');
+                  },
+                  image:
+                      healthInst[index]['Health-Institution-Image-Url'] ?? '',
+                  title: healthInst[index]['Health-Institution-Name'] ??
+                      'Unknown Name',
+                  subtitle: healthInst[index]['Health-Institution-Type'] ?? '',
+                  location:
+                      healthInst[index]['Health-Institution-Address'] ?? '',
                 ),
-              ],
-            ),
-          );
-        }
-
-        final healthInst = snapshot.data ?? [];
-
-        if (healthInst.isEmpty) {
-          return const Center(child: Text('No data available'));
-        }
-
-        return ListView.builder(
-          itemCount: healthInst.length,
-          itemBuilder: (context, index) => CardDesign1(
-            goto: () {
-              final id = healthInst[index]['Health-Institution-ID'];
-              GoRouter.of(context).push('/Health-Institution/$id');
+              );
             },
-            image: healthInst[index]['Health-Institution-Image-Url'] ?? '',
-            title:
-                healthInst[index]['Health-Institution-Name'] ?? 'Unknown Name',
-            subtitle: healthInst[index]['Health-Institution-Type'] ?? '',
-            location: healthInst[index]['Health-Institution-Address'] ?? '',
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 
   Widget _buildBrgyHealthStationsList() {
