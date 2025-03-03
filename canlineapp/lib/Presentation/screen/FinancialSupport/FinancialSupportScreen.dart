@@ -227,80 +227,131 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
+            return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Filter',
-                      style: TextStyle(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filter',
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: _primaryColor)),
-                  SizedBox(height: 16),
-                  Text('Institution Type',
-                      style: TextStyle(color: _primaryColor)),
-                  ToggleButtons(
-                    isSelected: [
-                      _selectedFilter == 'All',
-                      _selectedFilter == 'Private Institution',
-                      _selectedFilter == 'Government Institution'
-                    ],
-                    onPressed: (index) {
-                      setState(() {
-                        if (index == 0) _selectedFilter = 'All';
-                        if (index == 1) _selectedFilter = 'Private Institution';
-                        if (index == 2) {
-                          _selectedFilter = 'Government Institution';
-                        }
-                      });
-                      this.setState(() {}); // Update parent state
-                    },
-                    selectedColor: Colors.white,
-                    color: Colors.grey,
-                    fillColor: _primaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('All'),
+                          color: _primaryColor,
+                        ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Private'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Government'),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
-                  Center(
+                  const SizedBox(height: 16),
+                  Text(
+                    'Institution Type',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: _primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _filterChip('All', _selectedFilter == 'All', (selected) {
+                        setState(() => _selectedFilter = 'All');
+                        this.setState(() {});
+                      }),
+                      _filterChip(
+                        'Private Institution',
+                        _selectedFilter == 'Private Institution',
+                        (selected) {
+                          setState(
+                              () => _selectedFilter = 'Private Institution');
+                          this.setState(() {});
+                        },
+                      ),
+                      _filterChip(
+                        'Government Institution',
+                        _selectedFilter == 'Government Institution',
+                        (selected) {
+                          setState(
+                              () => _selectedFilter = 'Government Institution');
+                          this.setState(() {});
+                        },
+                      ),
+                      _filterChip(
+                        'Partylist',
+                        _selectedFilter == 'Partylist',
+                        (selected) {
+                          setState(() => _selectedFilter = 'Partylist');
+                          this.setState(() {});
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text('Apply Filters',
-                          style: TextStyle(color: Colors.white)),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Apply Filters',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 16),
                 ],
               ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _filterChip(String label, bool isSelected, Function(bool) onSelected) {
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: onSelected,
+      backgroundColor: Colors.white,
+      selectedColor: _primaryColor.withOpacity(0.2),
+      checkmarkColor: _primaryColor,
+      labelStyle: TextStyle(
+        color: isSelected ? _primaryColor : Colors.black87,
+        fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected ? _primaryColor : Colors.grey.shade300,
+        ),
+      ),
     );
   }
 }

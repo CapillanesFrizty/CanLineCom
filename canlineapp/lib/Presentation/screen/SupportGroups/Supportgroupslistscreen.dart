@@ -229,64 +229,110 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Filter',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: _primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Support Group Category',
-                    style: TextStyle(color: _primaryColor),
-                  ),
-                  const SizedBox(height: 8),
-                  FutureBuilder<List<String>>(
-                    future: _fetchCategories(),
-                    builder: (context, snapshot) {
-                      List<String> categories = ['All', ...?snapshot.data];
-
-                      return DropdownButton<String>(
-                        value: _selectedFilter,
-                        isExpanded: true,
-                        items: categories.map((String category) {
-                          return DropdownMenuItem<String>(
-                            value: category,
-                            child: Text(category),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedFilter = newValue ?? 'All';
-                          });
-                          this.setState(() {});
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primaryColor,
+            return DraggableScrollableSheet(
+              initialChildSize: 0.4,
+              minChildSize: 0.2,
+              maxChildSize: 0.75,
+              expand: false,
+              builder: (_, controller) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Apply Filter',
-                          style: TextStyle(color: Colors.white)),
-                    ),
+                      Text(
+                        'Filter Categories',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: _primaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: FutureBuilder<List<String>>(
+                          future: _fetchCategories(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            List<String> categories = [
+                              'All',
+                              ...?snapshot.data
+                            ];
+
+                            return Wrap(
+                              spacing: 8.0,
+                              runSpacing: 8.0,
+                              children: categories.map((category) {
+                                return FilterChip(
+                                  selected: _selectedFilter == category,
+                                  label: Text(category),
+                                  labelStyle: TextStyle(
+                                    color: _selectedFilter == category
+                                        ? Colors.white
+                                        : _primaryColor,
+                                  ),
+                                  backgroundColor: _secondaryColor,
+                                  selectedColor: _primaryColor,
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _selectedFilter =
+                                          selected ? category : 'All';
+                                    });
+                                    this.setState(() {});
+                                  },
+                                  checkmarkColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    side: BorderSide(
+                                      color: _primaryColor,
+                                      width: 1,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
+                      ),
+                      Center(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryColor,
+                            minimumSize: const Size(200, 45),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text(
+                            'Apply',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
