@@ -39,6 +39,46 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   String _searchInput = '';
   String _selectedCategory = 'All';
 
+  // Update the specializations list
+  final List<Map<String, List<String>>> _specializations = [
+    {
+      'Cancer Care': [
+        'All',
+        'Medical Oncologist',
+        'Surgical Oncologist',
+        'Radiation Oncologist',
+        'Hematologist',
+        'Gynecologic Oncologist',
+        'Pediatric Oncologist',
+      ],
+    },
+    {
+      'Mental Health': [
+        'Psychiatrist',
+        'Psycho-Oncologist',
+        'Neuropsychiatrist',
+        'Pain Management Specialist',
+      ],
+    },
+    {
+      'Surgical Specialists': [
+        'General Surgeon',
+        'Neurosurgeon',
+        'Thoracic Surgeon',
+        'Reconstructive Surgeon',
+      ],
+    },
+    {
+      'Support Specialists': [
+        'Radiologist',
+        'Pathologist',
+        'Nuclear Medicine Specialist',
+        'Palliative Care Specialist',
+        'Physical Medicine',
+      ],
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -208,82 +248,147 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     );
   }
 
+  // Update the filter bottom sheet UI
   void _showFilterBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Filter',
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: MedicalSpecialistScreens._primaryColor)),
-                  SizedBox(height: 16),
-                  Text('Specialist Type',
-                      style: TextStyle(
-                          color: MedicalSpecialistScreens._primaryColor)),
-                  ToggleButtons(
-                    isSelected: [
-                      _selectedCategory == 'All',
-                      _selectedCategory == 'Oncologist',
-                      _selectedCategory == 'Specialist'
-                    ],
-                    onPressed: (index) {
-                      setState(() {
-                        if (index == 0) _selectedCategory = 'All';
-                        if (index == 1) _selectedCategory = 'Oncologist';
-                        if (index == 2) _selectedCategory = 'Specialist';
-                      });
-                      this.setState(() {});
-                    },
-                    selectedColor: Colors.white,
-                    color: Colors.grey,
-                    fillColor: MedicalSpecialistScreens._primaryColor,
-                    borderRadius: BorderRadius.circular(8),
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (context, scrollController) {
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('All'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Filter Specialists',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: MedicalSpecialistScreens._primaryColor,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Oncologist'),
+                      const SizedBox(height: 20),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: _specializations.length,
+                          itemBuilder: (context, index) {
+                            final category = _specializations[index];
+                            final title = category.keys.first;
+                            final specialists = category.values.first;
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        MedicalSpecialistScreens._primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: specialists.map((specialization) {
+                                    final isSelected =
+                                        _selectedCategory == specialization;
+                                    return FilterChip(
+                                      selected: isSelected,
+                                      label: Text(specialization),
+                                      labelStyle: GoogleFonts.poppins(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.grey[800],
+                                        fontSize: 14,
+                                      ),
+                                      selectedColor: MedicalSpecialistScreens
+                                          ._primaryColor,
+                                      backgroundColor: Colors.grey[100],
+                                      checkmarkColor: Colors.white,
+                                      onSelected: (selected) {
+                                        setState(() {
+                                          _selectedCategory = specialization;
+                                        });
+                                        this.setState(() {});
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Specialist'),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                MedicalSpecialistScreens._primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'Apply Filters',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: MedicalSpecialistScreens._primaryColor,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text('Apply Filters',
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
+      },
+    );
+  }
+
+  // Add this helper method for sort chips
+  Widget _buildSortChip(String label) {
+    return FilterChip(
+      label: Text(label),
+      labelStyle: GoogleFonts.poppins(
+        color: Colors.grey[800],
+        fontSize: 14,
+      ),
+      backgroundColor: Colors.grey[100],
+      onSelected: (selected) {
+        // Implement sorting logic
       },
     );
   }
