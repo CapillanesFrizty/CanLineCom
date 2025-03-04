@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen>
     return [
       _AnimatedGridItem(
         userid: widget.userid,
-        label: "Health\nInstitution",
+        label: "Chemoteraphy\nServices",
         iconAsset: 'lib/assets/icons/Hospital.svg',
         textColor: 0xffFF5267,
         bgColor: 0xffFFD7DB,

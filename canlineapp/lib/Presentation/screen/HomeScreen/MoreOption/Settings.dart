@@ -321,6 +321,7 @@ class _SettingsState extends State<Settings> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: Text(
             'Who are we?',
             style: GoogleFonts.poppins(
@@ -387,12 +388,6 @@ class _SettingsState extends State<Settings> {
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Close'),
-            ),
-          ],
         );
       },
     );
@@ -403,12 +398,27 @@ class _SettingsState extends State<Settings> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            'Terms & Conditions',
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              color: Settings.primaryColor,
-            ),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.medical_services_outlined,
+                color: Settings.primaryColor,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Terms & Conditions',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  color: Settings.primaryColor,
+                  fontSize: 22,
+                ),
+              ),
+            ],
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -469,28 +479,27 @@ class _SettingsState extends State<Settings> {
 \u2022 Users are responsible for ensuring that their use of the Software complies with all applicable local, state, and federal laws, including healthcare regulations.  
 \u2022 The Company does not assume liability for any misuse of the Software that results in non-compliance with healthcare regulations. ''',
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  'Last updated: ${DateTime.now().toString().split(' ')[0]}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                const Divider(height: 24),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Last updated: ${DateTime.now().toString().split(' ')[0]}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Close',
-                style: GoogleFonts.poppins(
-                  color: Settings.primaryColor,
-                ),
-              ),
-            ),
-          ],
         );
       },
     );

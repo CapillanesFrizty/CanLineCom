@@ -118,8 +118,8 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     }
 
     // Sort the result list by Doctor-Firstname
-    result.sort((a, b) => (a['Doctor-Lastname'] as String)
-        .compareTo(b['Doctor-Lastname'] as String));
+    result.sort((a, b) => (a['Doctor-Firstname'] as String)
+        .compareTo(b['Doctor-Firstname'] as String));
     debugPrint('Results: $result.toString()');
     return result;
   }

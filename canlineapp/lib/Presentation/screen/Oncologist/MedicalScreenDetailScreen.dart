@@ -15,8 +15,8 @@ class MedicalSpeciaDetailScreens extends StatefulWidget {
 class _MedicalSpeciaDetailScreensState
     extends State<MedicalSpeciaDetailScreens> {
   late Future<Map<String, dynamic>> _future;
-  String _selectedFilter = 'all';
-  List<Map<String, dynamic>> _filteredClinics = [];
+  final String _selectedFilter = 'all';
+  final List<Map<String, dynamic>> _filteredClinics = [];
   final ValueNotifier<String> _filterNotifier = ValueNotifier<String>('all');
 
   @override
@@ -26,36 +26,36 @@ class _MedicalSpeciaDetailScreensState
   }
 
   Future<Map<String, dynamic>> _fetchDoctorDetails() async {
-    if (widget.docid == null || widget.docid.isEmpty) {
+    if (widget.docid.isEmpty) {
       throw Exception('Invalid doctor ID');
     }
-    print('Received doctor ID: ${widget.docid}');
     try {
-      // Simplified ID handling - no need to parse twice
       final doctorId = int.tryParse(widget.docid);
       if (doctorId == null) {
         throw Exception('Invalid doctor ID format');
       }
 
-      final response = await Supabase.instance.client
+      // Fetch doctor details
+      final doctor = await Supabase.instance.client
           .from('Doctor')
           .select()
-          .eq('id', doctorId) // Use the parsed integer directly
+          .eq('id', doctorId)
           .single();
 
-      if (response == null) {
-        throw Exception('No data found');
-      }
+      // Fetch clinics with their details
+      final clinics =
+          await Supabase.instance.client.from('ClinicDetails').select('''
+          *,
+          Health-Institution (
+            *
+          )
+        ''').eq('Affailated_Doctors', doctorId);
 
-      // Rest of the code remains the same
-      // final fileName =
-      //     "${response['Doctor-Firstname']}_${response['Doctor-Lastname']}.png";
-      // final imageUrl = Supabase.instance.client.storage
-      //     .from('Assets')
-      //     .getPublicUrl("Doctor/$fileName");
-
-      // response['Doctor-Image-Url'] = imageUrl;
-      return response;
+      // Combine the data
+      return {
+        ...doctor,
+        'clinics': clinics,
+      };
     } catch (e) {
       throw Exception('Failed to fetch doctor details: $e');
     }
@@ -98,7 +98,7 @@ class _MedicalSpeciaDetailScreensState
                       _buildDividerWithSpacing(),
                       _buildAboutSection(data),
                       _buildDividerWithSpacing(),
-                      _buildClinicLocationsSection(data),
+                      _buildClinicSection(data),
                     ],
                   ),
                 ),
@@ -201,54 +201,8 @@ class _MedicalSpeciaDetailScreensState
     );
   }
 
-  Widget _buildClinicLocationsSection(Map<String, dynamic> data) {
-    final List<Map<String, dynamic>> clinics = [
-      {
-        'name': 'St. Luke\'s Medical Center',
-        'type': 'Hospital',
-        'address': '279 E Rodriguez Sr. Ave, Quezon City',
-        'schedule': {
-          'Mon-Fri': '9:00 AM - 5:00 PM',
-          'Sat': '9:00 AM - 12:00 PM',
-        },
-        'contact': '(02) 8723-0101',
-        'status': 'Primary',
-      },
-      {
-        'name': 'Private Clinic',
-        'type': 'Private Practice',
-        'address': 'Unit 1204, Medical Plaza Ortigas',
-        'schedule': {
-          'Tue-Thu': '2:00 PM - 6:00 PM',
-        },
-        'contact': '(02) 8888-9999',
-        'status': 'By Appointment',
-      },
-      {
-        'name': 'Asian Hospital and Medical Center',
-        'type': 'Hospital',
-        'address': '2205 Civic Drive, Alabang, Muntinlupa',
-        'schedule': {
-          'Mon': '1:00 PM - 7:00 PM',
-          'Wed': '1:00 PM - 7:00 PM',
-          'Fri': '9:00 AM - 3:00 PM',
-        },
-        'contact': '(02) 8771-9000',
-        'status': 'Secondary',
-      },
-      {
-        'name': 'Telemedicine Consultation',
-        'type': 'Virtual',
-        'address': 'Online Video Consultation',
-        'schedule': {
-          'Tue': '10:00 AM - 12:00 PM',
-          'Thu': '10:00 AM - 12:00 PM',
-          'Sat': '2:00 PM - 4:00 PM',
-        },
-        'contact': 'Book through App',
-        'status': 'Available',
-      }
-    ];
+  Widget _buildClinicSection(Map<String, dynamic> data) {
+    final clinics = data['clinics'] as List<dynamic>?;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,167 +218,109 @@ class _MedicalSpeciaDetailScreensState
                 color: const Color(0xff5B50A0),
               ),
             ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.filter_list, color: Color(0xff5B50A0)),
-              onSelected: (value) {
-                _filterNotifier.value = value;
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'all',
-                  child: Row(
-                    children: [
-                      Icon(Icons.all_inbox, size: 20),
-                      SizedBox(width: 8),
-                      Text('All Locations'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'hospital',
-                  child: Row(
-                    children: [
-                      Icon(Icons.local_hospital, size: 20),
-                      SizedBox(width: 8),
-                      Text('Hospitals'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'private',
-                  child: Row(
-                    children: [
-                      Icon(Icons.medical_services, size: 20),
-                      SizedBox(width: 8),
-                      Text('Private Clinics'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'virtual',
-                  child: Row(
-                    children: [
-                      Icon(Icons.videocam, size: 20),
-                      SizedBox(width: 8),
-                      Text('Telemedicine'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            // Keep existing PopupMenuButton
           ],
         ),
         const SizedBox(height: 20),
-        ValueListenableBuilder<String>(
-          valueListenable: _filterNotifier,
-          builder: (context, filterValue, child) {
-            final filteredClinics = _filterClinics(clinics, filterValue);
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: filteredClinics.length,
-              itemBuilder: (context, index) =>
-                  _buildClinicCard(filteredClinics[index]),
-            );
-          },
-        ),
+        if (clinics != null && clinics.isNotEmpty)
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: clinics.length,
+            itemBuilder: (context, index) {
+              return _buildClinicCard(clinics[index]);
+            },
+          )
+        else
+          Text(
+            'No clinics available',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
       ],
     );
   }
 
-  List<Map<String, dynamic>> _filterClinics(
-      List<Map<String, dynamic>> clinics, String filter) {
-    if (filter == 'all') {
-      return clinics;
-    }
-
-    return clinics.where((clinic) {
-      switch (filter) {
-        case 'hospital':
-          return clinic['type'] == 'Hospital';
-        case 'private':
-          return clinic['type'] == 'Private Practice';
-        case 'virtual':
-          return clinic['type'] == 'Virtual';
-        default:
-          return false;
-      }
-    }).toList();
-  }
-
   Widget _buildClinicCard(Map<String, dynamic> clinic) {
+    final healthInstitution =
+        clinic['Health-Institution'] as Map<String, dynamic>?;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.symmetric(vertical: 12.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFE0E6ED), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: const Color(0xff5B50A0).withOpacity(0.08),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
-          // Clinic Header with colored background
+          // Header section with clinic name and appointment type
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: const Color(0xff5B50A0).withOpacity(0.05),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(15)),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xff5B50A0).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    _getClinicIcon(clinic['type']),
-                    color: const Color(0xff5B50A0),
+                  child: const Icon(
+                    Icons.local_hospital_rounded,
+                    color: Color(0xff5B50A0),
                     size: 24,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        clinic['name'],
+                        healthInstitution?['Health-Institution-Name'] ??
+                            'Unknown Clinic',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xff5B50A0),
                         ),
                       ),
-                      const SizedBox(height: 4),
                       Container(
+                        margin: const EdgeInsets.only(top: 4),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(clinic['status'])
-                              .withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _getStatusColor(clinic['status'])
-                                .withOpacity(0.3),
-                          ),
+                          color: clinic['isAppointmentBased']
+                              ? const Color(0xFFE3F2FD)
+                              : const Color(0xFFF1F8E9),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          clinic['status'],
+                          clinic['isAppointmentBased']
+                              ? 'By Appointment'
+                              : 'Walk-in',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: _getStatusColor(clinic['status']),
+                            color: clinic['isAppointmentBased']
+                                ? const Color(0xFF1976D2)
+                                : const Color(0xFF689F38),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -435,102 +331,25 @@ class _MedicalSpeciaDetailScreensState
               ],
             ),
           ),
-          // Clinic Details
-          Padding(
+          // Details section
+          Container(
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Address and Contact with improved layout
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildInfoRow(
-                        Icons.location_on,
-                        clinic['address'],
-                        Colors.grey.shade700,
-                      ),
-                      if (clinic['type'] != 'Virtual') ...[
-                        const Divider(height: 16),
-                        _buildInfoRow(
-                          Icons.phone,
-                          clinic['contact'],
-                          Colors.grey.shade700,
-                        ),
-                      ],
-                    ],
-                  ),
+                _buildInfoRow(
+                  Icons.location_on_rounded,
+                  clinic['Clinic-Address'] ?? 'No address available',
+                  const Color(0xFF6B7280),
                 ),
-                // Schedule Section
-                if (clinic['type'] != 'Virtual') ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.access_time_rounded,
-                              size: 18,
-                              color: const Color(0xff5B50A0),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Schedule',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xff5B50A0),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        ...(clinic['schedule'] as Map<String, String>)
-                            .entries
-                            .map(
-                              (e) => Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 90,
-                                      child: Text(
-                                        e.key,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 13,
-                                          color: Colors.grey.shade800,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        e.value,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 13,
-                                          color: Colors.grey.shade700,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  Icons.phone_rounded,
+                  clinic['Clinic-ContactNumber'] ?? 'No contact available',
+                  const Color(0xFF6B7280),
+                ),
+                if (clinic['Clinic-OpenHours'] != null) ...[
+                  const SizedBox(height: 12),
+                  _buildScheduleSection(clinic['Clinic-OpenHours']),
                 ],
               ],
             ),
@@ -544,18 +363,22 @@ class _MedicalSpeciaDetailScreensState
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: const Color(0xff5B50A0),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xff5B50A0).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(icon, size: 16, color: const Color(0xff5B50A0)),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
             style: GoogleFonts.poppins(
-              fontSize: 13,
+              fontSize: 14,
               color: textColor,
+              height: 1.4,
             ),
           ),
         ),
@@ -563,101 +386,204 @@ class _MedicalSpeciaDetailScreensState
     );
   }
 
-  void _showClinicDetails(Map<String, dynamic> clinic) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, controller) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: ListView(
-            controller: controller,
-            children: [
-              // ... Detailed clinic information
-            ],
-          ),
+  Widget _buildScheduleSection(Map<String, dynamic> schedule) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xff5B50A0).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Icon(
+                Icons.schedule_rounded,
+                size: 16,
+                color: Color(0xff5B50A0),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Schedule',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF374151),
+              ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  IconData _getClinicIcon(String type) {
-    switch (type) {
-      case 'Hospital':
-        return Icons.local_hospital;
-      case 'Virtual':
-        return Icons.videocam;
-      case 'Private Practice':
-        return Icons.medical_services;
-      default:
-        return Icons.local_hospital;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Primary':
-        return Colors.green;
-      case 'Secondary':
-        return Colors.orange;
-      case 'By Appointment':
-        return Colors.blue;
-      case 'Available':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  List<Widget> _buildScheduleRows(Map<String, String> schedule) {
-    return schedule.entries
-        .map(
-          (e) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                Container(
-                  width: 80,
-                  child: Text(
-                    '${e.key}:',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+        const SizedBox(height: 8),
+        ...schedule.entries.map((e) => Padding(
+              padding: const EdgeInsets.only(left: 36, bottom: 4),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 80,
+                    child: Text(
+                      '${e.key}:',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: const Color(0xFF6B7280),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  e.value,
-                  style: GoogleFonts.poppins(fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-        )
-        .toList();
-  }
-
-  Widget _buildClinicInfoRow(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.poppins(fontSize: 14),
-          ),
-        ),
+                  Expanded(
+                    child: Text(
+                      '${e.value}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: const Color(0xFF374151),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )),
       ],
     );
   }
+
+  // List<Map<String, dynamic>> _filterClinics(
+  //     List<Map<String, dynamic>> clinics, String filter) {
+  //   if (filter == 'all') {
+  //     return clinics;
+  //   }
+
+  //   return clinics.where((clinic) {
+  //     switch (filter) {
+  //       case 'hospital':
+  //         return clinic['type'] == 'Hospital';
+  //       case 'private':
+  //         return clinic['type'] == 'Private Practice';
+  //       case 'virtual':
+  //         return clinic['type'] == 'Virtual';
+  //       default:
+  //         return false;
+  //     }
+  //   }).toList();
+  // }
+
+  // Widget _buildInfoRow(IconData icon, String text, Color textColor) {
+  //   return Row(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Icon(
+  //         icon,
+  //         size: 18,
+  //         color: const Color(0xff5B50A0),
+  //       ),
+  //       const SizedBox(width: 12),
+  //       Expanded(
+  //         child: Text(
+  //           text,
+  //           style: GoogleFonts.poppins(
+  //             fontSize: 13,
+  //             color: textColor,
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // void _showClinicDetails(Map<String, dynamic> clinic) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (context) => DraggableScrollableSheet(
+  //       initialChildSize: 0.7,
+  //       minChildSize: 0.5,
+  //       maxChildSize: 0.95,
+  //       builder: (_, controller) => Container(
+  //         decoration: const BoxDecoration(
+  //           color: Colors.white,
+  //           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  //         ),
+  //         padding: const EdgeInsets.all(20),
+  //         child: ListView(
+  //           controller: controller,
+  //           children: [
+  //             // ... Detailed clinic information
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // IconData _getClinicIcon(String type) {
+  //   switch (type) {
+  //     case 'Hospital':
+  //       return Icons.local_hospital;
+  //     case 'Virtual':
+  //       return Icons.videocam;
+  //     case 'Private Practice':
+  //       return Icons.medical_services;
+  //     default:
+  //       return Icons.local_hospital;
+  //   }
+  // }
+
+  // Color _getStatusColor(String status) {
+  //   switch (status) {
+  //     case 'Primary':
+  //       return Colors.green;
+  //     case 'Secondary':
+  //       return Colors.orange;
+  //     case 'By Appointment':
+  //       return Colors.blue;
+  //     case 'Available':
+  //       return Colors.green;
+  //     default:
+  //       return Colors.grey;
+  //   }
+  // }
+
+  // List<Widget> _buildScheduleRows(Map<String, String> schedule) {
+  //   return schedule.entries
+  //       .map(
+  //         (e) => Padding(
+  //           padding: const EdgeInsets.only(bottom: 4),
+  //           child: Row(
+  //             children: [
+  //               Container(
+  //                 width: 80,
+  //                 child: Text(
+  //                   '${e.key}:',
+  //                   style: GoogleFonts.poppins(
+  //                     fontSize: 14,
+  //                     fontWeight: FontWeight.w500,
+  //                   ),
+  //                 ),
+  //               ),
+  //               const SizedBox(width: 8),
+  //               Text(
+  //                 e.value,
+  //                 style: GoogleFonts.poppins(fontSize: 14),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       )
+  //       .toList();
+  // }
+
+  // Widget _buildClinicInfoRow(IconData icon, String text) {
+  //   return Row(
+  //     children: [
+  //       Icon(icon, size: 16, color: Colors.grey[600]),
+  //       const SizedBox(width: 8),
+  //       Expanded(
+  //         child: Text(
+  //           text,
+  //           style: GoogleFonts.poppins(fontSize: 14),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 }
