@@ -400,10 +400,10 @@ class _AnalyticsJournalState extends State<AnalyticsJournal>
 
   Widget _buildAnalyticsView(List<ChartData> chartData) {
     final int totalEntries = chartData.length;
-    final int positiveMoods = chartData
-        .where((data) =>
-            data.emotion == Emotion.awesome || data.emotion == Emotion.happy)
-        .length;
+    // final int positiveMoods = chartData
+    //     .where((data) =>
+    //         data.emotion == Emotion.awesome || data.emotion == Emotion.happy)
+    //     .length;
     final int negativeMoods = chartData
         .where((data) =>
             data.emotion == Emotion.sad || data.emotion == Emotion.terrible)

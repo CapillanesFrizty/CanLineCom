@@ -35,9 +35,9 @@ class _JournalScreenState extends State<JournalScreen> {
     fetchUserJournalEntries();
   }
 
-  Future<void> _refreshContent() async {
-    setState(() {}); // This triggers a rebuild of the widget
-  }
+  // Future<void> _refreshContent() async {
+  //   setState(() {}); // This triggers a rebuild of the widget
+  // }
 
   Future<void> _submitJournalEntry() async {
     if (!_formKey.currentState!.validate()) return;

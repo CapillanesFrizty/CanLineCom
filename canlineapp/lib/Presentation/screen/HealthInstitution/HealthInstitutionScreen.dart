@@ -20,7 +20,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
   static const Color _primaryColor = Color(0xFF5B50A0);
 
   final TextEditingController _searchController = TextEditingController();
-  final String _searchQuery = '';
+  String _searchQuery = '';
   int _currentCategoryIndex =
       0; // Track current category (0: Hospitals, 1: Clinics, 2: Brgy. HS)
   // String _selectedFilter = 'All';
@@ -72,26 +72,6 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       query = query.eq('Treatment-Type', 'Admission');
     }
 
-    // // Apply Specialty filter
-    // if (_selectedtreatmentType != 'All') {
-    //   query = query.eq('Treatment-Type', _selectedtreatmentType);
-    // }
-
-    // // Apply 24/7 Service filter
-    // if (_is24Hours) {
-    //   query = query.eq('Is24Hours', true);
-    // }
-
-    // // Apply Emergency Services filter
-    // if (_hasEmergencyServices) {
-    //   query = query.eq('HasEmergencyServices', true);
-    // }
-
-    // Apply Insurance filter
-    // if (_selectedInsurance.isNotEmpty) {
-    //   query = query.contains('AcceptedInsurance', _selectedInsurance);
-    // }
-
     final response = await query;
 
     List<Map<String, dynamic>> result = [];
@@ -106,6 +86,16 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
         institution['Health-Institution-Image-Url'] = imageUrl;
         result.add(institution);
       }
+    }
+
+    // Filter results based on search query
+    if (_searchQuery.isNotEmpty) {
+      result = result.where((institution) {
+        final name =
+            institution['Health-Institution-Name']?.toString().toLowerCase() ??
+                '';
+        return name.contains(_searchQuery);
+      }).toList();
     }
 
     // Sort the result list alphabetically by institution name
@@ -194,15 +184,14 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 35.0),
       child: TextField(
         controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.toLowerCase();
+          });
+        },
         decoration: InputDecoration(
-          hintText: 'Search',
+          hintText: 'Search hospitals, clinics...',
           prefixIcon: Icon(Icons.search, color: _primaryColor),
-          suffixIcon: IconButton(
-            icon: Icon(Icons.filter_list, color: _primaryColor),
-            onPressed: () {
-              _showFilterBottomSheet(context);
-            },
-          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: _primaryColor),
@@ -217,147 +206,6 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  void _applyFilters() {
-    setState(() {});
-  }
-
-  void _showFilterBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return DraggableScrollableSheet(
-              initialChildSize: 0.8,
-              minChildSize: 0.5,
-              maxChildSize: 0.95,
-              expand: false,
-              builder: (context, scrollController) {
-                return SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Filters',
-                            style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: _primaryColor)),
-                        const SizedBox(height: 20),
-
-                        // Specialty Filter
-                        // Text('Specialty',
-                        //     style: TextStyle(
-                        //         fontSize: 16,
-                        //         fontWeight: FontWeight.w600,
-                        //         color: _primaryColor)),
-                        // const SizedBox(height: 8),
-                        // DropdownButtonFormField<String>(
-                        //   value: _selectedtreatmentType,
-                        //   decoration: InputDecoration(
-                        //     border: OutlineInputBorder(
-                        //       borderRadius: BorderRadius.circular(8),
-                        //     ),
-                        //   ),
-                        //   items: specialties
-                        //       .map((specialty) => DropdownMenuItem(
-                        //             value: specialty,
-                        //             child: Text(specialty),
-                        //           ))
-                        //       .toList(),
-                        //   onChanged: (value) {
-                        //     setState(() {
-                        //       _selectedtreatmentType = value!;
-                        //     });
-                        //   },
-                        // ),
-
-                        // const SizedBox(height: 20),
-
-                        // Additional Services
-                        // Text('Additional Services',
-                        //     style: TextStyle(
-                        //         fontSize: 16,
-                        //         fontWeight: FontWeight.w600,
-                        //         color: _primaryColor)),
-                        // CheckboxListTile(
-                        //   title: const Text('24/7 Service'),
-                        //   value: _is24Hours,
-                        //   onChanged: (bool? value) {
-                        //     setState(() {
-                        //       _is24Hours = value!;
-                        //     });
-                        //   },
-                        // ),
-                        // CheckboxListTile(
-                        //   title: const Text('Emergency Services'),
-                        //   value: _hasEmergencyServices,
-                        //   onChanged: (bool? value) {
-                        //     setState(() {
-                        //       _hasEmergencyServices = value!;
-                        //     });
-                        //   },
-                        // ),
-
-                        // const SizedBox(height: 20),
-
-                        // Insurance Acceptance
-                        // Text('Accepted Insurance',
-                        //     style: TextStyle(
-                        //         fontSize: 16,
-                        //         fontWeight: FontWeight.w600,
-                        //         color: _primaryColor)),
-                        // ...insuranceProviders.map((insurance) {
-                        //   return CheckboxListTile(
-                        //     title: Text(insurance),
-                        //     value: _selectedInsurance.contains(insurance),
-                        //     onChanged: (bool? value) {
-                        //       setState(() {
-                        //         if (value!) {
-                        //           _selectedInsurance.add(insurance);
-                        //         } else {
-                        //           _selectedInsurance.remove(insurance);
-                        //         }
-                        //       });
-                        //     },
-                        //   );
-                        // }),
-
-                        // const SizedBox(height: 20),
-
-                        // Apply Button
-                        Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _primaryColor,
-                              minimumSize: const Size(200, 45),
-                            ),
-                            onPressed: () {
-                              _applyFilters();
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Apply Filters',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
     );
   }
 
@@ -387,7 +235,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('No Internet Connection'),
+                  const Text(
+                      'No internet connection. Please check your network and try again.'),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _refreshContent,
@@ -409,7 +258,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Server Error'),
+                      const Text(
+                          'We’re experiencing technical issues. Please try again later'),
                     ],
                   ),
                 );
@@ -418,7 +268,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
               final healthInst = snapshot.data ?? [];
 
               if (healthInst.isEmpty) {
-                return const Center(child: Text('No data available'));
+                return const Center(
+                    child: Text('No data available. Please check back later'));
               }
 
               return ListView.builder(
@@ -440,5 +291,11 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             },
           );
         });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }

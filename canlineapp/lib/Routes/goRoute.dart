@@ -104,12 +104,6 @@ final GoRouter linkrouter = GoRouter(
           builder: (context, state) =>
               MoreInfoInstitutionScreen(id: state.pathParameters['hid']!),
         ),
-        GoRoute(
-          name: "id",
-          path: '/clinic/:id',
-          builder: (context, state) =>
-              MoreinfoClinicsscreen(id: state.pathParameters['id']!),
-        ),
       ],
     ),
 

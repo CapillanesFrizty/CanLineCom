@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -6,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../BarrelFileScreen.dart';
 import 'HealthInstitutionDetails/AffiliatedProfessional.dart';
+
+import 'package:readmore/readmore.dart';
 
 class MoreInfoInstitutionScreen extends StatefulWidget {
   final String id;
@@ -21,13 +24,24 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   late Future<Map<String, dynamic>> _future;
   late GoogleMapController mapController;
 
-  bool _isExpandedAbout = false;
-  final int _maxLength = 227;
-
   @override
   void initState() {
     super.initState();
     _future = _fetchInstitutionDetails();
+  }
+
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
+  }
+
+  // Check Internet Connection using dart:io
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
   }
 
   // Fetch institution details
@@ -87,26 +101,57 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         ),
       ),
       extendBodyBehindAppBar: true,
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            final data = snapshot.data!;
-            return ListView(
-              children: [
-                _buildBackgroundImage(data['Health-Institution-Image-Url']),
-                _buildDetailsSection(data),
-              ],
+      body: FutureBuilder(
+          future: _checkInternetConnection(),
+          builder: (context, internetSnapshot) {
+            if (internetSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (internetSnapshot.error is SocketException) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                        'No internet connection. Please check your network and try again.'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _refreshContent,
+                      child: const Text('Try Again'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return FutureBuilder<Map<String, dynamic>>(
+              future: _future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child: Text(
+                          'We’re experiencing technical issues. Please try again later.'));
+                } else if (snapshot.hasData) {
+                  final data = snapshot.data!;
+                  return ListView(
+                    children: [
+                      _buildBackgroundImage(
+                          data['Health-Institution-Image-Url']),
+                      _buildDetailsSection(data),
+                    ],
+                  );
+                } else {
+                  return const Center(
+                      child: Expanded(
+                          child: Text(
+                              'No data available. Please check back later')));
+                }
+              },
             );
-          } else {
-            return const Center(child: Text('No data found'));
-          }
-        },
-      ),
+          }),
     );
   }
 
@@ -203,7 +248,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       children: const [
         Divider(color: Colors.black),
-        SizedBox(height: 32),
+        SizedBox(height: 20),
       ],
     );
   }
@@ -300,11 +345,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   }
 
   Widget _buildAboutUsSection(String description) {
-    final bool needsShowMore = description.length > _maxLength;
-    final String displayText = !_isExpandedAbout && needsShowMore
-        ? '${description.substring(0, _maxLength)}...'
-        : description;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -317,25 +357,18 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          displayText,
-          style: GoogleFonts.poppins(fontSize: 15),
-        ),
-        if (needsShowMore)
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _isExpandedAbout = !_isExpandedAbout;
-              });
-            },
-            child: Text(
-              _isExpandedAbout ? 'Show Less' : 'Show More',
-              style: GoogleFonts.poppins(
-                color: const Color(0xff5B50A0),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+        ReadMoreText(
+          description,
+          trimLines: 6,
+          colorClickableText: const Color(0xff5B50A0),
+          trimMode: TrimMode.Line,
+          trimCollapsedText: 'Show more',
+          trimExpandedText: 'Show less',
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            color: Colors.black,
           ),
+        ),
       ],
     );
   }
@@ -421,54 +454,60 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         _buildSectionTitle('Accredited Insurances'),
         const SizedBox(height: 16),
         SizedBox(
-          height: 120,
+          height: 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: acreditedinsurances.length,
             itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  // Handle card tap
-                  _showSnackBar('Clicked on ${acreditedinsurances[index]}');
-                },
-                child: Container(
-                  width: 180,
-                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff5B50A0),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+              return Container(
+                width: 180,
+                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color.fromARGB(255, 101, 99, 116),
+                    width: 2,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.image,
-                        size: 50,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
                         color: Colors.white,
+                        shape: BoxShape.rectangle,
                       ),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          acreditedinsurances[index],
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.center,
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 120,
+                        color: const Color.fromARGB(255, 17, 16, 16),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        acreditedinsurances[index],
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -497,7 +536,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
               title: Text(affiliatedDoctors[index]["name"] as String),
               subtitle:
                   Text(affiliatedDoctors[index]["Specialization"] as String),
-              trailing: Text(affiliatedDoctors[index]["email"] as String),
             );
           },
         ),
@@ -607,7 +645,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           Text(
             text,
             style: GoogleFonts.poppins(
-              fontSize: 15,
+              fontSize: 17,
               color: Colors.black,
             ),
           ),

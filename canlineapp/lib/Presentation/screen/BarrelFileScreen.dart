@@ -29,8 +29,6 @@ export 'FinancialSupport/MoreFinancialDetails/BenefitsDetails.dart';
 
 // ! Oncologist\
 export 'Oncologist/MedicalSpecialistScreen.dart';
-// ! Clinic
-export 'HealthInstitution/Moreinfo_ClinicsScreen.dart';
 
 // ! Login Screen
 export 'authentication flow/LoginScreen.dart';

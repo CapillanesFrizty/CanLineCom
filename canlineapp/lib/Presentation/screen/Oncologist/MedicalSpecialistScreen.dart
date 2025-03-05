@@ -379,17 +379,17 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   }
 
   // Add this helper method for sort chips
-  Widget _buildSortChip(String label) {
-    return FilterChip(
-      label: Text(label),
-      labelStyle: GoogleFonts.poppins(
-        color: Colors.grey[800],
-        fontSize: 14,
-      ),
-      backgroundColor: Colors.grey[100],
-      onSelected: (selected) {
-        // Implement sorting logic
-      },
-    );
-  }
+  // Widget _buildSortChip(String label) {
+  //   return FilterChip(
+  //     label: Text(label),
+  //     labelStyle: GoogleFonts.poppins(
+  //       color: Colors.grey[800],
+  //       fontSize: 14,
+  //     ),
+  //     backgroundColor: Colors.grey[100],
+  //     onSelected: (selected) {
+  //       // Implement sorting logic
+  //     },
+  //   );
+  // }
 }

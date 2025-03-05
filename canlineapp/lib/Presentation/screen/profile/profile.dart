@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -49,11 +48,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _user = u.user;
     });
     debugPrint('Authenticated User: $_user');
-  }
-
-  Future<void> _Logout() async {
-    await supabase.auth.signOut();
-    GoRouter.of(context).go('/');
   }
 
   @override

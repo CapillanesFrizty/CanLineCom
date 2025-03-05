@@ -74,7 +74,8 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Schedule navigation after fade-out completes
     Future.delayed(const Duration(seconds: 2), () {
-      _animationController.reverse(); // Smoothly fade out the splash screen
+      // _animationController.reverse(); // Smoothly fade out the splash screen
+
       Future.delayed(const Duration(seconds: 1), () {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
