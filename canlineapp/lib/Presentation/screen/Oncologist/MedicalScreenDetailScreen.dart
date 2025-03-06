@@ -96,8 +96,6 @@ class _MedicalSpeciaDetailScreensState
                       // Header in the screen include name and specialization
                       _buildHeaderSection(data),
                       _buildDividerWithSpacing(),
-                      _buildAboutSection(data),
-                      _buildDividerWithSpacing(),
                       _buildClinicSection(data),
                     ],
                   ),

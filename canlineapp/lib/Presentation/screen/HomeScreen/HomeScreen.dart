@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen>
     return [
       _AnimatedGridItem(
         userid: widget.userid,
-        label: "Chemoteraphy\nServices",
+        label: "Health\nInstitution",
         iconAsset: 'lib/assets/icons/Hospital.svg',
         textColor: 0xffFF5267,
         bgColor: 0xffFFD7DB,
@@ -244,12 +244,34 @@ class _AnimatedGridItem extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 15),
-                              Text(
-                                'The Information provided here is for educational purposes only.',
+                              RichText(
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.grey[700],
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          'The Information provided here as of now is ',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: 'limited for Chemotherapy only',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '.',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(height: 25),

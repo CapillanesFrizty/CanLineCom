@@ -32,9 +32,10 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
         }).toList();
       }
 
-      if (_selectedFilter != 'All') {
+      if (_selectedCategories.isNotEmpty &&
+          !_selectedCategories.contains('All')) {
         supportGroups = supportGroups.where((group) {
-          return group['Group_category'] == _selectedFilter;
+          return _selectedCategories.contains(group['Group_category']);
         }).toList();
       }
 
@@ -100,6 +101,7 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedFilter = 'All';
+  List<String> _selectedCategories = [];
 
   @override
   void initState() {
@@ -230,36 +232,34 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return DraggableScrollableSheet(
-              initialChildSize: 0.4,
-              minChildSize: 0.2,
-              maxChildSize: 0.75,
+              initialChildSize: 0.7,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
               expand: false,
-              builder: (_, controller) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
+              builder: (context, scrollController) {
+                return Container(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(2),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Filter Support Groups',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: _primaryColor,
+                            ),
                           ),
-                        ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
                       ),
-                      Text(
-                        'Filter Categories',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: _primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       Expanded(
                         child: FutureBuilder<List<String>>(
                           future: _fetchCategories(),
@@ -275,59 +275,108 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
                               ...?snapshot.data
                             ];
 
-                            return Wrap(
-                              spacing: 8.0,
-                              runSpacing: 8.0,
-                              children: categories.map((category) {
-                                return FilterChip(
-                                  selected: _selectedFilter == category,
-                                  label: Text(category),
-                                  labelStyle: TextStyle(
-                                    color: _selectedFilter == category
-                                        ? Colors.white
-                                        : _primaryColor,
+                            return ListView(
+                              controller: scrollController,
+                              children: [
+                                Text(
+                                  'Categories',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: _primaryColor,
                                   ),
-                                  backgroundColor: _secondaryColor,
-                                  selectedColor: _primaryColor,
-                                  onSelected: (selected) {
-                                    setState(() {
-                                      _selectedFilter =
-                                          selected ? category : 'All';
-                                    });
-                                    this.setState(() {});
-                                  },
-                                  checkmarkColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    side: BorderSide(
-                                      color: _primaryColor,
-                                      width: 1,
+                                ),
+                                const SizedBox(height: 12),
+                                ...categories.map((category) {
+                                  return CheckboxListTile(
+                                    title: Text(
+                                      category,
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }).toList(),
+                                    value:
+                                        _selectedCategories.contains(category),
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        if (value == true) {
+                                          if (category == 'All') {
+                                            _selectedCategories.clear();
+                                          } else {
+                                            _selectedCategories.remove('All');
+                                          }
+                                          _selectedCategories.add(category);
+                                        } else {
+                                          _selectedCategories.remove(category);
+                                        }
+                                      });
+                                    },
+                                    activeColor: _primaryColor,
+                                    checkColor: Colors.white,
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                  );
+                                }).toList(),
+                              ],
                             );
                           },
                         ),
                       ),
-                      Center(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _primaryColor,
-                            minimumSize: const Size(200, 45),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _selectedCategories.clear();
+                                  _selectedCategories.add('All');
+                                });
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                side: BorderSide(color: _primaryColor),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Clear All',
+                                style: GoogleFonts.poppins(
+                                  color: _primaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
                           ),
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            'Apply',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _primaryColor,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () {
+                                this.setState(() {});
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                'Apply Filters',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),

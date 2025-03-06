@@ -79,11 +79,18 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         .from('Assets')
         .getPublicUrl("Health-Institution/$fileName");
 
+    // Get the chemotherapy services of the institution
+    // final chemotherapyServices = await Supabase.instance.client
+    //     .from('Chemotherapy_Services')
+    //     .select()
+    //     .eq('Health-Institution', widget.id);
+
     // Return the institution details
     response['Health-Institution-Image-Url'] = imageUrl;
     response['Health-Institution-Services'] = services;
     response['Health-Institution-Acredited-Insurance'] = acreditedInsurance;
     response['Health-Institution-Affiliated-Doctors'] = affiliatedDoctors;
+    // response['Chemotherapy-Services'] = chemotherapyServices;
     return response;
   }
 
@@ -110,17 +117,73 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
 
             if (internetSnapshot.error is SocketException) {
               return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                        'No internet connection. Please check your network and try again.'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _refreshContent,
-                      child: const Text('Try Again'),
-                    ),
-                  ],
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 5,
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xff5B50A0).withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.wifi_off_rounded,
+                          size: 60,
+                          color: Color(0xff5B50A0),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'No Internet Connection',
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xff5B50A0),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Please check your network connection and try again',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton.icon(
+                        onPressed: _refreshContent,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Retry'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff5B50A0),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
@@ -132,8 +195,58 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(
-                      child: Text(
-                          'We’re experiencing technical issues. Please try again later.'));
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      margin: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            spreadRadius: 5,
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.error_outline_rounded,
+                              size: 60,
+                              color: Colors.red[400],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Something went wrong',
+                            style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.red[400],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'We\'re having trouble loading the data.\nPlease try again later.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 } else if (snapshot.hasData) {
                   final data = snapshot.data!;
                   return ListView(
@@ -144,10 +257,57 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                     ],
                   );
                 } else {
-                  return const Center(
-                      child: Expanded(
-                          child: Text(
-                              'No data available. Please check back later')));
+                  return Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      margin: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            spreadRadius: 5,
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.inbox_rounded,
+                              size: 60,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'No Data Available',
+                            style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Please check back later',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
               },
             );
@@ -192,7 +352,10 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildDividerWithSpacing(),
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
+          _buildChemotherapySection(),
+          _buildDividerWithSpacing(),
           _buildLocationSection(data),
+
           (data['Health-Institution-Services'] as List).isNotEmpty
               ? _buildServicesOffers(
                   (data['Health-Institution-Services'] as List)
@@ -201,6 +364,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                       .toList(),
                 )
               : const SizedBox(),
+
           (data['Health-Institution-Acredited-Insurance'] as List).isNotEmpty
               ? _buildAccreditedInsurance(
                   (data['Health-Institution-Acredited-Insurance'] as List)
@@ -210,6 +374,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                       .toList(),
                 )
               : const SizedBox(),
+
           (data['Health-Institution-Affiliated-Doctors'] as List).isNotEmpty
               ? _buildAffiliatedProfessionalsSection(
                   (data['Health-Institution-Affiliated-Doctors'] as List)
@@ -223,7 +388,9 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                       .toList())
               : const SizedBox(),
           // Add this line
+          _buildDividerWithSpacing(),
           _buildContactSection(data),
+          _buildDividerWithSpacing(),
           _buildReportSection(),
           const SizedBox(height: 32),
         ],
@@ -239,7 +406,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         _buildTitle(data['Health-Institution-Name'] ?? 'Unknown Name'),
         const SizedBox(height: 10),
         _buildSubtitle(data['Health-Institution-Type'] ?? 'Unknown Type'),
-        const SizedBox(height: 32),
       ],
     );
   }
@@ -247,6 +413,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   Widget _buildDividerWithSpacing() {
     return Column(
       children: const [
+        SizedBox(height: 20),
         Divider(color: Colors.black),
         SizedBox(height: 20),
       ],
@@ -339,7 +506,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
       ],
     );
   }
@@ -586,7 +752,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDividerWithSpacing(),
         _buildSectionTitle('Contact Us'),
         const SizedBox(height: 16),
         _buildContactInfo(contactNumber),
@@ -599,7 +764,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDividerWithSpacing(),
         InkWell(
           onTap: () => _showSnackBar('This feature is not available right now'),
           child: _buildReportHeader(),
@@ -713,6 +877,101 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
+    );
+  }
+
+  // Add this method to the _MoreInfoInstitutionScreenState class
+  Widget _buildChemotherapySection() {
+    // Placeholder data
+    final List<String> placeholderServices = [
+      'Chemotherapy Infusion',
+      'Immunotherapy',
+      'Hormone Therapy',
+      'Targeted Drug Therapy'
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Chemotherapy Services',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Color(0xff5B50A0),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Color(0xff5B50A0), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Available Treatment Options:',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: placeholderServices.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline,
+                            color: Color(0xff5B50A0), size: 20),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            placeholderServices[index],
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: 16),
+              Text(
+                'For detailed information about our chemotherapy services and scheduling, please contact our oncology department.',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
