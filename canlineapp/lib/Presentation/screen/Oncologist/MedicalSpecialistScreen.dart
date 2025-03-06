@@ -126,7 +126,8 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     }
 
     if (_searchInput.isNotEmpty) {
-      query = query.ilike("Doctor-Firstname", "%$_searchInput%");
+      query = query.or(
+          'Doctor-Firstname.ilike.%$_searchInput%,Doctor-Lastname.ilike.%$_searchInput%');
     }
 
     final response = await query;
@@ -139,8 +140,8 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     }
 
     // Sort the result list by Doctor-Firstname
-    result.sort((a, b) => (a['Doctor-Firstname'] as String)
-        .compareTo(b['Doctor-Firstname'] as String));
+    result.sort((a, b) => (a['Doctor-Lastname'] as String)
+        .compareTo(b['Doctor-Lastname'] as String));
     debugPrint('Results: $result.toString()');
     return result;
   }
@@ -300,12 +301,21 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
                 itemCount: doctors.length,
                 itemBuilder: (context, index) {
                   final doctor = doctors[index];
+
+                  final designation = doctor['Doctor-designation'] != null
+                      ? ',${doctor['Doctor-designation']}'
+                      : '';
+
+                  final firstname = doctor['Doctor-Firstname'] != null
+                      ? '${doctor['Doctor-Firstname']}'
+                      : '';
+
                   return CardDesign1(
                     goto: () =>
                         context.push('/Medical-Specialists/${doctor['id']}'),
                     image: doctor['Doctor-Image-Url'] ?? "",
                     title:
-                        '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
+                        '${doctor['Doctor-Lastname']}, $firstname$designation',
                     subtitle:
                         doctor['Specialization'] ?? 'Unknown Specialization',
                     location: doctor['Health-Institution']

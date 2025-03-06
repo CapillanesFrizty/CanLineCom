@@ -239,8 +239,8 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
 
   Widget _buildEventCard(Map<String, dynamic> eventData) {
     return CardDesign1(
-      goto: () =>
-          context.go('/${widget.userid}/event/${eventData['Event_id']}'),
+      goto: () => GoRouter.of(context)
+          .push('/${widget.userid}/event/${eventData['Event_id']}'),
       image: '',
       title: eventData['Event_name'] ?? 'Unknown Event',
       subtitle: 'Event', // Changed to display "Event" as category
@@ -251,7 +251,8 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
 
   Widget _buildBlogCard(Map<String, dynamic> blogData) {
     return CardDesign1(
-      goto: () => context.go('/${widget.userid}/blog/${blogData['Blog-ID']}'),
+      goto: () => GoRouter.of(context)
+          .push('/${widget.userid}/blog/${blogData['Blog-ID']}'),
       image: blogData['im'] ?? '',
       title: blogData['Blogs-Name'] ?? 'Unknown Title',
       subtitle: 'Blog', // Changed to display "Blog" as category
