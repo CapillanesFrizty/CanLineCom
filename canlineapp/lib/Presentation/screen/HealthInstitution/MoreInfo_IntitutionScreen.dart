@@ -79,11 +79,18 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         .from('Assets')
         .getPublicUrl("Health-Institution/$fileName");
 
+    // Get the chemotherapy services of the institution
+    // final chemotherapyServices = await Supabase.instance.client
+    //     .from('Chemotherapy_Services')
+    //     .select()
+    //     .eq('Health-Institution', widget.id);
+
     // Return the institution details
     response['Health-Institution-Image-Url'] = imageUrl;
     response['Health-Institution-Services'] = services;
     response['Health-Institution-Acredited-Insurance'] = acreditedInsurance;
     response['Health-Institution-Affiliated-Doctors'] = affiliatedDoctors;
+    // response['Chemotherapy-Services'] = chemotherapyServices;
     return response;
   }
 
@@ -192,7 +199,10 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildDividerWithSpacing(),
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
+          _buildChemotherapySection(),
+          _buildDividerWithSpacing(),
           _buildLocationSection(data),
+
           (data['Health-Institution-Services'] as List).isNotEmpty
               ? _buildServicesOffers(
                   (data['Health-Institution-Services'] as List)
@@ -201,6 +211,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                       .toList(),
                 )
               : const SizedBox(),
+
           (data['Health-Institution-Acredited-Insurance'] as List).isNotEmpty
               ? _buildAccreditedInsurance(
                   (data['Health-Institution-Acredited-Insurance'] as List)
@@ -210,6 +221,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                       .toList(),
                 )
               : const SizedBox(),
+
           (data['Health-Institution-Affiliated-Doctors'] as List).isNotEmpty
               ? _buildAffiliatedProfessionalsSection(
                   (data['Health-Institution-Affiliated-Doctors'] as List)
@@ -223,7 +235,9 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                       .toList())
               : const SizedBox(),
           // Add this line
+          _buildDividerWithSpacing(),
           _buildContactSection(data),
+          _buildDividerWithSpacing(),
           _buildReportSection(),
           const SizedBox(height: 32),
         ],
@@ -239,7 +253,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
         _buildTitle(data['Health-Institution-Name'] ?? 'Unknown Name'),
         const SizedBox(height: 10),
         _buildSubtitle(data['Health-Institution-Type'] ?? 'Unknown Type'),
-        const SizedBox(height: 32),
       ],
     );
   }
@@ -247,6 +260,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   Widget _buildDividerWithSpacing() {
     return Column(
       children: const [
+        SizedBox(height: 20),
         Divider(color: Colors.black),
         SizedBox(height: 20),
       ],
@@ -339,7 +353,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
       ],
     );
   }
@@ -586,7 +599,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDividerWithSpacing(),
         _buildSectionTitle('Contact Us'),
         const SizedBox(height: 16),
         _buildContactInfo(contactNumber),
@@ -599,7 +611,6 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDividerWithSpacing(),
         InkWell(
           onTap: () => _showSnackBar('This feature is not available right now'),
           child: _buildReportHeader(),
@@ -713,6 +724,101 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
+    );
+  }
+
+  // Add this method to the _MoreInfoInstitutionScreenState class
+  Widget _buildChemotherapySection() {
+    // Placeholder data
+    final List<String> placeholderServices = [
+      'Chemotherapy Infusion',
+      'Immunotherapy',
+      'Hormone Therapy',
+      'Targeted Drug Therapy'
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Chemotherapy Services',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Color(0xff5B50A0),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Color(0xff5B50A0), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Available Treatment Options:',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: placeholderServices.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline,
+                            color: Color(0xff5B50A0), size: 20),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            placeholderServices[index],
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: 16),
+              Text(
+                'For detailed information about our chemotherapy services and scheduling, please contact our oncology department.',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

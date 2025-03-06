@@ -44,6 +44,9 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   // Add this variable to track the filter state
   String _selectedFilter = 'All';
 
+  // Add to state class
+  List<String> _selectedInstitutionTypes = [];
+
   @override
   void initState() {
     super.initState();
@@ -64,9 +67,10 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   Future<List<Map<String, dynamic>>> _fetchInstitutions() async {
     var query = Supabase.instance.client.from('Financial-Institution').select();
 
-    // Apply filter if not 'All'
-    if (_selectedFilter != 'All') {
-      query = query.eq('Financial-Institution-Type', _selectedFilter);
+    if (_selectedInstitutionTypes.isNotEmpty &&
+        !_selectedInstitutionTypes.contains('All')) {
+      query = query.inFilter(
+          'Financial-Institution-Type', _selectedInstitutionTypes);
     }
 
     final response = await query;
@@ -255,8 +259,19 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
         });
   }
 
-  // Add the filter bottom sheet method
+  // Replace _showFilterBottomSheet method with this updated version
   void _showFilterBottomSheet(BuildContext context) {
+    final List<Map<String, List<String>>> filterCategories = [
+      {
+        'Institution Types': [
+          'All',
+          'Private Institution',
+          'Government Institution',
+          'Partylist'
+        ],
+      },
+    ];
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -266,100 +281,154 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (context, scrollController) {
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Filter',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: _primaryColor,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Filter Institutions',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: _primaryColor,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: filterCategories.length,
+                          itemBuilder: (context, index) {
+                            final category = filterCategories[index];
+                            final title = category.keys.first;
+                            final options = category.values.first;
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: _primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ...options.map((type) {
+                                  return CheckboxListTile(
+                                    title: Text(
+                                      type,
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    value: _selectedInstitutionTypes
+                                        .contains(type),
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        if (value == true) {
+                                          if (type == 'All') {
+                                            _selectedInstitutionTypes.clear();
+                                          } else {
+                                            _selectedInstitutionTypes
+                                                .remove('All');
+                                          }
+                                          _selectedInstitutionTypes.add(type);
+                                        } else {
+                                          _selectedInstitutionTypes
+                                              .remove(type);
+                                        }
+                                      });
+                                    },
+                                    activeColor: _primaryColor,
+                                    checkColor: Colors.white,
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                  );
+                                }).toList(),
+                                const SizedBox(height: 20),
+                              ],
+                            );
+                          },
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _selectedInstitutionTypes.clear();
+                                  _selectedInstitutionTypes.add('All');
+                                });
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                side: BorderSide(color: _primaryColor),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Clear All',
+                                style: GoogleFonts.poppins(
+                                  color: _primaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _primaryColor,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () {
+                                this.setState(() {});
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                'Apply Filters',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Institution Type',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: _primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _filterChip('All', _selectedFilter == 'All', (selected) {
-                        setState(() => _selectedFilter = 'All');
-                        this.setState(() {});
-                      }),
-                      _filterChip(
-                        'Private Institution',
-                        _selectedFilter == 'Private Institution',
-                        (selected) {
-                          setState(
-                              () => _selectedFilter = 'Private Institution');
-                          this.setState(() {});
-                        },
-                      ),
-                      _filterChip(
-                        'Government Institution',
-                        _selectedFilter == 'Government Institution',
-                        (selected) {
-                          setState(
-                              () => _selectedFilter = 'Government Institution');
-                          this.setState(() {});
-                        },
-                      ),
-                      _filterChip(
-                        'Partylist',
-                        _selectedFilter == 'Partylist',
-                        (selected) {
-                          setState(() => _selectedFilter = 'Partylist');
-                          this.setState(() {});
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primaryColor,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Apply Filters',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
+                );
+              },
             );
           },
         );

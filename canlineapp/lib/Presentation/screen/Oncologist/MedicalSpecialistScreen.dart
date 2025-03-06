@@ -38,6 +38,7 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   final TextEditingController _searchController = TextEditingController();
   String _searchInput = '';
   String _selectedCategory = 'All';
+  List<String> _selectedSpecializations = [];
 
   // Update the specializations list
   final List<Map<String, List<String>>> _specializations = [
@@ -100,8 +101,9 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
         .from('Doctor')
         .select('*, Health-Institution!inner(Health-Institution-Name)');
 
-    if (_selectedCategory != "All") {
-      query = query.eq('Specialization', _selectedCategory);
+    if (_selectedSpecializations.isNotEmpty &&
+        !_selectedSpecializations.contains('All')) {
+      query = query.inFilter('Specialization', _selectedSpecializations);
     }
 
     if (_searchInput.isNotEmpty) {
@@ -248,7 +250,7 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     );
   }
 
-  // Update the filter bottom sheet UI
+  // Replace _showFilterBottomSheet method
   void _showFilterBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -310,62 +312,67 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: specialists.map((specialization) {
-                                    final isSelected =
-                                        _selectedCategory == specialization;
-                                    return FilterChip(
-                                      selected: isSelected,
-                                      label: Text(specialization),
-                                      labelStyle: GoogleFonts.poppins(
-                                        color: isSelected
-                                            ? Colors.white
-                                            : Colors.grey[800],
-                                        fontSize: 14,
-                                      ),
-                                      selectedColor: MedicalSpecialistScreens
-                                          ._primaryColor,
-                                      backgroundColor: Colors.grey[100],
-                                      checkmarkColor: Colors.white,
-                                      onSelected: (selected) {
-                                        setState(() {
-                                          _selectedCategory = specialization;
-                                        });
-                                        this.setState(() {});
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
+                                ...specialists.map((specialization) {
+                                  return CheckboxListTile(
+                                    title: Text(specialization),
+                                    value: _selectedSpecializations
+                                        .contains(specialization),
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        if (value == true) {
+                                          if (specialization == 'All') {
+                                            _selectedSpecializations.clear();
+                                          } else {
+                                            _selectedSpecializations
+                                                .remove('All');
+                                          }
+                                          _selectedSpecializations
+                                              .add(specialization);
+                                        } else {
+                                          _selectedSpecializations
+                                              .remove(specialization);
+                                        }
+                                      });
+                                    },
+                                    activeColor:
+                                        MedicalSpecialistScreens._primaryColor,
+                                  );
+                                }).toList(),
                                 const SizedBox(height: 20),
                               ],
                             );
                           },
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                MedicalSpecialistScreens._primaryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _selectedSpecializations.clear();
+                                  _selectedSpecializations.add('All');
+                                });
+                              },
+                              child: const Text('Clear All'),
                             ),
                           ),
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            'Apply Filters',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    MedicalSpecialistScreens._primaryColor,
+                              ),
+                              onPressed: () {
+                                this.setState(() {});
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Apply Filters',
+                                  style: TextStyle(color: Colors.white)),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -377,19 +384,4 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
       },
     );
   }
-
-  // Add this helper method for sort chips
-  // Widget _buildSortChip(String label) {
-  //   return FilterChip(
-  //     label: Text(label),
-  //     labelStyle: GoogleFonts.poppins(
-  //       color: Colors.grey[800],
-  //       fontSize: 14,
-  //     ),
-  //     backgroundColor: Colors.grey[100],
-  //     onSelected: (selected) {
-  //       // Implement sorting logic
-  //     },
-  //   );
-  // }
 }
