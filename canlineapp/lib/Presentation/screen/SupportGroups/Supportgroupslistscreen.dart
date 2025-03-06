@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -131,6 +134,22 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
     });
   }
 
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
+  }
+
+  // Check Internet Connection using dart:io
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com'); // Add timeout
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,64 +180,116 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
   }
 
   Widget _buildSupportGroupsList() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _fetchSupportGroups(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        var supportGroups = snapshot.data ?? [];
-
-        if (supportGroups.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('No support groups available'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _refreshData,
-                  child: const Text('Refresh'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          itemCount: supportGroups.length,
-          itemBuilder: (context, index) {
-            final supportGroup = supportGroups[index];
-
-            return CardDesign1(
-              goto: () {
-                if (supportGroup['id'] != null) {
-                  GoRouter.of(context)
-                      .push('/Support-Groups/${supportGroup['id'].toString()}');
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Unable to open support group details'),
+    return FutureBuilder(
+        future: _checkInternetConnection(),
+        builder: (context, networkSnapshot) {
+          if (networkSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (networkSnapshot.data == false) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Internet Connection',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
                     ),
-                  );
-                }
-              },
-              image: supportGroup['Support-Groups-Image-Url'] ?? '',
-              title: supportGroup['Group_name'] ?? 'No name',
-              subtitle: supportGroup['Group_category'] ?? 'No category',
-              location: supportGroup['Location'] ?? '',
-              address: supportGroup['Address'] ?? '',
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please check your network and try again',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _refreshContent,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
-          },
-        );
-      },
-    );
+          }
+          return FutureBuilder<List<Map<String, dynamic>>>(
+            future: _fetchSupportGroups(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
+              var supportGroups = snapshot.data ?? [];
+
+              if (supportGroups.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('No support groups available'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _refreshData,
+                        child: const Text('Refresh'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                itemCount: supportGroups.length,
+                itemBuilder: (context, index) {
+                  final supportGroup = supportGroups[index];
+
+                  return CardDesign1(
+                    goto: () {
+                      if (supportGroup['id'] != null) {
+                        GoRouter.of(context).push(
+                            '/Support-Groups/${supportGroup['id'].toString()}');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Unable to open support group details'),
+                          ),
+                        );
+                      }
+                    },
+                    image: supportGroup['Support-Groups-Image-Url'] ?? '',
+                    title: supportGroup['Group_name'] ?? 'No name',
+                    subtitle: supportGroup['Group_category'] ?? 'No category',
+                    location: supportGroup['Location'] ?? '',
+                    address: supportGroup['Address'] ?? '',
+                  );
+                },
+              );
+            },
+          );
+        });
   }
 
   void _showFilterBottomSheet(BuildContext context) {

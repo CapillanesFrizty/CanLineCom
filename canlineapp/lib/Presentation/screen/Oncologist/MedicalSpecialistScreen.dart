@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -96,6 +99,22 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
     super.dispose();
   }
 
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
+  }
+
+  // Check Internet Connection using dart:io
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com'); // Add timeout
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
+      return false;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> _fetchDoctors() async {
     var query = Supabase.instance.client
         .from('Doctor')
@@ -189,65 +208,116 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
   }
 
   Widget _buildDoctorSection() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _fetchDoctors(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('No Internet Connection'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => setState(() {}),
-                  child: const Text('Try Again'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final doctors = snapshot.data ?? [];
-        if (doctors.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('No doctors found'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => setState(() {}),
-                  child: const Text('Refresh'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          itemCount: doctors.length,
-          itemBuilder: (context, index) {
-            final doctor = doctors[index];
-            return CardDesign1(
-              goto: () => context.push('/Medical-Specialists/${doctor['id']}'),
-              image: doctor['Doctor-Image-Url'] ?? "",
-              title:
-                  '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
-              subtitle: doctor['Specialization'] ?? 'Unknown Specialization',
-              location: doctor['Health-Institution']
-                      ['Health-Institution-Name'] ??
-                  'No hospital information',
-              address: doctor['Address'] ?? 'No address available',
+    return FutureBuilder(
+        future: _checkInternetConnection(),
+        builder: (context, networkSnapshot) {
+          if (networkSnapshot.data == false) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Internet Connection',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please check your network and try again',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _refreshContent,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
-          },
-        );
-      },
-    );
+          }
+
+          return FutureBuilder<List<Map<String, dynamic>>>(
+            future: _fetchDoctors(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('No Internet Connection'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => setState(() {}),
+                        child: const Text('Try Again'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final doctors = snapshot.data ?? [];
+              if (doctors.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('No doctors found'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => setState(() {}),
+                        child: const Text('Refresh'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                itemCount: doctors.length,
+                itemBuilder: (context, index) {
+                  final doctor = doctors[index];
+                  return CardDesign1(
+                    goto: () =>
+                        context.push('/Medical-Specialists/${doctor['id']}'),
+                    image: doctor['Doctor-Image-Url'] ?? "",
+                    title:
+                        '${doctor['Doctor-Firstname']} ${doctor['Doctor-Lastname']}',
+                    subtitle:
+                        doctor['Specialization'] ?? 'Unknown Specialization',
+                    location: doctor['Health-Institution']
+                            ['Health-Institution-Name'] ??
+                        'No hospital information',
+                    address: doctor['Address'] ?? 'No address available',
+                  );
+                },
+              );
+            },
+          );
+        });
   }
 
   // Replace _showFilterBottomSheet method

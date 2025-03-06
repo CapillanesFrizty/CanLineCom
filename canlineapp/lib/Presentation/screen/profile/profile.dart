@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -21,40 +25,166 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _getUserData();
   }
 
-  // Future _CheckConnection() async {
-  //   try {
-  //     // Check if there's an active session
-  //     final session = supabase.auth.currentSession;
-  //     if (session == null) {
-  //       debugPrint('No active session');
-  //       GoRouter.of(context).go('/');
-  //       return;
-  //     }
-  //   } catch (e) {
-  //     if (e is SocketException) {
-  //       debugPrint('No internet connection');
-  //     } else if (e is AuthException) {
-  //       debugPrint('Authentication error: $e');
-  //     } else {
-  //       debugPrint('Connection failed: $e');
-  //     }
-  //     GoRouter.of(context).go('/');
-  //   }
-  // }
+  Future<void> _refreshContent() async {
+    final hasInternet = await _checkInternetConnection();
+    if (hasInternet) {
+      await _getUserData();
+    }
+    if (mounted) {
+      setState(() {}); // Rebuild widget
+    }
+  }
 
-  Future _getUserData() async {
-    final u = await supabase.auth.getUser();
-    setState(() {
-      _user = u.user;
-    });
-    debugPrint('Authenticated User: $_user');
+  // Check Internet Connection using dart:io
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com')
+          .timeout(const Duration(seconds: 5));
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _getUserData() async {
+    try {
+      final hasInternet = await _checkInternetConnection();
+      if (!hasInternet) {
+        return; // Don't attempt to fetch if no internet
+      }
+
+      final u = await supabase.auth.getUser().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Connection timed out');
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _user = u.user;
+        });
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Authentication error: ${e.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error fetching user data'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: _buildBody(),
+      body: FutureBuilder<bool>(
+        future: _checkInternetConnection(),
+        builder: (context, connectionSnapshot) {
+          if (connectionSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(ProfileScreen.primaryColor),
+              ),
+            );
+          }
+
+          if (connectionSnapshot.data == false) {
+            return _buildNoInternetView();
+          }
+
+          if (_user == null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        ProfileScreen.primaryColor),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading profile...',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return _buildBody();
+        },
+      ),
+    );
+  }
+
+  Widget _buildNoInternetView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.wifi_off_rounded,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Internet Connection',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please check your network and try again',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _refreshContent,
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ProfileScreen.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

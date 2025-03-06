@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -42,10 +43,10 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
   final int _currentCategoryIndex = 0;
 
   // Add this variable to track the filter state
-  String _selectedFilter = 'All';
+  final String _selectedFilter = 'All';
 
   // Add to state class
-  List<String> _selectedInstitutionTypes = [];
+  final List<String> _selectedInstitutionTypes = [];
 
   @override
   void initState() {
@@ -108,6 +109,20 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     setState(() {});
   }
 
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
+  }
+
+  // Check Internet Connection using dart:io
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,20 +181,6 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
     );
   }
 
-  Future<void> _refreshContent() async {
-    setState(() {}); // This triggers a rebuild of the widget
-  }
-
-  // Check Internet Connection using dart:io
-  Future<bool> _checkInternetConnection() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } on SocketException catch (_) {
-      return false;
-    }
-  }
-
   Widget _buildInstitutionsList() {
     return FutureBuilder(
         future: _checkInternetConnection(),
@@ -188,17 +189,45 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (internetSnapshot.error is SocketException) {
+          if (internetSnapshot.data == false) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                      'No internet connection. Please check your network and try again.'),
+                  const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  Text(
+                    'No Internet Connection',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please check your network and try again',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
                     onPressed: _refreshContent,
-                    child: const Text('Try Again'),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
                   ),
                 ],
               ),

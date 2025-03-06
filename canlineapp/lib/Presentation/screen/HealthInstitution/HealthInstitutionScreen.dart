@@ -230,22 +230,51 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (connectionSnapshot.error is SocketException) {
+          if (connectionSnapshot.data == false) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                      'No internet connection. Please check your network and try again.'),
+                  const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  Text(
+                    'No Internet Connection',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please check your network and try again',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
                     onPressed: _refreshContent,
-                    child: const Text('Try Again'),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
                   ),
                 ],
               ),
             );
           }
+
           return FutureBuilder<List<Map<String, dynamic>>>(
             future: _getHealthInstitutionData(),
             builder: (context, snapshot) {

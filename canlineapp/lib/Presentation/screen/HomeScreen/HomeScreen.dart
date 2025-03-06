@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? userid;
@@ -51,21 +54,97 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
+  Future<void> _refreshContent() async {
+    setState(() {}); // This triggers a rebuild of the widget
+  }
+
+  // Check Internet Connection using dart:io
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 30.0,
-      ).copyWith(bottom: 30.0), // Added bottom margin
-      physics: const AlwaysScrollableScrollPhysics(),
-      shrinkWrap: true,
-      children: [
-        _buildGreetingText(context),
-        Container(
-          child: _buildGridView(),
-        )
-      ],
-    );
+    return FutureBuilder(
+        future: _checkInternetConnection(),
+        builder: (context, networkSnapshot) {
+          if (networkSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (networkSnapshot.data == false) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF5B50A0).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      LucideIcons.wifiOff,
+                      size: 48,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Internet Connection',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF5B50A0),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please check your connection and try again',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _refreshContent,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 30.0,
+            ).copyWith(bottom: 30.0), // Added bottom margin
+            physics: const AlwaysScrollableScrollPhysics(),
+            shrinkWrap: true,
+            children: [
+              _buildGreetingText(context),
+              Container(
+                child: _buildGridView(),
+              )
+            ],
+          );
+        });
   }
 
   Widget _buildGreetingText(BuildContext context) {
