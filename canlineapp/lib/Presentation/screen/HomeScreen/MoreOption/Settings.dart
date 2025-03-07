@@ -244,7 +244,6 @@ class _SettingsState extends State<Settings> {
                   ),
                 ) ??
                 false;
-
             if (confirm) {
               await supabase.auth.signOut();
               context.go('/');
