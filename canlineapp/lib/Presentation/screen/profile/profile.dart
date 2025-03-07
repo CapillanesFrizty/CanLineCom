@@ -117,14 +117,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     valueColor: AlwaysStoppedAnimation<Color>(
                         ProfileScreen.primaryColor),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Loading profile...',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
                 ],
               ),
             );

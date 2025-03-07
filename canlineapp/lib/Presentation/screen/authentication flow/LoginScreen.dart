@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:elegant_notification/elegant_notification.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +29,20 @@ class _LoginScreenState extends State<LoginScreen> {
   // Obscure password variable
   var _obscurePassword;
 
-  // Login function
+  // Update the checkInternetConnection method
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com')
+          .timeout(const Duration(seconds: 5));
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
+      return false;
+    }
+  }
+
+  // Update the login function
   Future<void> login() async {
     try {
       await supabase.auth.signInWithPassword(
@@ -36,33 +53,36 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       final user = await supabase.auth.getUser();
-
       context.go('/HomeScreen/${user.user?.id}');
     } on AuthException catch (e) {
-      debugPrint('Error: ${e.message}');
-      // Display error to the user
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
+        SnackBar(
+          content: Text(e.message),
+          backgroundColor: Colors.red,
+        ),
       );
     } catch (e) {
-      debugPrint('Unexpected Error: $e');
-      // Handle other types of errors
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An unexpected error occurred.')),
+        const SnackBar(
+          content: Text('An unexpected error occurred.'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-  // Check session
+  // Update the checkSession function
   Future<void> checkSession() async {
-    final session = Supabase.instance.client.auth.currentSession;
-    debugPrint('Session: $session');
-    if (session != null && session.user != null) {
-      final userId = session.user.id;
-      debugPrint('User ID: $userId');
-      context.go('/HomeScreen/$userId');
-    } else {
-      context.go('/');
+    try {
+      final session = supabase.auth.currentSession;
+      if (session != null && session.user != null) {
+        if (!mounted) return;
+        context.go('/HomeScreen/${session.user.id}');
+      }
+    } catch (e) {
+      debugPrint('Session check error: $e');
     }
   }
 
@@ -77,88 +97,165 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  // Update the build method to show offline status when needed
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Adjust for keyboard
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        // Prevent overflow by making the layout scrollable
-        child: Container(
-          height: MediaQuery.of(context).size.height, // Make it fill the screen
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Form(
-            key: _formKey, // Assign the GlobalKey to the Form
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center content
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildWelcomeText(),
-                const SizedBox(height: 40.0),
-                // Email field
-                TextFormField(
-                  controller: _email,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle:
-                        GoogleFonts.poppins(color: LoginScreen._primaryColor),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: LoginScreen._primaryColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: LoginScreen._primaryColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: LoginScreen._primaryColor),
-                    ),
+      body: FutureBuilder(
+          future: _checkInternetConnection(),
+          builder: (context, networkSnapshot) {
+            if (networkSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            if (!networkSnapshot.hasData || !networkSnapshot.data!) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      icon: Icon(
+                        Icons.wifi_off_rounded,
+                        size: 48,
+                        color: LoginScreen._primaryColor,
+                      ),
+                      title: Text(
+                        'No Internet Connection',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: LoginScreen._primaryColor,
+                        ),
+                      ),
+                      content: Text(
+                        'Please check your internet connection and try again.',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            setState(() {}); // Refresh the connection check
+                          },
+                          child: Text(
+                            'Try Again',
+                            style: GoogleFonts.poppins(
+                              color: LoginScreen._primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    );
+                  },
+                );
+              });
+
+              // Return a loading indicator while the dialog is being shown
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            return SingleChildScrollView(
+              // Prevent overflow by making the layout scrollable
+              child: Container(
+                height: MediaQuery.of(context)
+                    .size
+                    .height, // Make it fill the screen
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: Form(
+                  key: _formKey, // Assign the GlobalKey to the Form
+                  child: Column(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center, // Center content
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildWelcomeText(),
+                      const SizedBox(height: 40.0),
+                      // Email field
+                      TextFormField(
+                        controller: _email,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: GoogleFonts.poppins(
+                              color: LoginScreen._primaryColor),
+                          border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator:
+                            _validateEmail, // Use the existing email validator
+                      ),
+                      const SizedBox(height: 20.0),
+                      // Password field
+                      TextFormField(
+                        controller: _password,
+                        obscureText: _obscurePassword!,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: GoogleFonts.poppins(
+                              color: LoginScreen._primaryColor),
+                          border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: LoginScreen._primaryColor),
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                            icon: Icon(_obscurePassword!
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                          ),
+                        ),
+                        validator: _validatePassword, // Add password validator
+                      ),
+                      const SizedBox(height: 40.0),
+                      _buildLoginButton(login),
+                      const SizedBox(height: 20.0),
+                      _buildOrText(),
+                      const SizedBox(height: 20.0),
+                      _buildCreateAccountText(),
+                      const SizedBox(height: 20.0),
+                      _buildCreateAccountButton(),
+                    ],
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: _validateEmail, // Use the existing email validator
                 ),
-                const SizedBox(height: 20.0),
-                // Password field
-                TextFormField(
-                  controller: _password,
-                  obscureText: _obscurePassword!,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle:
-                        GoogleFonts.poppins(color: LoginScreen._primaryColor),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: LoginScreen._primaryColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: LoginScreen._primaryColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: LoginScreen._primaryColor),
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                      icon: Icon(_obscurePassword!
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                    ),
-                  ),
-                  validator: _validatePassword, // Add password validator
-                ),
-                const SizedBox(height: 40.0),
-                _buildLoginButton(login),
-                const SizedBox(height: 20.0),
-                _buildOrText(),
-                const SizedBox(height: 20.0),
-                _buildCreateAccountText(),
-                const SizedBox(height: 20.0),
-                _buildCreateAccountButton(),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ),
+            );
+          }),
     );
   }
 
@@ -175,17 +272,65 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLoginButton(Function loginFunction) {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         if (_formKey.currentState!.validate()) {
-          // If the form is valid, proceed with login
+          // Check internet before login
+          final hasConnection = await _checkInternetConnection();
+          if (!hasConnection) {
+            if (!mounted) return;
+
+            // Show dialog for no internet
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  icon: Icon(
+                    Icons.wifi_off_rounded,
+                    size: 48,
+                    color: LoginScreen._primaryColor,
+                  ),
+                  title: Text(
+                    'No Internet Connection',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: LoginScreen._primaryColor,
+                    ),
+                  ),
+                  content: Text(
+                    'Please check your internet connection and try again.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {}); // Refresh the connection check
+                      },
+                      child: Text(
+                        'Try Again',
+                        style: GoogleFonts.poppins(
+                          color: LoginScreen._primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                );
+              },
+            );
+            return;
+          }
+
+          // If connected, proceed with login
           loginFunction();
-        } else {
-          // If the form is invalid, display a snackbar or handle accordingly
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   const SnackBar(
-          //       content:
-          //           Text('Please enter the nessecary credentials submitting.')),
-          // );
         }
       },
       style: ElevatedButton.styleFrom(
@@ -224,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildCreateAccountButton() {
     return OutlinedButton(
       onPressed: () {
-        GoRouter.of(context).go('/RegisterScreen');
+        GoRouter.of(context).push('/RegisterScreen');
       },
       style: OutlinedButton.styleFrom(
         foregroundColor: LoginScreen._primaryColor,

@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -206,17 +210,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
         value: "Colorectal cancer", child: Text("Colorectal cancer")),
   ];
 
-  final List<DropdownMenuItem<String>> _citizenshipItems = [
-    DropdownMenuItem(value: "none", child: Text("Select an option")),
-    DropdownMenuItem(value: "Filipino", child: Text("Filipino")),
-    DropdownMenuItem(value: "Foreigner", child: Text("Foreigner")),
-  ];
-
   final _formKeys = List.generate(4, (_) => GlobalKey<FormState>());
   final _controllers = List.generate(10, (_) => TextEditingController());
   final supabase = Supabase.instance.client;
 
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com')
+          .timeout(const Duration(seconds: 5));
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
+      return false;
+    }
+  }
+
   Future<void> signup() async {
+    // Check internet connection first
+    final hasInternet = await _checkInternetConnection();
+    if (!hasInternet) {
+      _showError(
+          'No internet connection. Please check your network and try again.');
+      return;
+    }
+
     try {
       final response = await supabase.auth.signUp(
         password: _controllers[9].text.trim(),
@@ -257,8 +275,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Error: $message')));
+    // TODO Please replace this with a more elegant error notification
+    ElegantNotification(description: Text("Please verifiy your data"))
+        .show(context);
   }
 
   @override
@@ -459,12 +478,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              _buildDropdown(
-                  'Citizenship*', _selectedCitizenship, _citizenshipItems,
-                  (value) {
-                setState(() => _selectedCitizenship = value!);
-              }),
-              const SizedBox(height: 20),
               _buildTextField('Current Address*', _controllers[5]),
               const SizedBox(height: 20),
               _buildTextField('City*', _controllers[6]),
@@ -611,7 +624,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: Colors.grey[50],
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
