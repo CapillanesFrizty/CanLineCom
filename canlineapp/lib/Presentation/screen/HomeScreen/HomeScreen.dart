@@ -329,14 +329,15 @@ class _AnimatedGridItem extends StatelessWidget {
                                   children: [
                                     TextSpan(
                                       text:
-                                          'The Information provided here as of now is ',
+                                          'The Information provided here are ',
                                       style: GoogleFonts.poppins(
                                         fontSize: 16,
                                         color: Colors.grey[700],
                                       ),
                                     ),
                                     TextSpan(
-                                      text: 'limited for Chemotherapy only',
+                                      text:
+                                          'undergoing validation process and limited for Chemotherapy ',
                                       style: GoogleFonts.poppins(
                                         fontSize: 16,
                                         color: Colors.red,
@@ -344,7 +345,7 @@ class _AnimatedGridItem extends StatelessWidget {
                                       ),
                                     ),
                                     TextSpan(
-                                      text: '.',
+                                      text: 'only.',
                                       style: GoogleFonts.poppins(
                                         fontSize: 16,
                                         color: Colors.grey[700],

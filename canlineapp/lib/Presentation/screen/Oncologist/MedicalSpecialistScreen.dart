@@ -322,6 +322,7 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
                             ['Health-Institution-Name'] ??
                         'No hospital information',
                     address: doctor['Address'] ?? 'No address available',
+                    isVerified: doctor['isVerified'],
                   );
                 },
               );

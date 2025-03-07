@@ -52,6 +52,7 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Settings',
@@ -132,9 +133,10 @@ class _SettingsState extends State<Settings> {
     String displayName = _user?.userMetadata?['firstname'] != null &&
             _user?.userMetadata?['lastname'] != null
         ? "${_user!.userMetadata!['firstname']} ${_user!.userMetadata!['lastname']}"
-        : _user?.email ?? 'User';
+        : _user?.email ?? '';
 
     return Card(
+      color: Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -291,6 +293,7 @@ class _SettingsState extends State<Settings> {
 
   Widget _buildSettingCard({required Widget child}) {
     return Card(
+      color: Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -328,35 +331,6 @@ class _SettingsState extends State<Settings> {
       onTap: onTap,
     );
   }
-
-  // void _showEmergencyContactsDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text(
-  //           'Emergency Contacts',
-  //           style: GoogleFonts.poppins(
-  //             fontWeight: FontWeight.w600,
-  //             color: Settings.primaryColor,
-  //           ),
-  //         ),
-  //         content: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             // Add emergency contacts list/form here
-  //           ],
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.pop(context),
-  //             child: Text('Close'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   void _showAboutDialog() {
     showDialog(
@@ -575,80 +549,6 @@ class _SettingsState extends State<Settings> {
       ),
     );
   }
-
-  // void _showPrivacyPolicyDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text(
-  //           'Privacy Policy',
-  //           style: GoogleFonts.poppins(
-  //             fontWeight: FontWeight.w600,
-  //             color: Settings.primaryColor,
-  //           ),
-  //         ),
-  //         content: SingleChildScrollView(
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 '1. Information Collection',
-  //                 style: GoogleFonts.poppins(
-  //                   fontWeight: FontWeight.w600,
-  //                   fontSize: 16,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 8),
-  //               Text(
-  //                 'We collect information that you provide directly to us, including medical history, contact information, and other personal details necessary for your care.',
-  //                 style: GoogleFonts.poppins(),
-  //               ),
-  //               const SizedBox(height: 16),
-  //               Text(
-  //                 '2. Data Protection',
-  //                 style: GoogleFonts.poppins(
-  //                   fontWeight: FontWeight.w600,
-  //                   fontSize: 16,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 8),
-  //               Text(
-  //                 'We implement appropriate technical and organizational measures to protect your personal data against unauthorized or unlawful processing and accidental loss.',
-  //                 style: GoogleFonts.poppins(),
-  //               ),
-  //               const SizedBox(height: 16),
-  //               Text(
-  //                 '3. Information Sharing',
-  //                 style: GoogleFonts.poppins(
-  //                   fontWeight: FontWeight.w600,
-  //                   fontSize: 16,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 8),
-  //               Text(
-  //                 'We only share your information with healthcare providers and emergency contacts that you specifically authorize.',
-  //                 style: GoogleFonts.poppins(),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.pop(context),
-  //             child: Text(
-  //               'Close',
-  //               style: GoogleFonts.poppins(
-  //                 color: Settings.primaryColor,
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   Future<void> _handleEditProfile() async {
     final TextEditingController firstNameController = TextEditingController(

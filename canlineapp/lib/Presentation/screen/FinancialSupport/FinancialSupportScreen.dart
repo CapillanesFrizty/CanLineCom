@@ -183,109 +183,111 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
 
   Widget _buildInstitutionsList() {
     return FutureBuilder(
-        future: _checkInternetConnection(),
-        builder: (context, internetSnapshot) {
-          if (internetSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      future: _checkInternetConnection(),
+      builder: (context, internetSnapshot) {
+        if (internetSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          if (internetSnapshot.data == false) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.wifi_off_rounded,
-                    size: 64,
-                    color: Colors.grey,
+        if (internetSnapshot.data == false) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.wifi_off_rounded,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No Internet Connection',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No Internet Connection',
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Please check your network and try again',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: _refreshContent,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Please check your network and try again',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: _refreshContent,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Try Again'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return FutureBuilder<List<Map<String, dynamic>>>(
-            future: _fetchInstitutions(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                          'We’re experiencing technical issues. Please try again later'),
-                    ],
-                  ),
-                );
-              }
-
-              final institutions = snapshot.data ?? [];
-              if (institutions.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('No data available. Please check back later'),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                itemCount: institutions.length,
-                itemBuilder: (context, index) {
-                  final institution = institutions[index];
-                  return CardDesign1(
-                    goto: () => GoRouter.of(context).push(
-                        '/Financial-Institution/${institution['Financial-Institution-ID']}'),
-                    image: institution['Financial-Institution-Image-Url'] ?? '',
-                    title: institution['Financial-Institution-Name'] ??
-                        'Unknown Institution',
-                    subtitle: institution['Financial-Institution-Type'] ??
-                        'Unknown Type',
-                    location: institution['Financial-Institution-Address'] ??
-                        'No location available',
-                  );
-                },
-              );
-            },
+                ),
+              ],
+            ),
           );
-        });
+        }
+
+        return FutureBuilder<List<Map<String, dynamic>>>(
+          future: _fetchInstitutions(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                        'We’re experiencing technical issues. Please try again later'),
+                  ],
+                ),
+              );
+            }
+
+            final institutions = snapshot.data ?? [];
+            if (institutions.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('No data available. Please check back later'),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              itemCount: institutions.length,
+              itemBuilder: (context, index) {
+                final institution = institutions[index];
+                return CardDesign1(
+                  goto: () => GoRouter.of(context).push(
+                      '/Financial-Institution/${institution['Financial-Institution-ID']}'),
+                  image: institution['Financial-Institution-Image-Url'] ?? '',
+                  title: institution['Financial-Institution-Name'] ??
+                      'Unknown Institution',
+                  subtitle: institution['Financial-Institution-Type'] ??
+                      'Unknown Type',
+                  location: institution['Financial-Institution-Address'] ??
+                      'No location available',
+                  isVerified: institution['isverified'] ?? false,
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   // Replace _showFilterBottomSheet method with this updated version

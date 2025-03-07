@@ -100,14 +100,16 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
 
           final groupData = snapshot.data!;
           return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
             children: [
               _buildBackgroundImage(groupData['image_url'] ?? ''),
-              _buildDetailsSection(
-                category: groupData['Group_category'] ?? '',
-                groupName: groupData['Group_name'] ?? '',
-                description: groupData['Group_description'] ?? '',
-                events: groupData['events'] ?? 'No upcoming events',
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: _buildDetailsSection(
+                  category: groupData['Group_category'] ?? '',
+                  groupName: groupData['Group_name'] ?? '',
+                  description: groupData['Group_description'] ?? '',
+                  events: groupData['events'] ?? 'No upcoming events',
+                ),
               ),
             ],
           );
@@ -271,7 +273,6 @@ class _SupportgroupdetailsscreenState extends State<Supportgroupdetailsscreen> {
         _buildAboutSection(description: description),
         _buildDividerWithSpacing(),
         _buildEventsSection(events: events),
-        const SizedBox(height: 32),
       ],
     );
   }

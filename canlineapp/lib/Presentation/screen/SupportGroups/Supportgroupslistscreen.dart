@@ -284,6 +284,7 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
                     subtitle: supportGroup['Group_category'] ?? 'No category',
                     location: supportGroup['Location'] ?? '',
                     address: supportGroup['Address'] ?? '',
+                    isVerified: supportGroup['isVerified'],
                   );
                 },
               );

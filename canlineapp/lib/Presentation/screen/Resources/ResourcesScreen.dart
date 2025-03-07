@@ -245,7 +245,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
       title: eventData['Event_name'] ?? 'Unknown Event',
       subtitle: 'Event', // Changed to display "Event" as category
       location: 'Date: ${eventData['Event_Date'] ?? 'TBA'}',
-      address: 'Time: ${eventData['Event_Time'] ?? 'TBA'}',
+      address: 'Time: ${eventData['Event_Time'] ?? 'TBA'}', isVerified: false,
     );
   }
 
@@ -257,7 +257,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
       title: blogData['Blogs-Name'] ?? 'Unknown Title',
       subtitle: 'Blog', // Changed to display "Blog" as category
       location: 'Published: ${blogData['Blog-Published'] ?? 'Unknown Date'}',
-      address: '', // Keep empty for blogs
+      address: '', isVerified: blogData['isVerified'], // Keep empty for blogs
     );
   }
 }

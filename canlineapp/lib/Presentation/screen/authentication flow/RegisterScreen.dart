@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late bool _obscurePassword;
   String _selectedCancerType = "none";
   bool isaccepted = false;
+  bool _hasShownTnC = false;
 
   @override
   void initState() {
@@ -33,178 +33,181 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) => WillPopScope(
-          onWillPop: () async =>
-              false, // This prevents the dialog from closing on back button
-          child: Dialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Terms and Conditions',
-                          style: GoogleFonts.poppins(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: RegisterScreen.primaryColor,
+    if (!_hasShownTnC) {
+      _hasShownTnC = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) => WillPopScope(
+            onWillPop: () async => false,
+            child: Dialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Terms and Conditions',
+                            style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: RegisterScreen.primaryColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSection(
-                            'Welcome to CanLine',
-                            'By accessing and using the CanLine application, you agree to be bound by these Terms and Conditions. Please read them carefully before proceeding with registration.',
-                          ),
-                          _buildSection(
-                            '1. LICENSE GRANT',
-                            '''Subject to your compliance with this Agreement, the Company grants you a limited, non-exclusive, non-transferable, and revocable license to install and use the Software for personal or professional healthcare-related purposes, strictly in accordance with applicable laws and regulations.''',
-                          ),
-                          _buildSection(
-                            '2. RESTRICTIONS ON USE',
-                            '''You agree not to:
+                      ],
+                    ),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSection(
+                              'Welcome to CanLine',
+                              'By accessing and using the CanLine application, you agree to be bound by these Terms and Conditions. Please read them carefully before proceeding with registration.',
+                            ),
+                            _buildSection(
+                              '1. LICENSE GRANT',
+                              '''Subject to your compliance with this Agreement, the Company grants you a limited, non-exclusive, non-transferable, and revocable license to install and use the Software for personal or professional healthcare-related purposes, strictly in accordance with applicable laws and regulations.''',
+                            ),
+                            _buildSection(
+                              '2. RESTRICTIONS ON USE',
+                              '''You agree not to:
 \u2022The medical information you provide will be used for patient care coordination.
 \u2022While we maintain strict privacy standards, no method of electronic storage is 100% secure.
 \u2022You agree to provide accurate medical history and current health status information.''',
-                          ),
-                          _buildSection(
-                            '3.  HEALTHCARE DISCLAIMER',
-                            '''The Software is intended to assist healthcare professionals and patients but is not a substitute for professional medical advice, diagnosis, or treatment. You should always seek the advice of a qualified healthcare provider before making any medical decisions. The Company is not responsible for any adverse outcomes resulting from reliance on the Software. The User acknowledges that the Software may contain errors or limitations that could impact its accuracy and should not be solely relied upon for critical healthcare decisions.
+                            ),
+                            _buildSection(
+                              '3.  HEALTHCARE DISCLAIMER',
+                              '''The Software is intended to assist healthcare professionals and patients but is not a substitute for professional medical advice, diagnosis, or treatment. You should always seek the advice of a qualified healthcare provider before making any medical decisions. The Company is not responsible for any adverse outcomes resulting from reliance on the Software. The User acknowledges that the Software may contain errors or limitations that could impact its accuracy and should not be solely relied upon for critical healthcare decisions.
 ''',
-                          ),
-                          _buildSection(
-                            '4.  DATA PRIVACY AND SECURITY',
-                            '''\u2022 The Company collects, stores, and processes personal and health-related information through the Software. By using the Software, users consent to the Company's collection and use of such data as outlined in the [Privacy Policy].
+                            ),
+                            _buildSection(
+                              '4.  DATA PRIVACY AND SECURITY',
+                              '''\u2022 The Company collects, stores, and processes personal and health-related information through the Software. By using the Software, users consent to the Company's collection and use of such data as outlined in the [Privacy Policy].
 \u2022 The Company is committed to implementing industry-standard security measures to protect user data. However, it does not guarantee absolute security against data breaches, and users are responsible for taking necessary precautions to protect their information.
 \u2022 The Company ensures compliance with applicable data protection laws, including but not limited to HIPAA (for U.S. users) and GDPR (for EU users).
 \u2022 The Company reserves the right to anonymize and aggregate collected data for analytics, research, and product development while ensuring that no personally identifiable information is disclosed.''',
-                          ),
-                          _buildSection(
-                            '5. UPDATES, MODIFICATIONS, AND SUPPORT',
-                            '''\u2022 The Company reserves the right to update, modify, or discontinue the Software at any time without notice. Updates may be required for continued use.
+                            ),
+                            _buildSection(
+                              '5. UPDATES, MODIFICATIONS, AND SUPPORT',
+                              '''\u2022 The Company reserves the right to update, modify, or discontinue the Software at any time without notice. Updates may be required for continued use.
 \u2022 The Company is not obligated to provide technical support or maintenance services but may do so at its discretion.
               ''',
-                          ),
-                          _buildSection(
-                            '6. TERMINATION',
-                            '''This Agreement is effective until terminated by you or the Company. Your rights under this Agreement will automatically terminate if you fail to comply with any terms. Upon termination, you must cease all use of the Software and delete all copies. The Company reserves the right to suspend or terminate access without liability if it determines that your use of the Software poses a risk to security, legal compliance, or operational integrity.
+                            ),
+                            _buildSection(
+                              '6. TERMINATION',
+                              '''This Agreement is effective until terminated by you or the Company. Your rights under this Agreement will automatically terminate if you fail to comply with any terms. Upon termination, you must cease all use of the Software and delete all copies. The Company reserves the right to suspend or terminate access without liability if it determines that your use of the Software poses a risk to security, legal compliance, or operational integrity.
 ''',
-                          ),
-                          _buildSection(
-                            '7. DISCLAIMER OF WARRANTIES',
-                            '''\u2022 The Software is provided "as is" and "as available" without warranties of any kind, either express or implied.
+                            ),
+                            _buildSection(
+                              '7. DISCLAIMER OF WARRANTIES',
+                              '''\u2022 The Software is provided "as is" and "as available" without warranties of any kind, either express or implied.
 \u2022 The Company does not warrant that the Software will be free from defects, errors, viruses, or interruptions.
 \u2022 The Company disclaims all warranties, including but not limited to merchantability, fitness for a particular purpose, and non-infringement.''',
-                          ),
-                          _buildSection(
-                            '8. LIMITATION OF LIABILITY',
-                            '''To the fullest extent permitted by law, the Company shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from the use or inability to use the Software. This includes but is not limited to loss of data, revenue, or profits, business interruption, and unauthorized access to personal data.  ''',
-                          ),
-                          _buildSection(
-                            '9. COMPLIANCE WITH LAWS',
-                            '''
+                            ),
+                            _buildSection(
+                              '8. LIMITATION OF LIABILITY',
+                              '''To the fullest extent permitted by law, the Company shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from the use or inability to use the Software. This includes but is not limited to loss of data, revenue, or profits, business interruption, and unauthorized access to personal data.  ''',
+                            ),
+                            _buildSection(
+                              '9. COMPLIANCE WITH LAWS',
+                              '''
 \u2022 Users are responsible for ensuring that their use of the Software complies with all applicable local, state, and federal laws, including healthcare regulations.
 \u2022 The Company does not assume liability for any misuse of the Software that results in non-compliance with healthcare regulations. ''',
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Last updated: ${DateTime.now().toString().split(' ')[0]}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: Colors.grey,
                             ),
-                          ),
-                          StatefulBuilder(
-                            builder: (BuildContext context,
-                                StateSetter setModalState) {
-                              return Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Checkbox(
-                                        value: isaccepted,
-                                        onChanged: (bool? value) {
-                                          setModalState(() {
-                                            isaccepted = value ?? false;
-                                          });
-                                        },
-                                        activeColor:
-                                            RegisterScreen.primaryColor,
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          'I have read and agree to these Terms and Conditions',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                            color: Colors.grey[800],
+                            const SizedBox(height: 20),
+                            Text(
+                              'Last updated: ${DateTime.now().toString().split(' ')[0]}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            StatefulBuilder(
+                              builder: (BuildContext context,
+                                  StateSetter setModalState) {
+                                return Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Checkbox(
+                                          value: isaccepted,
+                                          onChanged: (bool? value) {
+                                            setModalState(() {
+                                              isaccepted = value ?? false;
+                                            });
+                                          },
+                                          activeColor:
+                                              RegisterScreen.primaryColor,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            'I have read and agree to these Terms and Conditions',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 14,
+                                              color: Colors.grey[800],
+                                            ),
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 24),
+                                    ElevatedButton(
+                                      onPressed: isaccepted
+                                          ? () {
+                                              Navigator.of(context).pop();
+                                            }
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: isaccepted
+                                            ? RegisterScreen.primaryColor
+                                            : Colors.grey,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        minimumSize:
+                                            const Size(double.infinity, 50),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 24),
-                                  ElevatedButton(
-                                    onPressed: isaccepted
-                                        ? () {
-                                            Navigator.of(context).pop();
-                                          }
-                                        : null,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isaccepted
-                                          ? RegisterScreen.primaryColor
-                                          : Colors.grey,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 16),
-                                      minimumSize:
-                                          const Size(double.infinity, 50),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                      child: Text(
+                                        'Accept Terms',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                    child: Text(
-                                      'Accept Terms',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
+                                    const SizedBox(height: 12),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      });
+    }
   }
 
   Widget _buildSection(String title, String content) {
@@ -317,9 +320,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _showError(String message) {
-    // TODO Please replace this with a more elegant error notification
-    ElegantNotification(description: Text("Please verifiy your data"))
-        .show(context);
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).clearSnackBars(); // Clear existing snackbars
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.error,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFFE53935),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height - 100,
+          right: 16,
+          left: 16,
+        ),
+        elevation: 4,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -403,6 +447,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     bool isValid = _formKeys[_currentStep].currentState?.validate() ?? false;
 
     if (_currentStep == 3) {
+      if (_controllers[0].text.isEmpty) {
+        isValid = false;
+        _showError('Please enter your First Name');
+        return;
+      }
+      if (_controllers[1].text.isEmpty) {
+        isValid = false;
+        _showError('Please enter your Last Name');
+        return;
+      }
+      if (_controllers[4].text.isEmpty) {
+        isValid = false;
+        _showError('Please enter your Occupation');
+        return;
+      }
       if (selectedDate == null) {
         isValid = false;
         _showError('Please select your Date of Birth');

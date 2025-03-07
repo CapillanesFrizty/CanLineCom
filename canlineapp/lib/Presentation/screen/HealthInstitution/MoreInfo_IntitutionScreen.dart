@@ -884,10 +884,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
   Widget _buildChemotherapySection() {
     // Placeholder data
     final List<String> placeholderServices = [
-      'Chemotherapy Infusion',
-      'Immunotherapy',
-      'Hormone Therapy',
-      'Targeted Drug Therapy'
+      'Outpatient Chemotherapy',
+      'Inpatient Chemotherapy',
     ];
 
     return Column(
@@ -961,7 +959,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
               ),
               SizedBox(height: 16),
               Text(
-                'For detailed information about our chemotherapy services and scheduling, please contact our oncology department.',
+                'The chemotheraphy service will depends on the treatment plan of your doctor.',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontStyle: FontStyle.italic,

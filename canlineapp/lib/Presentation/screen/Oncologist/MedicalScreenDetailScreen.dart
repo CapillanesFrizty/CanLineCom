@@ -205,7 +205,8 @@ class _MedicalSpeciaDetailScreensState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        _buildTitle('${data['Doctor-Firstname']} ${data['Doctor-Lastname']}'),
+        _buildTitle(
+            '${data['Doctor-Firstname']} ${data['Doctor-Lastname']}${data['Doctor-designation'] == null ? " " : ", ${data['Doctor-designation']}"}'),
         _buildSubtitle(data['Specialization'] ?? 'Unknown Specialization'),
       ],
     );
@@ -243,27 +244,6 @@ class _MedicalSpeciaDetailScreensState
         color: Colors.green,
         fontWeight: FontWeight.w500,
       ),
-    );
-  }
-
-  Widget _buildAboutSection(Map<String, dynamic> data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'About',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xff5B50A0),
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          data['Medical Background'] ?? 'No description available',
-          style: GoogleFonts.poppins(fontSize: 15),
-        ),
-      ],
     );
   }
 
@@ -371,7 +351,7 @@ class _MedicalSpeciaDetailScreensState
                       Container(
                         margin: const EdgeInsets.only(top: 4),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                            horizontal: 10, vertical: 2),
                         decoration: BoxDecoration(
                           color: clinic['isAppointmentBased']
                               ? const Color(0xFFE3F2FD)
@@ -487,7 +467,7 @@ class _MedicalSpeciaDetailScreensState
               child: Row(
                 children: [
                   SizedBox(
-                    width: 80,
+                    width: 100,
                     child: Text(
                       '${e.key}:',
                       style: GoogleFonts.poppins(

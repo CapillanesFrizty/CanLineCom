@@ -11,6 +11,7 @@ class CardDesign1 extends StatefulWidget {
   final String time;
   final String date;
   final String gender;
+  final bool isVerified;
 
   const CardDesign1({
     super.key,
@@ -23,7 +24,8 @@ class CardDesign1 extends StatefulWidget {
     this.distance = '', // Optional with default value
     this.time = '', // Optional with default value
     this.date = '', // Optional with default value
-    this.gender = '', // Optional with default value
+    this.gender = '',
+    required this.isVerified, // Optional with default value
   });
 
   @override
@@ -162,13 +164,36 @@ class _CardDesign1State extends State<CardDesign1>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            widget.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xff2D2D2D),
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    if (widget.isVerified)
+                                      const Padding(
+                                        padding: EdgeInsets.only(right: 10),
+                                        child: Icon(
+                                          Icons.verified,
+                                          size: 20,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    Expanded(
+                                      child: Text(
+                                        widget.gender.isNotEmpty
+                                            ? '${widget.title} (${widget.gender})'
+                                            : widget.title,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xff2D2D2D),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                           if (widget.location.isNotEmpty) ...[
                             const SizedBox(height: 8),

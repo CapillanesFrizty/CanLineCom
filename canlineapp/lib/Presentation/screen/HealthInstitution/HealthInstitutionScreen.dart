@@ -69,7 +69,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     if (_currentCategoryIndex == 1) {
       query = query.eq('Treatment-Type', 'Outpatient');
     } else if (_currentCategoryIndex == 2) {
-      query = query.eq('Treatment-Type', 'Admission');
+      query;
     }
 
     final response = await query;
@@ -137,9 +137,9 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
         children: [
           _buildCategoryButton(
               LucideIcons.hospital, "All", 0, const Color(0xff5B50A0)),
+          _buildCategoryButton(LucideIcons.bed, "Admission", 2, Colors.red),
           _buildCategoryButton(
               LucideIcons.stethoscope, "Outpatient", 1, Colors.green),
-          _buildCategoryButton(LucideIcons.bed, "Admission", 2, Colors.red),
         ],
       ),
     );
@@ -315,6 +315,7 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                   subtitle: healthInst[index]['Health-Institution-Type'] ?? '',
                   location:
                       healthInst[index]['Health-Institution-Address'] ?? '',
+                  isVerified: false,
                 ),
               );
             },

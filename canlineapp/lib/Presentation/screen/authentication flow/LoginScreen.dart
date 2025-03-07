@@ -130,44 +130,47 @@ class _LoginScreenState extends State<LoginScreen> {
                   context: context,
                   barrierDismissible: false,
                   builder: (BuildContext context) {
-                    return AlertDialog(
-                      icon: Icon(
-                        Icons.wifi_off_rounded,
-                        size: 48,
-                        color: LoginScreen._primaryColor,
-                      ),
-                      title: Text(
-                        'No Internet Connection',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                    return WillPopScope(
+                      onWillPop: () async => false,
+                      child: AlertDialog(
+                        icon: Icon(
+                          Icons.wifi_off_rounded,
+                          size: 48,
                           color: LoginScreen._primaryColor,
                         ),
-                      ),
-                      content: Text(
-                        'Please check your internet connection and try again.',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            setState(() {}); // Refresh the connection check
-                          },
-                          child: Text(
-                            'Try Again',
-                            style: GoogleFonts.poppins(
-                              color: LoginScreen._primaryColor,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        title: Text(
+                          'No Internet Connection',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: LoginScreen._primaryColor,
                           ),
                         ),
-                      ],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        content: Text(
+                          'Please check your internet connection and try again.',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              setState(() {}); // Refresh the connection check
+                            },
+                            child: Text(
+                              'Try Again',
+                              style: GoogleFonts.poppins(
+                                color: LoginScreen._primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     );
                   },
