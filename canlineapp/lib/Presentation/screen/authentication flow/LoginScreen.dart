@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,6 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
   // Obscure password variable
   var _obscurePassword;
 
+  // Add this variable with the other state variables
+  bool _isLoading = false;
+
   // Update the checkInternetConnection method
   Future<bool> _checkInternetConnection() async {
     try {
@@ -44,6 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Update the login function
   Future<void> login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       await supabase.auth.signInWithPassword(
         password: _password.text.trim(),
@@ -70,6 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
