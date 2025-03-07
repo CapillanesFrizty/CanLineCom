@@ -284,67 +284,69 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLoginButton(Function loginFunction) {
     return ElevatedButton(
-      onPressed: () async {
-        if (_formKey.currentState!.validate()) {
-          // Check internet before login
-          final hasConnection = await _checkInternetConnection();
-          if (!hasConnection) {
-            if (!mounted) return;
+      onPressed: _isLoading
+          ? null
+          : () async {
+              if (_formKey.currentState!.validate()) {
+                // Check internet before login
+                final hasConnection = await _checkInternetConnection();
+                if (!hasConnection) {
+                  if (!mounted) return;
 
-            // Show dialog for no internet
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  icon: Icon(
-                    Icons.wifi_off_rounded,
-                    size: 48,
-                    color: LoginScreen._primaryColor,
-                  ),
-                  title: Text(
-                    'No Internet Connection',
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: LoginScreen._primaryColor,
-                    ),
-                  ),
-                  content: Text(
-                    'Please check your internet connection and try again.',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        setState(() {}); // Refresh the connection check
-                      },
-                      child: Text(
-                        'Try Again',
-                        style: GoogleFonts.poppins(
+                  // Show dialog for no internet
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        icon: Icon(
+                          Icons.wifi_off_rounded,
+                          size: 48,
                           color: LoginScreen._primaryColor,
-                          fontWeight: FontWeight.w500,
                         ),
-                      ),
-                    ),
-                  ],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                );
-              },
-            );
-            return;
-          }
+                        title: Text(
+                          'No Internet Connection',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: LoginScreen._primaryColor,
+                          ),
+                        ),
+                        content: Text(
+                          'Please check your internet connection and try again.',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              setState(() {}); // Refresh the connection check
+                            },
+                            child: Text(
+                              'Try Again',
+                              style: GoogleFonts.poppins(
+                                color: LoginScreen._primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      );
+                    },
+                  );
+                  return;
+                }
 
-          // If connected, proceed with login
-          loginFunction();
-        }
-      },
+                // If connected, proceed with login
+                loginFunction();
+              }
+            },
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: LoginScreen._primaryColor,
@@ -353,10 +355,29 @@ class _LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
-      child: Text(
-        'Log in',
-        style: GoogleFonts.poppins(),
-      ),
+      child: _isLoading
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Logging in...',
+                  style: GoogleFonts.poppins(),
+                ),
+              ],
+            )
+          : Text(
+              'Log in',
+              style: GoogleFonts.poppins(),
+            ),
     );
   }
 
