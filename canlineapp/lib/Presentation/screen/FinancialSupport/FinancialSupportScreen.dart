@@ -47,6 +47,7 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
 
   // Add to state class
   final List<String> _selectedInstitutionTypes = [];
+  final List<String> _selectedPartyLists = []; // Add this line
 
   @override
   void initState() {
@@ -72,6 +73,11 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
         !_selectedInstitutionTypes.contains('All')) {
       query = query.inFilter(
           'Financial-Institution-Type', _selectedInstitutionTypes);
+    }
+
+    if (_selectedPartyLists.isNotEmpty &&
+        !_selectedPartyLists.contains('All')) {
+      query = query.inFilter('Party-List', _selectedPartyLists);
     }
 
     final response = await query;
@@ -298,7 +304,16 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
           'All',
           'Private Institution',
           'Government Institution',
-          'Partylist'
+        ],
+      },
+      {
+        'Party List': [
+          'All',
+          'CIBAC',
+          'AGAP',
+          'AANGAT TAYO',
+          'DUTERTE YOUTH',
+          'ACT-CIS',
         ],
       },
     ];
@@ -371,21 +386,26 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
                                         fontSize: 16,
                                       ),
                                     ),
-                                    value: _selectedInstitutionTypes
-                                        .contains(type),
+                                    value: title == 'Institution Types'
+                                        ? _selectedInstitutionTypes
+                                            .contains(type)
+                                        : _selectedPartyLists.contains(type),
                                     onChanged: (bool? value) {
                                       setState(() {
+                                        final targetList =
+                                            title == 'Institution Types'
+                                                ? _selectedInstitutionTypes
+                                                : _selectedPartyLists;
+
                                         if (value == true) {
                                           if (type == 'All') {
-                                            _selectedInstitutionTypes.clear();
+                                            targetList.clear();
                                           } else {
-                                            _selectedInstitutionTypes
-                                                .remove('All');
+                                            targetList.remove('All');
                                           }
-                                          _selectedInstitutionTypes.add(type);
+                                          targetList.add(type);
                                         } else {
-                                          _selectedInstitutionTypes
-                                              .remove(type);
+                                          targetList.remove(type);
                                         }
                                       });
                                     },
@@ -408,7 +428,9 @@ class _FinancialSupportScreenState extends State<FinancialSupportScreen> {
                               onPressed: () {
                                 setState(() {
                                   _selectedInstitutionTypes.clear();
+                                  _selectedPartyLists.clear();
                                   _selectedInstitutionTypes.add('All');
+                                  _selectedPartyLists.add('All');
                                 });
                               },
                               style: OutlinedButton.styleFrom(
