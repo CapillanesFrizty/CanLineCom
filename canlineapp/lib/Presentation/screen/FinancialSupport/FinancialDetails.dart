@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:readmore/readmore.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -83,10 +84,10 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     final response = await Supabase.instance.client
         .from('Financial-Institution')
         .select()
-        .eq('Financial-Institution-ID', widget.id)
+        .eq('Financial_Institution_ID', widget.id)
         .single();
 
-    final fileName = "${response['Financial-Institution-Name']}.png";
+    final fileName = "${response['Financial_Institution_Name']}.png";
     final imageUrl = Supabase.instance.client.storage
         .from('Assets')
         .getPublicUrl("Financial-Institution/$fileName");
@@ -235,7 +236,6 @@ class _FinancialDetailsState extends State<FinancialDetails> {
           _buildHeaderSection(data),
           _buildDividerWithSpacing(),
           _buildSchedule(data),
-          _buildDividerWithSpacing(),
           _buildAboutSection(data),
           _buildDividerWithSpacing(),
           _buildLocationSection(data),
@@ -256,9 +256,9 @@ class _FinancialDetailsState extends State<FinancialDetails> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        _buildTitle(data['Financial-Institution-Name'] ?? 'Unknown Name'),
+        _buildTitle(data['Financial_Institution_Name'] ?? 'Unknown Name'),
         const SizedBox(height: 10),
-        _buildSubtitle(data['Financial-Institution-Type'] ?? 'Unknown Type'),
+        _buildSubtitle(data['Financial_Institution_Type'] ?? 'Unknown Type'),
         const SizedBox(height: 32),
       ],
     );
@@ -267,8 +267,9 @@ class _FinancialDetailsState extends State<FinancialDetails> {
   Widget _buildDividerWithSpacing() {
     return Column(
       children: const [
+        SizedBox(height: 20),
         Divider(color: Colors.black),
-        SizedBox(height: 32),
+        SizedBox(height: 20),
       ],
     );
   }
@@ -299,34 +300,79 @@ class _FinancialDetailsState extends State<FinancialDetails> {
   }
 
   Widget _buildSchedule(Map<String, dynamic> data) {
+    final scheduleData = data['Financial_Insitution_opening_hours'];
+
+    if (scheduleData is! Map<String, dynamic>) {
+      return Text(
+        'Invalid schedule format',
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          color: Colors.red,
+        ),
+      );
+    }
+
+    // Convert Map to List of maps where each entry contains "day" and "hours"
+    final List<Map<String, String>> schedule = scheduleData.entries
+        .map((entry) => {"day": entry.key, "hours": entry.value.toString()})
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Schedule',
+          'Operating hours',
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: const Color(0xff5B50A0),
           ),
-        ),
-        const SizedBox(height: 16),
-        RichText(
-          text: TextSpan(
-            style: GoogleFonts.poppins(fontSize: 15),
-            children: [
-              const TextSpan(
-                text: 'Open for ',
-                style: TextStyle(color: Color(0xff5B50A0)),
-              ),
-              TextSpan(
-                text: data['opening_hours'] ?? 'Unknown',
-                style: const TextStyle(
-                    color: Colors.green, fontWeight: FontWeight.bold),
-              ),
-            ],
+        ),  
+        if (schedule.isNotEmpty)
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: schedule.length,
+            itemBuilder: (context, index) {
+              final item = schedule[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 100,
+                      child: Text(
+                        "${item['day']}:",
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        "${item['hours']}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          )
+        else
+          Text(
+            'No available schedule',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
           ),
-        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -352,6 +398,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildDividerWithSpacing(),
         Text(
           'About Us',
           style: GoogleFonts.poppins(
@@ -360,30 +407,20 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             color: const Color(0xff5B50A0),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 0),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              data['Financial-Institution-Desc'] ?? 'No description available',
-              style: GoogleFonts.poppins(fontSize: 15),
-              maxLines: _isExpanded ? null : 3,
-              overflow:
-                  _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
-              },
-              child: Text(
-                _isExpanded ? 'Show Less' : 'Show More',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: const Color(0xff5B50A0),
-                  fontWeight: FontWeight.w500,
-                ),
+            ReadMoreText(
+              data['Financial_Institution_Desc'] ?? 'No description available',
+              trimLines: 6,
+              colorClickableText: const Color(0xff5B50A0),
+              trimMode: TrimMode.Line,
+              trimCollapsedText: 'Show more',
+              trimExpandedText: 'Show less',
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                color: Colors.black,
               ),
             ),
           ],
@@ -413,7 +450,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
         ),
         const SizedBox(height: 8),
         Text(
-          data['Financial-Institution-Address'] ?? '',
+          data['Financial_Institution_Address'] ?? '',
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
         ),
@@ -427,18 +464,18 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             zoomControlsEnabled: true,
             initialCameraPosition: CameraPosition(
               target: LatLng(
-                data['Financial-Institution-Address-Lat'] ?? 0.0,
-                data['Financial-Institution-Address-Long'] ?? 0.0,
+                data['Financial_Institution_Address_Lat'] ?? 0.0,
+                data['Financial_Institution_Address_Long'] ?? 0.0,
               ),
               zoom: 18.0,
             ),
             markers: {
               Marker(
-                markerId: MarkerId(data['Financial-Institution-Name']),
+                markerId: MarkerId(data['Financial_Institution_Name']),
                 icon: BitmapDescriptor.defaultMarker,
                 position: LatLng(
-                  data['Financial-Institution-Address-Lat'] ?? 0.0,
-                  data['Financial-Institution-Address-Long'] ?? 0.0,
+                  data['Financial_Institution_Address_Lat'] ?? 0.0,
+                  data['Financial_Institution_Address_Long'] ?? 0.0,
                 ),
               ),
             },
@@ -463,7 +500,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
       onButtonPressed: () => GoRouter.of(context).goNamed(
         "benefits",
         pathParameters: {
-          'fid': data['Financial-Institution-ID']?.toString() ?? '',
+          'fid': data['Financial_Institution_ID']?.toString() ?? '',
         },
       ),
     );
@@ -569,7 +606,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             const Icon(Icons.phone_outlined, color: Colors.black, size: 25),
             const SizedBox(width: 10),
             Text(
-              data['Financial-Institution-ContactNumber'] ??
+              data['Financial_Institution_Contact_Number'] ??
                   'No contact available',
               style: GoogleFonts.poppins(fontSize: 15, color: Colors.black),
             ),

@@ -52,9 +52,7 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
       for (var group in supportGroups) {
         if (group['Group_name'] != null) {
           try {
-            // Debug print
-            print('Processing group: ${group['Group_name']}');
-
+            
             // Get image URL from the database if it exists
             final imageUrl = "${group['Group_name']}.png";
             if (imageUrl != null && imageUrl.toString().isNotEmpty) {
@@ -62,12 +60,10 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
                   .from('Assets')
                   .getPublicUrl("Support-Groups/$imageUrl");
               group['Support-Groups-Image-Url'] = publicUrl;
-              print('Generated image URL: $imageUrl');
-            } else {
-              print('No image URL found for group: ${group['Group_name']}');
+              
             }
           } catch (e) {
-            print(
+            debugPrint(
                 'Error processing image for group ${group['Group_name']}: $e');
           }
         }
@@ -104,7 +100,7 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedFilter = 'All';
-  List<String> _selectedCategories = [];
+  final List<String> _selectedCategories = [];
 
   @override
   void initState() {
@@ -389,7 +385,7 @@ class _SupportgroupslistscreenState extends State<Supportgroupslistscreen> {
                                     controlAffinity:
                                         ListTileControlAffinity.leading,
                                   );
-                                }).toList(),
+                                }),
                               ],
                             );
                           },

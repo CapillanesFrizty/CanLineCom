@@ -1,3 +1,4 @@
+import 'package:cancerline_companion/Presentation/screen/FinancialSupport/PartylistDetails.dart';
 import 'package:cancerline_companion/Presentation/screen/Oncologist/MedicalScreenDetailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -153,6 +154,13 @@ final GoRouter linkrouter = GoRouter(
                   Benefitsdetails(fid: state.pathParameters['fid']!),
             ),
           ],
+        ),
+        GoRoute(
+          name: 'partylist',
+          path: 'partylist/:fid',
+          builder: (context, state) => PartylistDetails(
+            partylistid: state.pathParameters['fid']!,
+          ),
         ),
       ],
     ),

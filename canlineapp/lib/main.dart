@@ -1,4 +1,7 @@
+import 'package:cancerline_companion/Controllers/FinancialAssistanceController.dart';
+import 'package:cancerline_companion/Controllers/Utils/Utilities.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +19,12 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(const MyApp());
+    runApp(MultiProvider(providers: [
+      ChangeNotifierProvider(
+        create: (_) => Financialassistancecontroller(),
+      ),
+      ChangeNotifierProvider(create: (_) => Utilities())
+    ], child: const MyApp()));
   });
 }
 

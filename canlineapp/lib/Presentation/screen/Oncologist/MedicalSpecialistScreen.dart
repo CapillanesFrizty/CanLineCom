@@ -40,8 +40,8 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
 
   final TextEditingController _searchController = TextEditingController();
   String _searchInput = '';
-  String _selectedCategory = 'All';
-  List<String> _selectedSpecializations = [];
+  final String _selectedCategory = 'All';
+  final List<String> _selectedSpecializations = [];
 
   // Update the specializations list
   final List<Map<String, List<String>>> _specializations = [
@@ -418,7 +418,7 @@ class _MedicalSpecialistScreensState extends State<MedicalSpecialistScreens> {
                                     activeColor:
                                         MedicalSpecialistScreens._primaryColor,
                                   );
-                                }).toList(),
+                                }),
                                 const SizedBox(height: 20),
                               ],
                             );

@@ -214,14 +214,6 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                             ),
                             'To avail of these benefits, cancer patients must meet certain requirements:'),
                         const SizedBox(height: 20),
-                        Text(
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xff5B50A0),
-                            ),
-                            'General Requirements:'),
-                        const SizedBox(height: 20),
                         ListView.builder(
                           padding: EdgeInsets.zero,
                           shrinkWrap: true, // Important to use inside Column
@@ -229,20 +221,43 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                           itemCount: data.length,
                           itemBuilder: (context, index) {
                             final item = data[index];
-                            return ListTile(
-                              title: Text(
-                                "${index + 1}.) ${item['Financial-Institution-Requirements-Name'].toString()}",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              subtitle: Text(
-                                item['Financial-Institution-Requirements-Desc']
-                                    .toString(),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.black,
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "${index + 1}.) ",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: item[
+                                              'Financial-Institution-Requirements-Name']
+                                          .toString(),
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: item['Financial-Institution-Requirements-Desc']
+                                                      ?.toString() ==
+                                                  'none' ||
+                                              item['Financial-Institution-Requirements-Desc']
+                                                      ?.toString() ==
+                                                  null
+                                          ? ''
+                                          : ''' : ${item['Financial-Institution-Requirements-Desc']}''',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
@@ -287,22 +302,29 @@ class _BenefitsdetailsState extends State<Benefitsdetails> {
                           itemCount: data.length,
                           itemBuilder: (context, index) {
                             final item = data[index];
-                            return ListTile(
-                              title: Text(
-                                "Step ${index + 1}",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 20,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              subtitle: Text(
-                                item['financialinstitutionprocessdesc']
-                                    .toString(),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: RichText(
+                                  text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "Step ${index + 1}",
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        ''' -> ${item['financialinstitutionprocessdesc'].toString()}''',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              )),
                             );
                           },
                         );
