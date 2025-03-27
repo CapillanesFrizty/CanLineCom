@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/test_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../widgets/BarrelFileWidget..dart';
@@ -308,8 +309,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                     final id = healthInst[index]['Health-Institution-ID'];
                     GoRouter.of(context).push('/Health-Institution/$id');
                   },
-                  image:
-                      healthInst[index]['Health-Institution-Image-Url'] ?? '',
+                  image: healthInst[index]['Health-Institution-Image-Url'] ??
+                      Icon(Icons.image),
                   title: healthInst[index]['Health-Institution-Name'] ??
                       'Unknown Name',
                   subtitle: healthInst[index]['Health-Institution-Type'] ?? '',

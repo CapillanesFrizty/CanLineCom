@@ -252,7 +252,8 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
                   return ListView(
                     children: [
                       _buildBackgroundImage(
-                          data['Health-Institution-Image-Url']),
+                          data['Health-Institution-Image-Url'] ??
+                              Icon(Icons.image)),
                       _buildDetailsSection(data),
                     ],
                   );
