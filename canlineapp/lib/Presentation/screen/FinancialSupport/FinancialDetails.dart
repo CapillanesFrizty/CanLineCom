@@ -327,7 +327,7 @@ class _FinancialDetailsState extends State<FinancialDetails> {
             fontWeight: FontWeight.w600,
             color: const Color(0xff5B50A0),
           ),
-        ),  
+        ),
         if (schedule.isNotEmpty)
           ListView.builder(
             shrinkWrap: true,
