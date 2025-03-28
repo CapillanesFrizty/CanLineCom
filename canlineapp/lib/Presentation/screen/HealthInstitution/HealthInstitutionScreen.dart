@@ -106,10 +106,213 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     return result;
   }
 
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.85,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: _primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child:
+                                Icon(Icons.help_outline, color: _primaryColor),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            "Service Types",
+                            style: GoogleFonts.poppins(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: _primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(Icons.close, color: Colors.grey[600]),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Understanding medical service categories:",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Service Categories
+                _buildHelpCategory(
+                  icon: LucideIcons.stethoscope,
+                  title: "Outpatient Services",
+                  description: "Quick medical services without hospital stay",
+                  examples: [
+                    "• Consultations & Check-ups",
+                    "• Laboratory Tests",
+                    "• X-rays & Imaging",
+                    "• Minor Procedures",
+                  ],
+                  color: Colors.green.shade600,
+                ),
+                const SizedBox(height: 16),
+                _buildHelpCategory(
+                  icon: LucideIcons.bed,
+                  title: "Admission Services",
+                  description: "Extended medical care with hospital stay",
+                  examples: [
+                    "• Major Surgeries",
+                    "• Intensive Care",
+                    "• Extended Treatment",
+                    "• 24/7 Medical Monitoring",
+                  ],
+                  color: Colors.red.shade600,
+                ),
+                const SizedBox(height: 24),
+                // Footer
+                Align(
+                  alignment: Alignment.center,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: TextButton.styleFrom(
+                      backgroundColor: _primaryColor.withOpacity(0.1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Got it!",
+                      style: GoogleFonts.poppins(
+                        color: _primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHelpCategory({
+    required IconData icon,
+    required String title,
+    required String description,
+    required List<String> examples,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            description,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...examples.map((example) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline,
+                        size: 16, color: color.withOpacity(0.7)),
+                    const SizedBox(width: 8),
+                    Text(
+                      example.substring(2),
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.black54,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showHelpDialog,
+        backgroundColor: _primaryColor,
+        child: const Icon(Icons.help_outline, color: Colors.white),
+      ),
       body: RefreshIndicator(
         onRefresh: _refreshContent,
         child: Column(
