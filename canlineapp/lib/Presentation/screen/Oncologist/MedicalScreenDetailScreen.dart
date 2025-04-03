@@ -341,7 +341,7 @@ class _MedicalSpeciaDetailScreensState
                     children: [
                       Text(
                         healthInstitution?['Health-Institution-Name'] ??
-                            'Unknown Clinic',
+                            clinic['Clinic_name'],
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

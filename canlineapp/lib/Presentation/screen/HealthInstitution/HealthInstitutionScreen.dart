@@ -70,6 +70,8 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
     if (_currentCategoryIndex == 1) {
       query = query.eq('Treatment-Type', 'Outpatient');
     } else if (_currentCategoryIndex == 2) {
+      query = query.neq('Treatment-Type', 'not defined');
+    } else if (_currentCategoryIndex == 0) {
       query;
     }
 

@@ -351,10 +351,15 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
           _buildDividerWithSpacing(),
           _buildSchedule(),
           _buildDividerWithSpacing(),
-          _buildAboutSection(data),
-          _buildDividerWithSpacing(),
-          _buildChemotherapySection(),
-          _buildDividerWithSpacing(),
+          (data['Health-Institution-Desc'] == 'none')
+              ? const SizedBox()
+              : _buildAboutSection(data),
+
+          (data['Health-Institution-Name'] ==
+                  "Ricardo Limso Medical Center, Inc"
+              ? const SizedBox()
+              : _buildChemotherapySection()),
+
           _buildLocationSection(data),
 
           (data['Health-Institution-Services'] as List).isNotEmpty
@@ -536,6 +541,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             color: Colors.black,
           ),
         ),
+        _buildDividerWithSpacing(),
       ],
     );
   }
@@ -970,6 +976,7 @@ class _MoreInfoInstitutionScreenState extends State<MoreInfoInstitutionScreen> {
             ],
           ),
         ),
+        _buildDividerWithSpacing(),
       ],
     );
   }
