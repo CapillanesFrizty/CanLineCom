@@ -118,10 +118,10 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
           ),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.85,
+            height:
+                MediaQuery.of(context).size.height * 0.7, // Set fixed height
             padding: const EdgeInsets.all(24),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
                 Stack(
@@ -169,54 +169,59 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Service Categories
-                _buildHelpCategory(
-                  icon: LucideIcons.stethoscope,
-                  title: "Outpatient Services",
-                  description: "Quick medical services without hospital stay",
-                  examples: [
-                    "• Consultations & Check-ups",
-                    "• Laboratory Tests",
-                    "• X-rays & Imaging",
-                    "• Minor Procedures",
-                  ],
-                  color: Colors.green.shade600,
-                ),
-                const SizedBox(height: 16),
-                _buildHelpCategory(
-                  icon: LucideIcons.bed,
-                  title: "Admission Services",
-                  description: "Extended medical care with hospital stay",
-                  examples: [
-                    "• Major Surgeries",
-                    "• Intensive Care",
-                    "• Extended Treatment",
-                    "• 24/7 Medical Monitoring",
-                  ],
-                  color: Colors.red.shade600,
-                ),
-                const SizedBox(height: 24),
-                // Footer
-                Align(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: TextButton.styleFrom(
-                      backgroundColor: _primaryColor.withOpacity(0.1),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                // Service Categories - Now in Expanded
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _buildHelpCategory(
+                          icon: LucideIcons.stethoscope,
+                          title: "Outpatient Services",
+                          description:
+                              "Cancer treatment services without hospital stay",
+                          examples: [
+                            "• Standard Chemotherapy",
+                            "• Pre & Post-chemo Labs",
+                            "• Treatment Assessment",
+                            "• Supportive Care",
+                          ],
+                          color: Colors.green.shade600,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildHelpCategory(
+                          icon: LucideIcons.bed,
+                          title: "Admission Services",
+                          description:
+                              "Cancer treatment requiring hospitalization",
+                          examples: [
+                            "• High-dose Chemotherapy",
+                            "• Inpatient Treatment",
+                            "• Medical Monitoring",
+                            "• Emergency Care",
+                          ],
+                          color: Colors.red.shade600,
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      "Got it!",
-                      style: GoogleFonts.poppins(
-                        color: _primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  ),
+                ),
+                // Footer
+                const SizedBox(height: 24),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    backgroundColor: _primaryColor.withOpacity(0.1),
+                    minimumSize:
+                        const Size(double.infinity, 48), // Full width button
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Got it!",
+                    style: GoogleFonts.poppins(
+                      color: _primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -263,12 +268,14 @@ class _HealthInstitutionScreenState extends State<HealthInstitutionScreen> {
                 child: Icon(icon, color: color, size: 24),
               ),
               const SizedBox(width: 12),
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: color,
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
                 ),
               ),
             ],

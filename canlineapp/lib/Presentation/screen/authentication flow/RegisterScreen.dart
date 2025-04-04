@@ -20,9 +20,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String currentSexOption = 'Male';
   DateTime? selectedDate;
   late bool _obscurePassword;
-  String _selectedCancerType = "none";
+  String _selectedRole = ""; // Add this line
+  String _selectedCancerType = ""; // Modify this line to remove default "none"
   bool isaccepted = false;
   bool _hasShownTnC = false;
+
+  bool _showOtherCancerField = false;
+  final TextEditingController _otherCancerController = TextEditingController();
 
   @override
   void initState() {
@@ -244,16 +248,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   final List<DropdownMenuItem<String>> _dropdownItems = [
-    DropdownMenuItem(value: "none", child: Text("None")),
     DropdownMenuItem(value: "Breast Cancer", child: Text("Breast Cancer")),
-    DropdownMenuItem(value: "Cervical cancer", child: Text("Cervical cancer")),
-    DropdownMenuItem(value: "Liver cancer", child: Text("Liver cancer")),
+    DropdownMenuItem(value: "Cervical Cancer", child: Text("Cervical Cancer")),
+    DropdownMenuItem(value: "Liver Cancer", child: Text("Liver Cancer")),
     DropdownMenuItem(value: "Lung Cancer", child: Text("Lung Cancer")),
     DropdownMenuItem(value: "Prostate Cancer", child: Text("Prostate Cancer")),
     DropdownMenuItem(
-        value: "Endometrial  Cancer", child: Text("Endometrial  Cancer")),
+        value: "Endometrial Cancer", child: Text("Endometrial Cancer")),
     DropdownMenuItem(
-        value: "Colorectal cancer", child: Text("Colorectal cancer")),
+        value: "Colorectal Cancer", child: Text("Colorectal Cancer")),
+    DropdownMenuItem(value: "Ovarian Cancer", child: Text("Ovarian Cancer")),
+    DropdownMenuItem(
+        value: "Pancreatic Cancer", child: Text("Pancreatic Cancer")),
+    DropdownMenuItem(value: "Thyroid Cancer", child: Text("Thyroid Cancer")),
+    DropdownMenuItem(value: "Bladder Cancer", child: Text("Bladder Cancer")),
+    DropdownMenuItem(value: "Kidney Cancer", child: Text("Kidney Cancer")),
+    DropdownMenuItem(value: "Brain Cancer", child: Text("Brain Cancer")),
+    DropdownMenuItem(value: "Skin Cancer", child: Text("Skin Cancer")),
+    DropdownMenuItem(value: "Blood Cancer", child: Text("Blood Cancer")),
+    DropdownMenuItem(value: "Lymphoma", child: Text("Lymphoma")),
+    DropdownMenuItem(value: "Leukemia", child: Text("Leukemia")),
+    DropdownMenuItem(value: "other", child: Text("Other (Specify)")),
   ];
 
   final _formKeys = List.generate(4, (_) => GlobalKey<FormState>());
@@ -296,7 +311,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'city': _controllers[6].text.trim(),
           'province': _controllers[7].text.trim(),
           'date_of_birth': selectedDate?.toIso8601String() ?? '',
-          'cancer_type': _selectedCancerType,
+          'role': _selectedRole,
+          'cancer_type': _selectedRole == 'patient'
+              ? (_selectedCancerType == 'other'
+                  ? _otherCancerController.text.trim()
+                  : _selectedCancerType)
+              : '',
         },
       );
 
@@ -467,7 +487,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _showError('Please select your Date of Birth');
         return;
       }
-      if (_selectedCancerType == "none") {
+      if (_selectedRole.isEmpty) {
+        isValid = false;
+        _showError('Please select your role');
+        return;
+      }
+      if (_selectedRole == 'patient' && _selectedCancerType.isEmpty) {
         isValid = false;
         _showError('Please select the type of cancer');
         return;
@@ -623,11 +648,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 setState(() => currentSexOption = value!);
               }),
               const SizedBox(height: 20),
-              _buildDropdown(
-                  'Type of Cancer*', _selectedCancerType, _dropdownItems,
-                  (value) {
-                setState(() => _selectedCancerType = value!);
-              }),
+              _buildRoleSelection(),
+              if (_selectedRole == 'patient') ...[
+                const SizedBox(height: 20),
+                _buildDropdown(
+                    'Type of Cancer*', _selectedCancerType, _dropdownItems,
+                    (value) {
+                  setState(() {
+                    _selectedCancerType = value!;
+                  });
+                }),
+              ],
             ],
           ),
         ),
@@ -722,41 +753,103 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildDropdown(String labelText, String value,
       List<DropdownMenuItem<String>> items, ValueChanged<String?> onChanged) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        items: items,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          labelText: labelText,
-          labelStyle: GoogleFonts.poppins(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
-          border: OutlineInputBorder(
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          filled: true,
-          fillColor: Colors.grey[50],
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
+          child: DropdownButtonFormField<String>(
+            value: value.isEmpty ? null : value, // Set to null if empty
+            items: items,
+            onChanged: (newValue) {
+              setState(() {
+                _showOtherCancerField = newValue == 'other';
+                if (newValue != 'other') {
+                  _otherCancerController.clear();
+                }
+              });
+              onChanged(newValue);
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select a cancer type';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              labelText: labelText,
+              labelStyle: GoogleFonts.poppins(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey[50],
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
+            ),
+            icon:
+                Icon(Icons.arrow_drop_down, color: RegisterScreen.primaryColor),
           ),
         ),
-        icon: Icon(Icons.arrow_drop_down, color: RegisterScreen.primaryColor),
-      ),
+        if (_showOtherCancerField) ...[
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Colors.grey[50],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TextFormField(
+              controller: _otherCancerController,
+              decoration: InputDecoration(
+                labelText: 'Specify Cancer Type',
+                labelStyle: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[50],
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+              ),
+              validator: (value) {
+                if (_showOtherCancerField &&
+                    (value == null || value.trim().isEmpty)) {
+                  return 'Please specify the cancer type';
+                }
+                return null;
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -846,11 +939,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  Widget _buildRoleSelection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.grey[50],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Role*',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          RadioListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              'Patient',
+              style: GoogleFonts.poppins(fontSize: 15),
+            ),
+            value: 'patient',
+            groupValue: _selectedRole,
+            onChanged: (value) {
+              setState(() {
+                _selectedRole = value.toString();
+              });
+            },
+            activeColor: RegisterScreen.primaryColor,
+          ),
+          RadioListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              'Companion',
+              style: GoogleFonts.poppins(fontSize: 15),
+            ),
+            value: 'companion',
+            groupValue: _selectedRole,
+            onChanged: (value) {
+              setState(() {
+                _selectedRole = value.toString();
+                if (value == 'companion') {
+                  _selectedCancerType = "";
+                }
+              });
+            },
+            activeColor: RegisterScreen.primaryColor,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     for (var controller in _controllers) {
       controller.dispose();
     }
+    _otherCancerController.dispose();
     super.dispose();
   }
 }
