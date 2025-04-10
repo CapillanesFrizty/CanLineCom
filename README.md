@@ -18,5 +18,5 @@ Cancer Companion empowers patients and caregivers on their cancer journey. We co
 Clone the repository:
 
 ```bash
-git clone [https://github.com/your-username/your-repo-name.git](https://github.com/CapillanesFrizty/CanLineCom.git)
+git clone https://github.com/CapillanesFrizty/CanLineCom.git
 cd your-repo-name
